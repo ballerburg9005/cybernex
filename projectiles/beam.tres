@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Projectile" load_steps=3 format=3 uid="uid://balk6fmnp7tfh"]
+
+[ext_resource type="Script" path="res://Projectile.gd" id="1_2xduy"]
+[ext_resource type="SpriteFrames" uid="uid://cj40qk5h0uwbh" path="res://projectiles/beam_sprite_frames.tres" id="2_h4m67"]
+
+[resource]
+script = ExtResource("1_2xduy")
+name = "beam"
+short_name = "beam"
+damage = 5
+sprite_frames = ExtResource("2_h4m67")
+explosion_radius = 24
+bullet_radius = 3
+bullet_height = 6
+harms_player = false
+harms_enemies = false
+speed = 10

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=4 format=3 uid="uid://lb1efomgm8k0"]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="1_pjlp1"]
+[ext_resource type="Texture2D" uid="uid://cuvbtedpfw4f" path="res://assets/items.png" id="2_30soo"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j064y"]
+atlas = ExtResource("2_30soo")
+region = Rect2(32, 0, 16, 16)
+
+[resource]
+script = ExtResource("1_pjlp1")
+name = "Empty"
+short_name = "empty"
+texture = SubResource("AtlasTexture_j064y")
+type = 1

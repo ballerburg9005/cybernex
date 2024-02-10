@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://cx4su78ehqm6v"]
+
+[ext_resource type="Script" path="res://test.gd" id="1_cjlol"]
+[ext_resource type="Texture2D" uid="uid://cvimiu3ktpynb" path="res://icon.svg" id="2_c68t7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5rrm4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rsrht"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_cjlol")
+
+[node name="StaticBody2D" type="AnimatableBody2D" parent="."]
+position = Vector2(100, 100)
+collision_layer = 536870912
+collision_mask = 1073741824
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("RectangleShape2D_5rrm4")
+
+[node name="Sprite2D" type="Sprite2D" parent="StaticBody2D"]
+texture = ExtResource("2_c68t7")
+
+[node name="Area2D" type="Area2D" parent="."]
+position = Vector2(400, 100)
+collision_layer = 1073741824
+collision_mask = 536870912
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_rsrht")
+
+[node name="Sprite2D2" type="Sprite2D" parent="Area2D"]
+texture = ExtResource("2_c68t7")
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

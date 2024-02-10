@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=4 format=3 uid="uid://cpfp0qm7rdmoc"]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="1_hso05"]
+[ext_resource type="Texture2D" uid="uid://cuvbtedpfw4f" path="res://assets/items.png" id="2_n50oh"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r1w6b"]
+atlas = ExtResource("2_n50oh")
+region = Rect2(96, 0, 16, 16)
+
+[resource]
+script = ExtResource("1_hso05")
+name = "Junk"
+short_name = "junk"
+texture = SubResource("AtlasTexture_r1w6b")
+combos = Array[Resource("res://inventory_combo.gd")]([])
+type = 16

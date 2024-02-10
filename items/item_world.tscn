@@ -1,0 +1,43 @@
+[gd_scene load_steps=8 format=3 uid="uid://bax3ydx4vf0i5"]
+
+[ext_resource type="Script" path="res://items/item_world.gd" id="1_myr1b"]
+[ext_resource type="Resource" uid="uid://c4a6126edpi8a" path="res://items/missing.tres" id="2_ujtgw"]
+[ext_resource type="Texture2D" uid="uid://cuvbtedpfw4f" path="res://assets/items.png" id="3_2sp57"]
+[ext_resource type="Script" path="res://inventory_slot.gd" id="3_gpgeb"]
+
+[sub_resource type="Resource" id="Resource_0i61d"]
+script = ExtResource("3_gpgeb")
+item = ExtResource("2_ujtgw")
+count = 1
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cvpgs"]
+radius = 8.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r1w6b"]
+atlas = ExtResource("3_2sp57")
+region = Rect2(16, 0, 16, 16)
+
+[node name="Item" type="AnimatableBody2D"]
+z_index = 100
+y_sort_enabled = true
+collision_layer = 32
+collision_mask = 512
+sync_to_physics = false
+script = ExtResource("1_myr1b")
+itemslot = SubResource("Resource_0i61d")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_cvpgs")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_r1w6b")
+
+[node name="influence" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 512
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="influence"]
+shape = SubResource("CircleShape2D_cvpgs")
+
+[connection signal="body_shape_entered" from="influence" to="." method="_on_influence_body_shape_entered"]
+[connection signal="body_shape_exited" from="influence" to="." method="_on_influence_body_shape_exited"]

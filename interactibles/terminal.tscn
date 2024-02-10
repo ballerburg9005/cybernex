@@ -1,0 +1,82 @@
+[gd_scene load_steps=10 format=3 uid="uid://c0yc3rxh2tqpx"]
+
+[ext_resource type="Script" path="res://interactibles/Terminal.gd" id="1_clkfp"]
+[ext_resource type="Texture2D" uid="uid://bg3wvfoh82oqx" path="res://assets/tileset_interactibles.png" id="2_0sorp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lk0rk"]
+atlas = ExtResource("2_0sorp")
+region = Rect2(0, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kqc1p"]
+atlas = ExtResource("2_0sorp")
+region = Rect2(32, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2a3kp"]
+atlas = ExtResource("2_0sorp")
+region = Rect2(64, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3c2wn"]
+atlas = ExtResource("2_0sorp")
+region = Rect2(96, 64, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_6krea"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lk0rk")
+}],
+"loop": true,
+"name": &"off",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kqc1p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2a3kp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3c2wn")
+}],
+"loop": true,
+"name": &"on",
+"speed": 1.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_alm3w"]
+radius = 12.0
+height = 26.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0l47c"]
+radius = 12.0
+height = 32.0
+
+[node name="Terminal" type="StaticBody2D"]
+z_index = 100
+y_sort_enabled = true
+position = Vector2(0, -12)
+collision_layer = 1048592
+collision_mask = 512
+script = ExtResource("1_clkfp")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 100
+sprite_frames = SubResource("SpriteFrames_6krea")
+animation = &"off"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4)
+shape = SubResource("CapsuleShape2D_alm3w")
+
+[node name="influence" type="Area2D" parent="."]
+position = Vector2(2, 10)
+collision_layer = 16
+collision_mask = 512
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="influence"]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_0l47c")
+
+[connection signal="body_shape_entered" from="influence" to="." method="_on_influence_body_shape_entered"]
+[connection signal="body_shape_exited" from="influence" to="." method="_on_influence_body_shape_exited"]

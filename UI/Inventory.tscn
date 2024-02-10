@@ -1,0 +1,119 @@
+[gd_scene load_steps=18 format=3 uid="uid://btv4v1ibnrmla"]
+
+[ext_resource type="Script" path="res://UI/Inventory.gd" id="1_32n6p"]
+[ext_resource type="Script" path="res://UI/InventoryUI.gd" id="2_sqju3"]
+[ext_resource type="PackedScene" uid="uid://cbujhi3tvu5ra" path="res://UI/InventoryItem.tscn" id="3_yodcl"]
+[ext_resource type="Texture2D" uid="uid://cuvbtedpfw4f" path="res://assets/items.png" id="4_gl1tg"]
+[ext_resource type="Resource" uid="uid://nk6dibn14gor" path="res://items/blank.tres" id="5_sjoe8"]
+[ext_resource type="Script" path="res://inventory_slot.gd" id="6_5muxq"]
+
+[sub_resource type="Resource" id="Resource_x0h4l"]
+script = ExtResource("2_sqju3")
+rows = 1
+cols = 9
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r1w6b"]
+atlas = ExtResource("4_gl1tg")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="Resource" id="Resource_xb3j4"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[sub_resource type="Resource" id="Resource_gsjes"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[sub_resource type="Resource" id="Resource_kiqnk"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[sub_resource type="Resource" id="Resource_4b0qd"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[sub_resource type="Resource" id="Resource_iyfas"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[sub_resource type="Resource" id="Resource_ofsgp"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[sub_resource type="Resource" id="Resource_kh3wv"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[sub_resource type="Resource" id="Resource_fslkm"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[sub_resource type="Resource" id="Resource_8y3v2"]
+script = ExtResource("6_5muxq")
+item = ExtResource("5_sjoe8")
+count = 1
+
+[node name="InventoryItems" type="PanelContainer"]
+size_flags_horizontal = 6
+size_flags_vertical = 4
+size_flags_stretch_ratio = 6.0
+script = ExtResource("1_32n6p")
+inv = SubResource("Resource_x0h4l")
+
+[node name="GridContainer" type="GridContainer" parent="."]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+columns = 9
+
+[node name="InventoryItem0" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_xb3j4")
+
+[node name="InventoryItem1" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_gsjes")
+
+[node name="InventoryItem2" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_kiqnk")
+
+[node name="InventoryItem3" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_4b0qd")
+
+[node name="InventoryItem4" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_iyfas")
+
+[node name="InventoryItem5" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_ofsgp")
+
+[node name="InventoryItem6" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_kh3wv")
+
+[node name="InventoryItem7" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_fslkm")
+
+[node name="InventoryItem8" parent="GridContainer" instance=ExtResource("3_yodcl")]
+layout_mode = 2
+texture = SubResource("AtlasTexture_r1w6b")
+itemslot = SubResource("Resource_8y3v2")

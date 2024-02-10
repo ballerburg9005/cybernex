@@ -1,0 +1,226 @@
+[gd_scene load_steps=15 format=3 uid="uid://c1ncb7yj4ovtl"]
+
+[ext_resource type="Texture2D" uid="uid://xn5mq6c1axim" path="res://assets/title.jpg" id="1_mypru"]
+[ext_resource type="Script" path="res://title.gd" id="1_oybu7"]
+[ext_resource type="Shader" path="res://title_distort_new.gdshader" id="1_s062n"]
+[ext_resource type="Texture2D" uid="uid://dfvjd8p1p1lc3" path="res://assets/noise.jpg" id="3_lwcpk"]
+[ext_resource type="FontFile" uid="uid://cmdulbuu5ap81" path="res://fonts/AtariGames.ttf" id="4_j2lti"]
+[ext_resource type="FontFile" uid="uid://c7qj7gp1pt2ma" path="res://fonts/Phased.ttf" id="4_m2mpq"]
+[ext_resource type="Shader" path="res://ripple_distort.gdshader" id="6_hfgwi"]
+[ext_resource type="AudioStream" uid="uid://cfay85dowbf5a" path="res://music/CInematic_new.Ogg" id="7_qgk7b"]
+[ext_resource type="Script" path="res://xxx-presents.gd" id="9_eovwb"]
+[ext_resource type="Texture2D" uid="uid://grimopl7blki" path="res://assets/dickbutt.jpg" id="10_sb32c"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_geqxp"]
+size = Vector2(2048, 4600)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4kfo6"]
+shader = ExtResource("1_s062n")
+shader_parameter/iChannel0 = ExtResource("1_mypru")
+shader_parameter/iChannel1 = ExtResource("3_lwcpk")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_oiss6"]
+shader = ExtResource("6_hfgwi")
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_vyu0c"]
+
+[node name="Title" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_oybu7")
+
+[node name="black" type="TextureRect" parent="."]
+self_modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+offset_left = -448.0
+offset_top = -1976.0
+offset_right = 2929.0
+offset_bottom = 2624.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("PlaceholderTexture2D_geqxp")
+stretch_mode = 2
+
+[node name="Background" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_4kfo6")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -412.0
+offset_bottom = 92.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_mypru")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="Control2" type="Control" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="title" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 76
+theme_override_fonts/font = ExtResource("4_m2mpq")
+theme_override_font_sizes/font_size = 190
+text = "CYBERNEX"
+horizontal_alignment = 1
+
+[node name="Control3" type="Control" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="start" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 1)
+theme_override_constants/shadow_outline_size = 32
+theme_override_fonts/font = ExtResource("4_j2lti")
+theme_override_font_sizes/font_size = 120
+text = "start"
+horizontal_alignment = 1
+
+[node name="options" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 1)
+theme_override_constants/shadow_outline_size = 32
+theme_override_fonts/font = ExtResource("4_j2lti")
+theme_override_font_sizes/font_size = 120
+text = "options"
+horizontal_alignment = 1
+
+[node name="quit" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 1)
+theme_override_constants/shadow_outline_size = 32
+theme_override_fonts/font = ExtResource("4_j2lti")
+theme_override_font_sizes/font_size = 120
+text = "quit
+"
+horizontal_alignment = 1
+
+[node name="Control" type="Control" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Control2" type="Control" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Control2" type="Control" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ripple_distort" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_oiss6")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = 502.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("PlaceholderTexture2D_vyu0c")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_qgk7b")
+volume_db = -15.928
+
+[node name="black2" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+self_modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+offset_left = -448.0
+offset_top = -1976.0
+offset_right = 2914.0
+offset_bottom = 2624.0
+texture = SubResource("PlaceholderTexture2D_geqxp")
+
+[node name="xxx-presents" type="CenterContainer" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("9_eovwb")
+
+[node name="black" type="TextureRect" parent="xxx-presents"]
+self_modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+texture = SubResource("PlaceholderTexture2D_geqxp")
+stretch_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="xxx-presents"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="xxx-presents/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="Control2" type="Control" parent="xxx-presents/VBoxContainer2/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="present-text" type="Label" parent="xxx-presents/VBoxContainer2/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/shadow_outline_size = 32
+theme_override_fonts/font = ExtResource("4_j2lti")
+theme_override_font_sizes/font_size = 100
+text = "Ballerburg9005 
+&
+Tarverdiyev Rafael
+present"
+horizontal_alignment = 1
+
+[node name="Control" type="Control" parent="xxx-presents/VBoxContainer2/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Control2" type="Control" parent="xxx-presents/VBoxContainer2"]
+layout_mode = 2
+
+[node name="wtfdude" type="TextureRect" parent="."]
+layout_mode = 1
+offset_left = 207.0
+offset_top = 2640.0
+offset_right = 1007.0
+offset_bottom = 3040.0
+texture = ExtResource("10_sb32c")

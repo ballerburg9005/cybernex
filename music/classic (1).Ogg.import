@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bn5j6txx6apns"
+path="res://.godot/imported/classic (1).Ogg-dbea5b5eb65d0f3ecd1e509c0743774e.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/classic (1).Ogg"
+dest_files=["res://.godot/imported/classic (1).Ogg-dbea5b5eb65d0f3ecd1e509c0743774e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

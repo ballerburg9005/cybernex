@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=4 format=3 uid="uid://c4a6126edpi8a"]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="1_hdgin"]
+[ext_resource type="Texture2D" uid="uid://cuvbtedpfw4f" path="res://assets/items.png" id="2_xle4t"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r1w6b"]
+atlas = ExtResource("2_xle4t")
+region = Rect2(16, 0, 16, 16)
+
+[resource]
+script = ExtResource("1_hdgin")
+name = "missing"
+short_name = "missing"
+texture = SubResource("AtlasTexture_r1w6b")
+combos = Array[Resource("res://inventory_combo.gd")]([])
+type = 1

@@ -1,0 +1,95 @@
+[gd_scene load_steps=11 format=3 uid="uid://cfhmk4tjehyse"]
+
+[ext_resource type="Script" path="res://interactibles/Terminal.gd" id="1_2rhsl"]
+[ext_resource type="Texture2D" uid="uid://bg3wvfoh82oqx" path="res://assets/tileset_interactibles.png" id="2_fxr8d"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ak6i8"]
+radius = 12.0
+height = 26.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f2cpo"]
+atlas = ExtResource("2_fxr8d")
+region = Rect2(0, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1st57"]
+atlas = ExtResource("2_fxr8d")
+region = Rect2(32, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aa0nf"]
+atlas = ExtResource("2_fxr8d")
+region = Rect2(64, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7x1o6"]
+atlas = ExtResource("2_fxr8d")
+region = Rect2(96, 128, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_6krea"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f2cpo")
+}],
+"loop": true,
+"name": &"off",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1st57")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aa0nf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7x1o6")
+}],
+"loop": true,
+"name": &"on",
+"speed": 1.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0l47c"]
+radius = 5.0
+height = 36.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ute3e"]
+size = Vector2(25, 9)
+
+[node name="Desk" type="StaticBody2D"]
+z_index = 999
+y_sort_enabled = true
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("1_2rhsl")
+myname = "desk"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-1, -4)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_ak6i8")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -8)
+sprite_frames = SubResource("SpriteFrames_6krea")
+animation = &"off"
+
+[node name="influence" type="Area2D" parent="."]
+position = Vector2(-1, 5)
+collision_layer = 16
+collision_mask = 512
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="influence"]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_0l47c")
+
+[node name="physics" type="StaticBody2D" parent="."]
+position = Vector2(0, -8)
+collision_layer = 16
+collision_mask = 512
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="physics"]
+position = Vector2(-0.5, 11.5)
+shape = SubResource("RectangleShape2D_ute3e")
+
+[connection signal="body_shape_entered" from="influence" to="." method="_on_influence_body_shape_entered"]
+[connection signal="body_shape_exited" from="influence" to="." method="_on_influence_body_shape_exited"]

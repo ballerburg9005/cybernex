@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://cnrag655fynqt"]
+
+[ext_resource type="FontFile" uid="uid://cj2f5ohak587i" path="res://fonts/CelticTime.ttf" id="1_aji6y"]
+
+[node name="tooltip" type="PanelContainer"]
+offset_right = 10.0
+offset_bottom = 2.0
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = -2
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Label" type="RichTextLabel" parent="MarginContainer"]
+layout_mode = 2
+theme_override_fonts/normal_font = ExtResource("1_aji6y")
+theme_override_font_sizes/normal_font_size = 32
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false

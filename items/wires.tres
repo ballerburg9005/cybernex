@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=4 format=3 uid="uid://c1rm8ll7i4il7"]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="1_s1ivf"]
+[ext_resource type="Texture2D" uid="uid://cuvbtedpfw4f" path="res://assets/items.png" id="2_voc8h"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f7308"]
+atlas = ExtResource("2_voc8h")
+region = Rect2(64, 0, 16, 16)
+
+[resource]
+script = ExtResource("1_s1ivf")
+name = "wires"
+short_name = "wires"
+texture = SubResource("AtlasTexture_f7308")
+combos = Array[Resource("res://inventory_combo.gd")]([])
+type = 0
