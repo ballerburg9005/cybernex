@@ -184,7 +184,7 @@ height = 21.3334
 [sub_resource type="CircleShape2D" id="CircleShape2D_sy3n0"]
 radius = 200.0
 
-[node name="Enemy" type="CharacterBody2D"]
+[node name="Enemy" type="CharacterBody2D" groups=["enemies"]]
 z_index = 999
 y_sort_enabled = true
 position = Vector2(366, 132.333)

@@ -52,7 +52,7 @@ height = 26.0
 radius = 12.0
 height = 32.0
 
-[node name="Terminal" type="StaticBody2D"]
+[node name="Terminal" type="StaticBody2D" groups=["interactibles"]]
 z_index = 100
 y_sort_enabled = true
 position = Vector2(0, -12)

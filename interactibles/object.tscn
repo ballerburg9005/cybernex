@@ -1,0 +1,54 @@
+[gd_scene load_steps=5 format=3 uid="uid://c7fsimpojygjv"]
+
+[ext_resource type="Script" path="res://Object.gd" id="1_wcn4k"]
+[ext_resource type="Texture2D" uid="uid://bg3wvfoh82oqx" path="res://assets/tileset_interactibles.png" id="2_nii6r"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_modxt"]
+atlas = ExtResource("2_nii6r")
+region = Rect2(0, 96, 32, 32)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fcfa0"]
+radius = 12.0
+height = 24.0
+
+[node name="Object" type="StaticBody2D"]
+z_index = 100
+y_sort_enabled = true
+collision_layer = 1048640
+collision_mask = 4178496
+script = ExtResource("1_wcn4k")
+mysubtype = "wirewall"
+howoften = 3
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_modxt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_fcfa0")
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+z_index = 1
+position = Vector2(4, 4)
+amount = 24
+lifetime = 0.3
+preprocess = 1.0
+speed_scale = 0.5
+explosiveness = 0.53
+randomness = 0.97
+lifetime_randomness = 0.83
+emission_shape = 1
+emission_sphere_radius = 2.0
+particle_flag_align_y = true
+direction = Vector2(1, 50)
+initial_velocity_max = 10.1
+angular_velocity_min = -29.09
+angular_velocity_max = 305.46
+linear_accel_min = -58.6
+linear_accel_max = 40.4
+radial_accel_min = -32.32
+radial_accel_max = 74.75
+angle_min = -247.3
+angle_max = 450.9
+scale_amount_min = 3.0
+scale_amount_max = 3.0

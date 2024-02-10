@@ -12,5 +12,6 @@ script = ExtResource("1_hso05")
 name = "Junk"
 short_name = "junk"
 texture = SubResource("AtlasTexture_r1w6b")
+damage = 0.0
 combos = Array[Resource("res://inventory_combo.gd")]([])
 type = 16

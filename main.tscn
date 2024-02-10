@@ -1,4 +1,4 @@
-[gd_scene load_steps=61 format=3 uid="uid://ctfh5rdwvcfap"]
+[gd_scene load_steps=58 format=3 uid="uid://ctfh5rdwvcfap"]
 
 [ext_resource type="Texture2D" uid="uid://dhubr6ejtmom2" path="res://assets/tileset x1.png" id="1_brfee"]
 [ext_resource type="Shader" path="res://flowing_squares.gdshader" id="1_rtrpn"]
@@ -17,9 +17,8 @@
 [ext_resource type="Script" path="res://UI/InventoryUI.gd" id="11_b74jl"]
 [ext_resource type="Texture2D" uid="uid://dfvjd8p1p1lc3" path="res://assets/noise.jpg" id="12_3inrd"]
 [ext_resource type="Script" path="res://inventory_slot.gd" id="12_26g80"]
-[ext_resource type="Texture2D" uid="uid://bg3wvfoh82oqx" path="res://assets/tileset_interactibles.png" id="14_ai44c"]
-[ext_resource type="Script" path="res://Object.gd" id="14_bpdlf"]
 [ext_resource type="PackedScene" uid="uid://cfhmk4tjehyse" path="res://interactibles/desk.tscn" id="16_5p6vc"]
+[ext_resource type="PackedScene" uid="uid://c7fsimpojygjv" path="res://interactibles/object.tscn" id="16_h2lng"]
 [ext_resource type="Shader" path="res://hurtbox.gdshader" id="21_58x8x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ew5hl"]
@@ -1522,14 +1521,6 @@ script = ExtResource("12_26g80")
 item = ExtResource("9_bamd0")
 count = 1
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_modxt"]
-atlas = ExtResource("14_ai44c")
-region = Rect2(0, 96, 32, 32)
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fcfa0"]
-radius = 12.0
-height = 24.0
-
 [sub_resource type="Resource" id="Resource_38avg"]
 script = ExtResource("11_b74jl")
 rows = 1
@@ -1680,49 +1671,8 @@ position = Vector2(256.333, 111.667)
 position = Vector2(143.667, 176.333)
 itemslot = SubResource("Resource_kfjae")
 
-[node name="Object" type="StaticBody2D" parent="World"]
-z_index = 100
-y_sort_enabled = true
-position = Vector2(336, 112)
-collision_layer = 1048640
-collision_mask = 4178496
-script = ExtResource("14_bpdlf")
-mysubtype = "wirewall"
-howoften = 3
-
-[node name="Sprite2D" type="Sprite2D" parent="World/Object"]
-texture = SubResource("AtlasTexture_modxt")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Object"]
-position = Vector2(-0.666667, 3)
-rotation = 1.5708
-shape = SubResource("CapsuleShape2D_fcfa0")
-
-[node name="CPUParticles2D" type="CPUParticles2D" parent="World/Object"]
-z_index = 1
-position = Vector2(4, 4)
-amount = 24
-lifetime = 0.3
-preprocess = 1.0
-speed_scale = 0.5
-explosiveness = 0.53
-randomness = 0.97
-lifetime_randomness = 0.83
-emission_shape = 1
-emission_sphere_radius = 2.0
-particle_flag_align_y = true
-direction = Vector2(1, 50)
-initial_velocity_max = 10.1
-angular_velocity_min = -29.09
-angular_velocity_max = 305.46
-linear_accel_min = -58.6
-linear_accel_max = 40.4
-radial_accel_min = -32.32
-radial_accel_max = 74.75
-angle_min = -247.3
-angle_max = 450.9
-scale_amount_min = 3.0
-scale_amount_max = 3.0
+[node name="Object" parent="World" instance=ExtResource("16_h2lng")]
+position = Vector2(337.667, 112.667)
 
 [node name="Desk" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(346, -32)
@@ -1757,6 +1707,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="HUD" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="TextBox" type="VBoxContainer" parent="HUD"]
 anchors_preset = 15
