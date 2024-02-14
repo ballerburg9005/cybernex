@@ -39,7 +39,6 @@ func drag_inventory_item(uiitem, offset):
 		myitem[l] = preload("res://items/item_world.tscn").instantiate()
 		myitem[l].itemslot = uiitem.itemslot.duplicate()
 		myitem[l].name = "dragged_item_"+l
-		myitem[l].position = DisplayServer.mouse_get_position() #-offset*0.33333
 		if l == "UI":
 			myitem[l].scale = Vector2(SCALE, SCALE)
 			get_node("/root/main/HUD").add_child(myitem[l])
@@ -65,32 +64,93 @@ func arr_remove_dirty(arr):
 			print("Stale dirty resolvable: "+str(arr[i][0])+" - "+str(arr[i][1]))
 	return out
 
-@export var with  : InvItem
-@export var yields : InvItem = InvItem.new()
-@export var amount : int = 1
-@export var eats_source : bool = true
-@export var eats_target : bool = true
 
-func use_item_on_item(aidx, bidx):
-	for combo in inventory.items[aidx].item.combos:
-		if inventory.items[bidx].item == combo.with:
-				p("Used "+inventory.items[aidx].item.name+" on "+inventory.items[bidx].item.name+".")
+func use_item_on_item(from_inv, to_inv, fidx, tidx):
+	for combo in from_inv.items[fidx].item.combos:
+		if to_inv.items[tidx].item == combo.with:
+				p("Used "+from_inv.items[fidx].item.name+" on "+to_inv.items[tidx].item.name+".")
 				if combo.yields and combo.yields != preload("res://items/blank.tres"):
 					p("Crafted new item: "+combo.yields.name+".")
-					add_inventory_item(InvSlot.new(combo.yields, combo.amount))
-				inventory.items[aidx].count -= 1 if combo.eats_source else 0
-				inventory.items[bidx].count -= 1 if combo.eats_target else 0
-				for i in [aidx, bidx]:
-					if inventory.items[i].count <= 0:
-						inventory.items[i] = InvSlot.new()
+					add_inventory_item(InvSlot.new(combo.yields, combo.amount), -1, to_inv)
+				from_inv.items[fidx].count -= 1 if combo.eats_source else 0
+				to_inv.items[tidx].count -= 1 if combo.eats_target else 0
+				if from_inv.items[fidx].count <= 0:
+					from_inv.items[fidx] = InvSlot.new()
+				if to_inv.items[tidx].count <= 0:
+					to_inv.items[tidx] = InvSlot.new()
 				return true
-	p("Can't use "+inventory.items[aidx].item.name+" on "+inventory.items[bidx].item.name+".")
+	p("Can't use "+from_inv.items[fidx].item.name+" on "+to_inv.items[tidx].item.name+".")
 	return false
+
+func inv_action(from_action, to_action, from_inv, to_inv, itemslot, idx):
+	print("Putting item into UI at idx "+str(idx))
+	
+	var error = false
+	match to_action:
+		"put_tofree":
+			if add_inventory_item(itemslot, idx, to_inv):
+				pass
+			else:
+				error = true
+				p('Inventory is full!')
+		"link_onlyone":
+			var lastslot
+			while to_inv.has(itemslot.item):
+				lastslot = to_inv.items[to_inv.find(itemslot.item)]
+				to_inv.items[to_inv.find(itemslot.item)] = InvSlot.new()
+			to_inv.items[idx] = lastslot if lastslot else from_inv.items[from_inv.find(itemslot.item)]
+		"put_oruse":
+			# it is a real item and the source inventory has it
+			if to_inv.items[idx].item.type != InvItem.IS_NOT and from_inv.has(itemslot.item):
+				# don't use on self
+				if not (from_inv == to_inv and from_inv.find(itemslot.item) == idx):
+					use_item_on_item(from_inv, to_inv, from_inv.find(itemslot.item), idx)
+			else:
+				if add_inventory_item(itemslot, idx, to_inv):
+					pass
+				else:
+					error = true
+					p('Inventory is full!')
+	
+	if not error and from_inv.has(itemslot.item) and from_inv != to_inv:
+		if from_action == "delete_all":
+			print("delete all")
+			from_inv.items[from_inv.find(itemslot.item)] = InvSlot.new()
+		elif from_action == "delete":
+			print("delete "+str(itemslot.count))
+			from_inv.items[from_inv.find(itemslot.item)].count -= itemslot.count # this is not right currently
+
+func sort_dragging_combinables(a, b):
+
+	# knock out the z-index = 3000 from the dragged element
+	var x = a[0] if a[0].z_index < a[1].z_index else a[1]
+	var y = b[0] if b[0].z_index < b[1].z_index else b[1]
+	
+	# hitbox hack
+	if x.name == "hitbox":
+		x = x.get_parent()
+	if y.name == "hitbox":
+		y = y.get_parent()
+		
+	if x.z_index > y.z_index:
+		return true
+	# prefer collisions with player/enemy
+	elif x.z_index == y.z_index:
+		if x.has_node("hitbox"):
+			return true
+		elif y.has_node("hitbox"):
+			return false
+		else:
+			print("undecided z-index sort : "+str(x)+" "+str(y))
+			return false
+	else:
+		return false
+	
 
 # TODO combinables should not only work via mouse drag
 func resolve_combinables(mode):
 	combinables = arr_remove_dirty(combinables)
-	combinables.sort_custom(func(a, b): return (a[0] if a[0].z_index < a[1].z_index else a[1]).z_index > (b[0] if b[0].z_index < b[1].z_index else b[1]).z_index)	
+	combinables.sort_custom(sort_dragging_combinables)
 	print("Trying to combine: "+str(combinables))
 	for arr in combinables.duplicate():
 		var world_item = arr.filter(func(e): return e is StaticBody2D and "itemslot" in e)
@@ -102,7 +162,12 @@ func resolve_combinables(mode):
 			# dragged onto enemy / player (or ???)
 			if other_item.name == "hitbox":
 				if other_item.get_parent() == self:
-					p("Consuming item not impremented yet.")
+					match dragged_item["ui"].inv:
+						inventory, quickinventory:
+							p('Consuming item not implemented yet.')
+							pass
+						_:
+							inv_action("delete_all", "put_tofree", dragged_item["ui"].inv, inventory, dragged_item["ui"].itemslot, -1)
 					return false
 				if "health" in other_item.get_parent() and world_item.itemslot.item.damage > 0:
 					other_item.get_parent().health -= world_item.itemslot.item.damage
@@ -110,28 +175,26 @@ func resolve_combinables(mode):
 					return false
 			# item is targeting inventory slot
 			elif other_item.name.substr(0,13) == "InventoryItem":
-				print("Putting item into UI")
-				var inv = quickinventory if other_item.is_quick else inventory
-				if other_item.idx < inv.items.size():
-					if dragged_item and dragged_item["obj-uiclone"] == world_item:
-						# from full or quick into quick -> always overwrite
-						if other_item.is_quick:
-							# delete if it is already there
-							if inv.has(dragged_item["ui"].itemslot.item):
-								inv.items[inv.find(dragged_item["ui"].itemslot.item)] = InvSlot.new()
-							inv.items[other_item.idx] = world_item.itemslot.duplicate()
-						# from full into full
-						elif not dragged_item["ui"].is_quick and not other_item.is_quick:
-							# check if it is an empty slot
-							if inv.items[other_item.idx].item == preload("res://items/blank.tres"):
-								inv.items[dragged_item["ui"].idx] = InvSlot.new()
-								inv.items[other_item.idx] = world_item.itemslot.duplicate()
-							# slot is not empty
-							else:
-								use_item_on_item(dragged_item["ui"].idx, other_item.idx)
-						# from quick into full
-						else:
-							p('Can\'t put from quickinventory into full inventory.')
+				match [dragged_item["ui"].inv, other_item.inv]:
+					[quickinventory, quickinventory]:
+						inv_action("leave", "link_onlyone", quickinventory, quickinventory, dragged_item["ui"].itemslot, other_item.idx)
+					[quickinventory, inventory]:
+						inv_action("delete_all", "nothing", quickinventory, inventory, dragged_item["ui"].itemslot, other_item.idx)
+					[quickinventory, _]:
+						inv_action("delete", "put_tofree", inventory, other_item.inv, dragged_item["ui"].itemslot, other_item.idx)
+					[inventory, quickinventory]:
+						inv_action("leave", "link_onlyone", inventory, quickinventory, dragged_item["ui"].itemslot, other_item.idx)
+					[inventory, inventory]:
+						inv_action("delete_all", "put_oruse", inventory, inventory, dragged_item["ui"].itemslot, other_item.idx)
+					[inventory, _]:
+						inv_action("delete", "put_tofree", inventory, other_item.inv, dragged_item["ui"].itemslot, other_item.idx)
+					[_, quickinventory]:
+						inv_action("delete_all", "put_tofree", dragged_item["ui"].inv, inventory, dragged_item["ui"].itemslot, 0)
+						inv_action("leave", "link_onlyone", inventory, quickinventory, dragged_item["ui"].itemslot, other_item.idx)
+					[_, inventory]:
+						inv_action("delete_all", "put_tofree", dragged_item["ui"].inv, inventory, dragged_item["ui"].itemslot, other_item.idx)
+					[_, _]:
+						inv_action("delete_all", "put_tofree", dragged_item["ui"].inv, other_item.inv, dragged_item["ui"].itemslot, other_item.idx)
 				return false
 			# item seems to be targeting world
 			else:
@@ -173,10 +236,11 @@ func drag_apply_inventory_item():
 	var success = resolve_combinables("dragging")
 	if success:
 		# for the time we only drop one piece
-		var idx = inventory.find(dragged_item["ui"].itemslot.item)
-		inventory.items[idx].count -= 1 if inventory.items[idx].count - 1 >= 0 else 0
-		if inventory.items[idx].count == 0:
-			inventory.items[idx] = InvSlot.new()
+		var inv = dragged_item["ui"].inv
+		var idx = inv.find(dragged_item["ui"].itemslot.item)
+		inv.items[idx].count -= 1 if inv.items[idx].count - 1 >= 0 else 0
+		if inv.items[idx].count == 0:
+			inv.items[idx] = InvSlot.new()
 		dragged_item["obj"].itemslot.count = 1
 		
 		print("Item count now: "+str(inventory.items[idx].count))
@@ -205,15 +269,20 @@ func drag_apply_inventory_item():
 	dragged_item = null
 
 # this is for keyboard action currently
-func add_inventory_item(itemslot):
-	if inventory.has(itemslot.item): # TODO and if its not modded
-		inventory.items[inventory.find(itemslot.item)].count += itemslot.count
-		return true
-	else:
-		for i in range(0, inventory.items.size()):
-			if inventory.items[i].item == preload("res://items/blank.tres"):
-				inventory.items[i] = itemslot.duplicate()
-				return true
+func add_inventory_item(itemslot, start = 0, inv = inventory):
+	start = inv.find(itemslot.item) if start < 0 and inv.has(itemslot.item) else 0 if start < 0 else start
+
+	if inv.has(itemslot.item): 
+		if itemslot != inv.items[inv.find(itemslot.item)]:
+			itemslot.count += inv.items[inv.find(itemslot.item)].count
+		inv.items[inv.find(itemslot.item)] = InvSlot.new()
+
+	for i in (range(min(start, inv.items.size()), inv.items.size()) + range(0, min(start, inv.items.size()))):
+		if inv.items[i].item == preload("res://items/blank.tres"):
+			print("Index:"+str(i))
+			inv.items[i] = itemslot.duplicate()
+			return true
+	
 	return false
 
 func _input(event):

@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://ctfh5rdwvcfap"]
+[gd_scene load_steps=62 format=3 uid="uid://ctfh5rdwvcfap"]
 
 [ext_resource type="Texture2D" uid="uid://dhubr6ejtmom2" path="res://assets/tileset x1.png" id="1_brfee"]
 [ext_resource type="Shader" path="res://flowing_squares.gdshader" id="1_rtrpn"]
@@ -14,11 +14,13 @@
 [ext_resource type="Texture2D" uid="uid://ch4cn51rs5snq" path="res://assets/circle128.png" id="8_7lhx6"]
 [ext_resource type="Resource" uid="uid://djrjkdayl2olj" path="res://items/side_cutters.tres" id="9_bamd0"]
 [ext_resource type="PackedScene" uid="uid://btv4v1ibnrmla" path="res://UI/Inventory.tscn" id="10_vg8hb"]
-[ext_resource type="Script" path="res://UI/InventoryUI.gd" id="11_b74jl"]
 [ext_resource type="Texture2D" uid="uid://dfvjd8p1p1lc3" path="res://assets/noise.jpg" id="12_3inrd"]
 [ext_resource type="Script" path="res://inventory_slot.gd" id="12_26g80"]
 [ext_resource type="PackedScene" uid="uid://cfhmk4tjehyse" path="res://interactibles/desk.tscn" id="16_5p6vc"]
 [ext_resource type="PackedScene" uid="uid://c7fsimpojygjv" path="res://interactibles/object.tscn" id="16_h2lng"]
+[ext_resource type="Resource" uid="uid://c7oecn17tljh4" path="res://items/big_wire.tres" id="18_k8fjm"]
+[ext_resource type="Resource" uid="uid://cpfp0qm7rdmoc" path="res://items/junk.tres" id="18_rwox7"]
+[ext_resource type="Script" path="res://inventory.gd" id="19_gesh8"]
 [ext_resource type="Shader" path="res://hurtbox.gdshader" id="21_58x8x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ew5hl"]
@@ -1521,15 +1523,23 @@ script = ExtResource("12_26g80")
 item = ExtResource("9_bamd0")
 count = 1
 
-[sub_resource type="Resource" id="Resource_38avg"]
-script = ExtResource("11_b74jl")
-rows = 1
-cols = 9
+[sub_resource type="Resource" id="Resource_boupi"]
+script = ExtResource("12_26g80")
+item = ExtResource("18_k8fjm")
+count = 3
 
-[sub_resource type="Resource" id="Resource_gb5mm"]
-script = ExtResource("11_b74jl")
-rows = 9
-cols = 9
+[sub_resource type="Resource" id="Resource_grmg7"]
+script = ExtResource("19_gesh8")
+items = Array[ExtResource("12_26g80")]([SubResource("Resource_boupi")])
+
+[sub_resource type="Resource" id="Resource_3funf"]
+script = ExtResource("12_26g80")
+item = ExtResource("18_rwox7")
+count = 10
+
+[sub_resource type="Resource" id="Resource_lkee5"]
+script = ExtResource("19_gesh8")
+items = Array[ExtResource("12_26g80")]([SubResource("Resource_3funf")])
 
 [node name="main" type="Control"]
 layout_mode = 3
@@ -1540,10 +1550,10 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_rw06d")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="WorldBackground" type="CanvasLayer" parent="."]
 layer = -1
 
-[node name="TextureRect" type="TextureRect" parent="CanvasLayer"]
+[node name="TextureRect" type="TextureRect" parent="WorldBackground"]
 material = SubResource("ShaderMaterial_ew5hl")
 anchors_preset = 10
 anchor_right = 1.0
@@ -1586,14 +1596,17 @@ layer_5/z_index = 1010
 layer_5/tile_data = PackedInt32Array(1835009, 1310720, 14, 1835010, 1376256, 12, 1835011, 1376256, 12, 1835012, 1376256, 12, 1835013, 1376256, 12, 1835014, 1376256, 12, 1835015, 1376256, 12, 1835016, 1376256, 12, 1835017, 1376256, 12, 1835018, 1376256, 12, 1835019, 1441792, 14, 1048597, 393216, 14, 1048592, 262144, 14, 1048593, 458752, 12, 1048596, 327680, 12, 655363, 1114112, 9, 655364, 1376256, 10, 655365, 1376256, 10, 655366, 1376256, 10, 655367, 1376256, 10, 655368, 1376256, 10, 655369, 1376256, 10, 655370, 1376256, 10, 655371, 1376256, 10, 655372, 1638400, 9)
 
 [node name="Enemy" parent="World" instance=ExtResource("4_i0gwi")]
+position = Vector2(366, 132)
 health = 20.0
+hostile_towards = "enemies"
 
 [node name="Enemy2" parent="World" instance=ExtResource("4_i0gwi")]
 position = Vector2(300, 200)
 health = 2.0
 stationary = false
+hostile_towards = "enemies"
 
-[node name="Player" type="CharacterBody2D" parent="World"]
+[node name="Player" type="CharacterBody2D" parent="World" groups=["players"]]
 z_index = 999
 y_sort_enabled = true
 position = Vector2(200, 200)
@@ -1642,8 +1655,6 @@ enabled = false
 collision_mask = 2621440
 hit_from_inside = true
 
-[node name="Area2D" type="Area2D" parent="World/Player"]
-
 [node name="HurtBox" type="CanvasLayer" parent="World/Player"]
 layer = 2
 
@@ -1691,23 +1702,13 @@ position = Vector2(166, 0)
 
 [node name="Desk6" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(166, 32)
+loot = SubResource("Resource_grmg7")
 
 [node name="Desk7" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(258.333, 4.66667)
-
-[node name="Puzzle" type="Control" parent="."]
-visible = false
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="TextureRect" type="TextureRect" parent="Puzzle"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+loot = SubResource("Resource_lkee5")
 
 [node name="HUD" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="TextBox" type="VBoxContainer" parent="HUD"]
 anchors_preset = 15
@@ -1790,7 +1791,7 @@ mouse_filter = 2
 layout_mode = 2
 size_flags_vertical = 6
 size_flags_stretch_ratio = 1.0
-inv = SubResource("Resource_38avg")
+inv = ExtResource("6_pnrst")
 metadata/myname = "hud_quick_inventory"
 
 [node name="FullInventory" type="HBoxContainer" parent="HUD"]
@@ -1823,7 +1824,7 @@ layout_mode = 2
 
 [node name="InventoryItems" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer" instance=ExtResource("10_vg8hb")]
 layout_mode = 2
-inv = SubResource("Resource_gb5mm")
+inv = ExtResource("4_vxhr8")
 metadata/myname = "hud_full_inventory"
 
 [node name="S2" type="Control" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer"]

@@ -7,6 +7,7 @@ var hud
 var hud_full_inventory
 var hud_quick_inventory
 var hud_textbox
+var camera
 
 var TOOLTIP_WAIT = 6 # * timer 0.2s
 var tooltip_timer = Timer.new()
@@ -20,6 +21,7 @@ func _ready():
 	world = $World
 	hud = $HUD
 	player = $World/Player
+	camera = $World/Player/Camera2D
 	hud_full_inventory = find_myname_recursively($HUD, "hud_full_inventory")
 	hud_quick_inventory = find_myname_recursively($HUD, "hud_quick_inventory")
 	hud_textbox = find_myname_recursively($HUD, "hud_textbox")
@@ -88,12 +90,12 @@ func tooltip_timer_update():
 		var thename = "-1"
 		if "myname" in i.collider:
 			thename = i.collider.myname
-		elif "myname" in i.collider.get_parent():
+		elif "myname" in i.collider.get_parent() and i.collider.name in ["hitbox", "influence"]:
 			thename = i.collider.get_parent().myname
-		elif "itemslot" in i.collider and i.collider.itemslot and i.collider.itemslot.item:
-			thename = i.collider.itemslot.item.name
-		elif "itemslot" in i.collider.get_parent() and i.collider.get_parent().itemslot and i.collider.get_parent().itemslot.item:
-			thename = i.collider.get_parent().itemslot.item.name
+#		elif "itemslot" in i.collider and i.collider.itemslot and i.collider.itemslot.item:
+#			thename = i.collider.itemslot.item.name
+#		elif "itemslot" in i.collider.get_parent() and i.collider.get_parent().itemslot and i.collider.get_parent().itemslot.item:
+#			thename = i.collider.get_parent().itemslot.item.name
 		if str(thename) != "-1" and not hud_tooltip:
 			if thename and thename.length() > 0:
 				hud_tooltip = preload("res://tooltip.tscn").instantiate()
@@ -106,12 +108,21 @@ func tooltip_timer_update():
 
 
 func _on_ui_mouse_entered():
-	print("mouse_over_ui")
+	#print("mouse_over_ui")
 	mouse_over_ui = true
-	pass # Replace with function body.
 
 
 func _on_ui_mouse_exited():
-	print("mouse_not_over_ui")
+	#print("mouse_not_over_ui")
 	mouse_over_ui = false
-	pass # Replace with function body.
+
+
+func get_all_the_children(node, type = null):
+	var children = []
+	for n in node.get_children():
+			if type == null:
+				children.append(n)
+			elif n.is_class(type):
+				children.append(n)
+			children.append_array(get_all_the_children(n, type))
+	return children

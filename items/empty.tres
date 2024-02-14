@@ -12,4 +12,6 @@ script = ExtResource("1_pjlp1")
 name = "Empty"
 short_name = "empty"
 texture = SubResource("AtlasTexture_j064y")
+damage = 0.0
+combos = Array[Resource("res://inventory_combo.gd")]([])
 type = 1

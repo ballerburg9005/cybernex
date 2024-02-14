@@ -29,7 +29,7 @@ func _on_animation_player_animation_finished(anim_name):
 	finished_playing.emit()
 
 
-func _on_do_activate(object, instant):
+func _on_do_activate(object, instant = false):
 	get_node("/root/main").p(myname+" activated.")
 	var animated = false
 
@@ -44,7 +44,7 @@ func _on_do_activate(object, instant):
 	set_callers_playing(animated)
 	
 
-func _on_do_deactivate(object, instant):
+func _on_do_deactivate(object, instant = false):
 	get_node("/root/main").p(myname+" deactivated.")
 	var animated = false
 	if animatable:
@@ -59,3 +59,7 @@ func _on_do_deactivate(object, instant):
 				animatable.play("off")
 
 	set_callers_playing(animated)
+
+
+func _on_terminal_do_deactivate():
+	pass # Replace with function body.

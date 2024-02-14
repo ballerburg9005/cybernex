@@ -6,6 +6,7 @@ extends CharacterBody2D
 @export var drops : InvSlot
 
 @export var stationary = false
+@export var hostile_towards = "players"
 
 const SCALE = 3
 const SPEED = 300.0
@@ -19,6 +20,8 @@ var movement_timer_ok = true
 
 var projectile_timer = Timer.new()
 var projectile_timer_ok = true
+var projectile_pre_timer = Timer.new()
+
 
 
 var position_history = [Vector2(0,0),Vector2(0,0),Vector2(0,0),Vector2(0,0),Vector2(0,0),Vector2(0,0),Vector2(0,0),Vector2(0,0),Vector2(0,0),Vector2(0,0),]
@@ -33,6 +36,8 @@ var is_dying = false
 var dropped_item
 var do_drop = false
 var do_drop_timer = Timer.new()
+
+
 func _ready():
 	if not drops:
 		var randarr = [preload("res://items/big_wire.tres"), preload("res://items/wires.tres"), preload("res://items/junk.tres")]
@@ -50,12 +55,19 @@ func _ready():
 	movement_timer2.timeout.connect(movement_timer2_update)
 	projectile_timer.one_shot = true
 	projectile_timer.timeout.connect(projectile_timer_update)
+	projectile_pre_timer.one_shot = true
+	projectile_pre_timer.timeout.connect(projectile_pre_timer_update)
 	
 	add_child(movement_timer)
 	add_child(movement_timer2)
 	add_child(projectile_timer)
+	add_child(projectile_pre_timer)
 	movement_timer2.start(randi()%10)
 
+func projectile_pre_timer_update():
+	projectile_timer.start(0.1+randf()*1)
+	if attack_targets.size() > 0:
+		spawn_projectile(attack_targets[0].global_position + (attack_targets[0].global_position - $hitbox.global_position)*1000)
 
 func projectile_timer_update():
 	projectile_timer_ok = true
@@ -149,7 +161,7 @@ func _physics_process(delta):
 			movement_timer_ok = false
 			movement_timer.start(3)
 
-	if attack_targets.size() > 0:
+	if attack_targets.size() > 0 and attack_targets[0].get_parent().is_in_group(hostile_towards):
 		if attack_pursue_targets.has(attack_targets[0]):
 			movement_target = attack_targets[0].global_position - (attack_targets[0].global_position-global_position).normalized()*100
 		$attack/RayCast2D.target_position = (attack_targets[0].global_position - global_position)/SCALE
@@ -171,11 +183,6 @@ func _physics_process(delta):
 		elif velocity.x > 0.1:
 			$Sprite.flip_h = false
 
-	if can_shoot_target and projectile_timer_ok:
-		projectile_timer_ok = false
-		projectile_timer.start(0.1+randf()*1)
-		spawn_projectile(attack_targets[0].global_position + (attack_targets[0].global_position - $hitbox.global_position)*1000)
-
 	if movement_target and (movement_target - global_position).length() < 10:
 			movement_target = null
 			
@@ -184,13 +191,23 @@ func _physics_process(delta):
 	else:
 		velocity = Vector2(0,0)
 
+	var anim = "default"
 	if abs(velocity.x) + abs(velocity.y) < 0.1:
-		$Sprite.play("default")
+		anim = "default"
 		set_particles(Vector2(0,0))
 	else:
-		$Sprite.play("run")
+		anim = "run"
 		set_particles(velocity)
-		
+
+	if can_shoot_target:
+		if projectile_timer_ok:
+			projectile_timer_ok = false
+			projectile_pre_timer.start(0.3)
+		anim = "shoot"
+	
+	$Sprite.play(anim)
+
+
 	move_and_slide()
 
 

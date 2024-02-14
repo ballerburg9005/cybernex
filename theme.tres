@@ -3,5 +3,6 @@
 [ext_resource type="FontFile" uid="uid://cmdulbuu5ap81" path="res://fonts/AtariGames.ttf" id="1_xj0t1"]
 
 [resource]
+default_base_scale = 2.7
 default_font = ExtResource("1_xj0t1")
 default_font_size = 32

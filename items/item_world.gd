@@ -9,6 +9,7 @@ extends StaticBody2D
 @export var in_drag_space = false
 
 var mytype = "item"
+var myname = "item"
 
 
 var old_collision_layer = 0
@@ -28,8 +29,8 @@ func set_in_drag_space(value):
 		$CollisionShape2D.shape.radius = 1
 		in_drag_space = true
 	elif value == "world":
-		set_collision_layer_value(29, true)
-		set_collision_mask_value(31, true)	# inventory UI
+		set_collision_layer_value(29, true)							# does this make sense??
+		set_collision_mask_value(31, true)	# inventory UI			# same
 		$influence.set_collision_mask_value(21, true) # floor
 		$influence.set_collision_mask_value(7, true) # objects
 		$influence.set_collision_mask_value(5, true) # terminals/switches
@@ -54,9 +55,12 @@ func _ready():
 	old_influence_collision_mask = $influence.collision_mask
 	old_collision_shape = $CollisionShape2D.shape
 
+	if itemslot.item not in [preload("res://items/blank.tres")]:
+		myname = itemslot.item.name
+	
 func activate(caller):
 	if caller.has_method("add_inventory_item"):
-		if caller.add_inventory_item(itemslot):
+		if caller.add_inventory_item(itemslot, -1):
 			get_node("/root/main").p("Picked up "+itemslot.item.name+".")
 			_on_influence_body_shape_exited(null, caller, null, null)
 			queue_free()

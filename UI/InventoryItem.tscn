@@ -32,11 +32,11 @@ expand_mode = 1
 script = ExtResource("2_54w7e")
 itemslot = SubResource("Resource_m8lgp")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="influence" type="Area2D" parent="."]
 collision_layer = 1073741824
 collision_mask = 536870912
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="influence"]
 position = Vector2(24, 24)
 shape = SubResource("RectangleShape2D_bdgw1")
 
@@ -77,5 +77,5 @@ justification_flags = 0
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]
 [connection signal="mouse_entered" from="." to="." method="_on_focus_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_focus_exited"]
-[connection signal="body_entered" from="Area2D" to="." method="_on_body_entered"]
-[connection signal="body_exited" from="Area2D" to="." method="_on_body_exited"]
+[connection signal="body_entered" from="influence" to="." method="_on_body_entered"]
+[connection signal="body_exited" from="influence" to="." method="_on_body_exited"]

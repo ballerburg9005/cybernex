@@ -4,13 +4,16 @@ extends TextureRect
 @export var itemslot : InvSlot
 
 var in_drag_space = false
-var is_quick = false
+
+var inv : Inv
 
 var disabled = false
 
 var myname 
 
 var idx = 0
+
+var is_world = false
 
 func _ready():
 	idx = int(name.substr(13))
@@ -34,6 +37,11 @@ func _ready():
 		$PanelContainer.visible = true
 	else:
 		$PanelContainer.visible = false
+		
+	if is_world:
+		$influence.set_collision_mask_value(30, false)
+		$influence.set_collision_mask_value(29, true)
+		
 
 func _on_focus_entered():
 	material = ShaderMaterial.new()

@@ -11,7 +11,7 @@ region = Rect2(0, 96, 32, 32)
 radius = 12.0
 height = 24.0
 
-[node name="Object" type="StaticBody2D"]
+[node name="Object" type="StaticBody2D" groups=["interactibles"]]
 z_index = 100
 y_sort_enabled = true
 collision_layer = 1048640

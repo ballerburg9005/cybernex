@@ -1,70 +1,82 @@
 @tool
 extends PanelContainer
 
-@export var inv : InventoryUI
+@export var inv : Inv
 
 var item_scene = preload("res://UI/InventoryItem.tscn")
 
 var timer_update := Timer.new()
 
+var is_world = false
+
+@onready var grid_container = $GridContainer
+
 func _update_items():
-	if get_node("/root").has_node("main") and "player" in get_node("/root/main"):
-		# TODO link inventory based on id, or something, instead of guessing by size
-		var inventory
-		if inv.cols*inv.rows > 20:
-			inventory = get_node("/root/main").player.inventory
-			for node in $GridContainer.get_children():
-				node.is_quick = false
-		else:
-			inventory = get_node("/root/main").player.quickinventory
-			for node in $GridContainer.get_children():
-				node.is_quick = true
-			
-		for i in range(0, inv.cols*inv.rows):
-			var node_name = "./InventoryItem"+str(i)
-			if $GridContainer.has_node(node_name):
-				var ui_inv_item = $GridContainer.get_node(node_name)
-				if i < inventory.items.size() and inventory.items[i]:
-					if not ui_inv_item.itemslot == inventory.items[i]:
-						ui_inv_item.itemslot = inventory.items[i]
-						ui_inv_item.disabled = false
-					if ui_inv_item.is_quick:
-						var playerinv = get_node("/root/main").player.inventory
-						if not playerinv.has(ui_inv_item.itemslot.item):
-							ui_inv_item.disabled = true
-							ui_inv_item.itemslot = InvSlot.new()
-						else:
-							var playerinvslot = playerinv.items[playerinv.find(ui_inv_item.itemslot.item)]
-							if playerinvslot != ui_inv_item.itemslot:
-								ui_inv_item.itemslot = playerinvslot
-							
-				else:
+
+	for i in range(0, inv.items.size()):
+		var node_name = "./InventoryItem"+str(i)
+		if grid_container.has_node(node_name):
+			var ui_inv_item = grid_container.get_node(node_name)
+			if not ui_inv_item.itemslot == inv.items[i]:
+				ui_inv_item.itemslot = inv.items[i]
+				ui_inv_item.disabled = false
+			if ui_inv_item.inv == preload("res://quickinventory.tres"):
+				var playerinv = preload("res://playerinventory.tres")
+				if not playerinv.has(ui_inv_item.itemslot.item):
+					ui_inv_item.disabled = true
 					ui_inv_item.itemslot = InvSlot.new()
-				ui_inv_item._ready()
+				else:
+					var playerinvslot = playerinv.items[playerinv.find(ui_inv_item.itemslot.item)]
+					if playerinvslot != ui_inv_item.itemslot:
+						ui_inv_item.itemslot = playerinvslot
+			ui_inv_item._ready()
 
 
 func _ready():
-	timer_update.one_shot = false
-	timer_update.timeout.connect(_update_items)
-	add_child(timer_update)
-	timer_update.start(0.2)
-		
 	if not inv:
-		inv = InventoryUI.new()
-	$GridContainer.columns = inv.cols
+		inv = Inv.new()
 
-	for i in range(0, inv.cols*inv.rows):
+	grid_container.columns = int(ceil(sqrt(inv.items.size())))
+	grid_container.size = Vector2(0,0)
+	
+#	if not Engine.is_editor_hint():
+	call_deferred("_started")
+	
+
+func _started():
+	if inv == preload("res://playerinventory.tres"):
+		grid_container.columns = int(ceil(sqrt(inv.items.size())))
+	elif inv == preload("res://quickinventory.tres"):
+		grid_container.columns = 9
+	
+	if grid_container.columns < 3:
+		grid_container.columns = 3
+
+	if not inv == preload("res://quickinventory.tres"):
+		for i in range(inv.items.size(), grid_container.columns * grid_container.columns):
+			inv.items.append(InvSlot.new(preload("res://items/missing.tres")))
+
+	if not Engine.is_editor_hint():
+		timer_update.one_shot = false
+		timer_update.timeout.connect(_update_items)
+		add_child(timer_update)
+		timer_update.start(0.2)
+
+
+	for i in range(0, inv.items.size()):
 		var item = item_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE)
 		item.name = "InventoryItem"+str(i)
-		item.itemslot = InvSlot.new()
-		
-		if $GridContainer.has_node("./"+item.name):
-			var oldnode = $GridContainer.get_node("./"+item.name)
-			$GridContainer.remove_child(oldnode)
+		item.itemslot = inv.items[i]
+		item.inv = inv
+		item.is_world = is_world
+
+		if grid_container.has_node("./"+item.name):
+			var oldnode = grid_container.get_node("./"+item.name)
+			grid_container.remove_child(oldnode)
 			oldnode.queue_free()
 			oldnode = null
 			
-		$GridContainer.add_child(item)
+		grid_container.add_child(item)
 		item.set_owner(get_tree().get_edited_scene_root())
 		
 
