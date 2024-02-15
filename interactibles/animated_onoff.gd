@@ -5,6 +5,7 @@ extends Node2D
 var mytype = "door"
 
 var animatable
+var last_animation
 
 var callers = []
 
@@ -13,7 +14,7 @@ signal finished_playing
 
 func _ready():
 	animatable = $StaticBody2D/AnimationPlayer
-
+	last_animation = animatable.assigned_animation
 
 func set_callers_playing(state):
 	for caller in callers:
@@ -29,6 +30,13 @@ func _on_animation_player_animation_finished(anim_name):
 	finished_playing.emit()
 
 
+func _on_do_toggle(object, instant = false, state = null):
+	if (state != null and state) or state == null and last_animation in ["activate", "on"]:
+		_on_do_deactivate(object, instant)
+	else:
+		_on_do_activate(object, instant)
+
+
 func _on_do_activate(object, instant = false):
 	get_node("/root/main").p(myname+" activated.")
 	var animated = false
@@ -42,6 +50,7 @@ func _on_do_activate(object, instant = false):
 	if not callers.has(object):
 		callers.append(object)
 	set_callers_playing(animated)
+	last_animation = "on"
 	
 
 func _on_do_deactivate(object, instant = false):
@@ -59,7 +68,4 @@ func _on_do_deactivate(object, instant = false):
 				animatable.play("off")
 
 	set_callers_playing(animated)
-
-
-func _on_terminal_do_deactivate():
-	pass # Replace with function body.
+	last_animation = "off"

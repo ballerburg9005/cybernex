@@ -16,12 +16,16 @@ var SCALE = 3
 
 var animation_playing = []
 var is_activated = false
+var is_connected = false
+var playing_first_time = true
+var connections = []
 var has_loot = false
 
 var ui_menu
 
 signal do_activate
 signal do_deactivate
+signal do_toggle
 
 
 func _ready():
@@ -30,7 +34,14 @@ func _ready():
 		for i in range(0,max(9, loot.items.size())):
 			if i >= loot.items.size():
 				loot.items += [InvSlot.new()]
-		
+	
+	for signal_description in get_signal_list():
+		var signal_name = str(signal_description["name"])
+		for connection in get_signal_connection_list(signal_name):
+			if connection['signal'].get_name() in ["do_activate", "do_deactivate", "do_toggle"]:
+				is_connected = true
+				connections += [connection['signal'].get_name()]
+				
 	call_deferred("_started")
 
 
@@ -47,16 +58,20 @@ func _started():
 
 # start puzzle
 func activate(caller, action = "default"):
-	if action in ["loot", "activate"]:
-		caller.get_parent().remove_child(caller)
-		caller.queue_free()
-		ui_menu = null
 	
+	var toggled = false
 	if ui_menu:
+		if not (caller == ui_menu and action in ["loot", "activate"]):
+			toggled = true
+		get_node("/root/main").remove_child(ui_menu)
+		ui_menu.queue_free()
+		ui_menu = null
+
+	if toggled:
 		return false
 
 	if action == "default" and has_loot:
-		if disabled:
+		if disabled or not is_connected:
 			spawn_lootbox()
 		elif not loot_after_solved or access_granted:
 				print("spawn multichice")
@@ -64,7 +79,7 @@ func activate(caller, action = "default"):
 	elif action == "loot":
 		spawn_lootbox()
 	elif disabled:
-		get_node("/root/main").p("Terminal is not functional.")
+		get_node("/root/main").p(myname+" is not functional.")
 	elif animation_playing.size() == 0:
 		if access_granted:
 			if not is_activated:
@@ -107,13 +122,37 @@ func spawn_multiui_menu():
 
 
 func play_activate(instant = false):
-	is_activated = true
-	do_activate.emit(self, instant)
+	if playing_first_time:
+		playing_first_time = false
+		instant = true
+		
+	if "do_activate" in connections:
+		is_activated = true
+		do_activate.emit(self, instant)
+	else:
+		play_toggle(instant)
 
 
 func play_deactivate(instant = false):
-	is_activated = false
-	do_deactivate.emit(self, instant)
+	if playing_first_time:
+		playing_first_time = false
+		instant = true
+		
+	if "do_deactivate" in connections:
+		is_activated = false
+		do_deactivate.emit(self, instant)
+	else:
+		play_toggle(instant)
+
+
+func play_toggle(instant = false):
+	if playing_first_time:
+		playing_first_time = false
+		instant = true
+		
+	if "do_toggle" in connections:
+		is_activated = not is_activated
+		do_toggle.emit(self, instant, is_activated)
 
 
 func _on_influence_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
@@ -126,7 +165,7 @@ func _on_influence_body_shape_entered(body_rid, body, body_shape_index, local_sh
 
 func _on_influence_body_shape_exited(body_rid, body, body_shape_index, local_shape_index):
 	if ui_menu:
-		remove_child(ui_menu)
+		get_node("/root/main").remove_child(ui_menu)
 		ui_menu.queue_free()
 		ui_menu = null
 	if "activatables" in body and body.activatables.has(self):

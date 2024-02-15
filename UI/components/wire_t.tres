@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="Component" load_steps=4 format=3 uid="uid://dwkplbeccydmr"]
+
+[ext_resource type="Script" path="res://UI/Component.gd" id="1_ol8rk"]
+[ext_resource type="Texture2D" uid="uid://b3t85menwedlh" path="res://assets/tileset_electronics.png" id="2_48ecx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k6r8x"]
+atlas = ExtResource("2_48ecx")
+region = Rect2(192, 32, 16, 16)
+
+[resource]
+script = ExtResource("1_ol8rk")
+name = "wire"
+short_name = "wire"
+texture = SubResource("AtlasTexture_k6r8x")
+value = 0
+is_input = false
+is_output = false
+is_ground = false
+pnp = true
+connections = {
+"bottom": 1,
+"left": 1,
+"right": -1,
+"top": -1
+}

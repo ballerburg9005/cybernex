@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Component" load_steps=2 format=3 uid="uid://bobdv0rbnegi5"]
+
+[ext_resource type="Script" path="res://UI/Component.gd" id="1_wnmru"]
+
+[resource]
+script = ExtResource("1_wnmru")
+name = "blank"
+short_name = "blank"
+value = 0
+is_input = false
+is_output = false
+is_ground = false
+pnp = true
+connections = {
+"bottom": -1,
+"left": -1,
+"right": -1,
+"top": -1
+}

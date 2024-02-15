@@ -1,27 +1,25 @@
-[gd_scene load_steps=62 format=3 uid="uid://ctfh5rdwvcfap"]
+[gd_scene load_steps=36 format=3 uid="uid://ctfh5rdwvcfap"]
 
 [ext_resource type="Texture2D" uid="uid://dhubr6ejtmom2" path="res://assets/tileset x1.png" id="1_brfee"]
 [ext_resource type="Shader" path="res://flowing_squares.gdshader" id="1_rtrpn"]
 [ext_resource type="Script" path="res://main.gd" id="1_rw06d"]
-[ext_resource type="Script" path="res://Player.gd" id="2_3pqom"]
-[ext_resource type="Texture2D" uid="uid://ctaqpvt85mg5i" path="res://assets/Players/players grey x1.png" id="3_ilg1g"]
 [ext_resource type="PackedScene" uid="uid://b5tvsd06gu6sx" path="res://enemies/enemy.tscn" id="4_i0gwi"]
 [ext_resource type="Resource" uid="uid://belbro1hfjjh3" path="res://playerinventory.tres" id="4_vxhr8"]
+[ext_resource type="PackedScene" uid="uid://c1bhreaem7qlk" path="res://player.tscn" id="5_605dv"]
 [ext_resource type="PackedScene" uid="uid://bteu1klgy2kto" path="res://interactibles/door_2x.tscn" id="5_gs8tt"]
 [ext_resource type="Resource" uid="uid://dba0oafttyvuv" path="res://quickinventory.tres" id="6_pnrst"]
 [ext_resource type="PackedScene" uid="uid://c0yc3rxh2tqpx" path="res://interactibles/terminal.tscn" id="6_rq1bm"]
 [ext_resource type="PackedScene" uid="uid://bax3ydx4vf0i5" path="res://items/item_world.tscn" id="7_n8dxg"]
-[ext_resource type="Texture2D" uid="uid://ch4cn51rs5snq" path="res://assets/circle128.png" id="8_7lhx6"]
 [ext_resource type="Resource" uid="uid://djrjkdayl2olj" path="res://items/side_cutters.tres" id="9_bamd0"]
 [ext_resource type="PackedScene" uid="uid://btv4v1ibnrmla" path="res://UI/Inventory.tscn" id="10_vg8hb"]
 [ext_resource type="Texture2D" uid="uid://dfvjd8p1p1lc3" path="res://assets/noise.jpg" id="12_3inrd"]
 [ext_resource type="Script" path="res://inventory_slot.gd" id="12_26g80"]
+[ext_resource type="Resource" uid="uid://c1rm8ll7i4il7" path="res://items/wires.tres" id="14_vb2n3"]
 [ext_resource type="PackedScene" uid="uid://cfhmk4tjehyse" path="res://interactibles/desk.tscn" id="16_5p6vc"]
 [ext_resource type="PackedScene" uid="uid://c7fsimpojygjv" path="res://interactibles/object.tscn" id="16_h2lng"]
 [ext_resource type="Resource" uid="uid://c7oecn17tljh4" path="res://items/big_wire.tres" id="18_k8fjm"]
 [ext_resource type="Resource" uid="uid://cpfp0qm7rdmoc" path="res://items/junk.tres" id="18_rwox7"]
 [ext_resource type="Script" path="res://inventory.gd" id="19_gesh8"]
-[ext_resource type="Shader" path="res://hurtbox.gdshader" id="21_58x8x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ew5hl"]
 shader = ExtResource("1_rtrpn")
@@ -1304,224 +1302,32 @@ physics_layer_1/collision_layer = 1048576
 physics_layer_1/collision_mask = 536870912
 sources/0 = SubResource("TileSetAtlasSource_tc4v3")
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t7thv"]
-radius = 4.66667
-height = 15.3333
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_idmjf"]
-radius = 1.99991
-height = 12.0
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_0156n"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(0, 160, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_j65ch"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(32, 160, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_fc7g2"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(64, 160, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6riec"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(96, 160, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_mkc12"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(128, 160, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_82h4m"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(160, 160, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3p5l0"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(192, 160, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_4if4o"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(0, 0, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ifdsy"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(0, 64, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_lrqrd"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(32, 64, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3bc24"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(64, 64, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_y3y7h"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(96, 64, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_x84qc"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(128, 64, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_lw5qp"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(0, 96, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_aiuc1"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(32, 96, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_cljop"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(64, 96, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_kjstr"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(96, 96, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_goty7"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(0, 128, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_40xii"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(32, 128, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_2jo7t"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(64, 128, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_kn8d4"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(96, 128, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_r27ut"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(0, 32, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ntfln"]
-atlas = ExtResource("3_ilg1g")
-region = Rect2(32, 32, 32, 32)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_gnc0s"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_0156n")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_j65ch")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_fc7g2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6riec")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_mkc12")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_82h4m")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3p5l0")
-}],
-"loop": true,
-"name": &"death",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_4if4o")
-}],
-"loop": true,
-"name": &"default",
-"speed": 0.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ifdsy")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_lrqrd")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3bc24")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_y3y7h")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_x84qc")
-}],
-"loop": true,
-"name": &"reload",
-"speed": 3.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_lw5qp")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_aiuc1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_cljop")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_kjstr")
-}],
-"loop": true,
-"name": &"run",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_goty7")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_40xii")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_2jo7t")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_kn8d4")
-}],
-"loop": true,
-"name": &"shoot",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_r27ut")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ntfln")
-}],
-"loop": true,
-"name": &"talk",
-"speed": 3.0
-}]
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_0pub3"]
-radius = 49.0
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_wx2j1"]
-shader = ExtResource("21_58x8x")
-shader_parameter/mouseSize = 0.8
-shader_parameter/smoothObjectPadding = 0.66
-shader_parameter/alpha = 0.0
-
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_tgny2"]
-size = Vector2(1000, 1000)
-
 [sub_resource type="Resource" id="Resource_kfjae"]
 script = ExtResource("12_26g80")
 item = ExtResource("9_bamd0")
 count = 1
+
+[sub_resource type="Resource" id="Resource_ha1qs"]
+script = ExtResource("12_26g80")
+item = ExtResource("18_rwox7")
+count = 1
+
+[sub_resource type="Resource" id="Resource_7lir4"]
+script = ExtResource("12_26g80")
+item = ExtResource("14_vb2n3")
+count = 1
+
+[sub_resource type="Resource" id="Resource_g6cdm"]
+script = ExtResource("19_gesh8")
+items = Array[ExtResource("12_26g80")]([SubResource("Resource_ha1qs"), SubResource("Resource_7lir4")])
+
+[sub_resource type="Resource" id="Resource_2qi1w"]
+script = ExtResource("19_gesh8")
+items = Array[ExtResource("12_26g80")]([])
+
+[sub_resource type="Resource" id="Resource_3daxw"]
+script = ExtResource("19_gesh8")
+items = Array[ExtResource("12_26g80")]([])
 
 [sub_resource type="Resource" id="Resource_boupi"]
 script = ExtResource("12_26g80")
@@ -1606,71 +1412,7 @@ health = 2.0
 stationary = false
 hostile_towards = "enemies"
 
-[node name="Player" type="CharacterBody2D" parent="World" groups=["players"]]
-z_index = 999
-y_sort_enabled = true
-position = Vector2(200, 200)
-collision_layer = 512
-collision_mask = 15712272
-motion_mode = 1
-script = ExtResource("2_3pqom")
-inventory = ExtResource("4_vxhr8")
-quickinventory = ExtResource("6_pnrst")
-
-[node name="hitbox" type="AnimatableBody2D" parent="World/Player"]
-z_index = 101
-position = Vector2(0, -6)
-collision_layer = 2048
-collision_mask = 8
-sync_to_physics = false
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Player/hitbox"]
-shape = SubResource("CapsuleShape2D_t7thv")
-
-[node name="Shape" type="CollisionShape2D" parent="World/Player"]
-rotation = 1.5708
-shape = SubResource("CapsuleShape2D_idmjf")
-
-[node name="Sprite" type="AnimatedSprite2D" parent="World/Player"]
-position = Vector2(0, -13.6667)
-sprite_frames = SubResource("SpriteFrames_gnc0s")
-animation = &"death"
-
-[node name="Camera2D" type="Camera2D" parent="World/Player"]
-
-[node name="PlayerReach" type="Area2D" parent="World/Player"]
-collision_layer = 1024
-collision_mask = 268435456
-
-[node name="Sprite2D" type="Sprite2D" parent="World/Player/PlayerReach"]
-modulate = Color(1, 1, 1, 0.164706)
-self_modulate = Color(0.0745098, 0.27451, 0.435294, 1)
-texture = ExtResource("8_7lhx6")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Player/PlayerReach"]
-shape = SubResource("CircleShape2D_0pub3")
-
-[node name="RayCast2D" type="RayCast2D" parent="World/Player/PlayerReach"]
-enabled = false
-collision_mask = 2621440
-hit_from_inside = true
-
-[node name="HurtBox" type="CanvasLayer" parent="World/Player"]
-layer = 2
-
-[node name="HurtShader" type="TextureRect" parent="World/Player/HurtBox"]
-top_level = true
-z_index = 4096
-material = SubResource("ShaderMaterial_wx2j1")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -140.0
-offset_bottom = 140.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = SubResource("PlaceholderTexture2D_tgny2")
+[node name="Player" parent="World" instance=ExtResource("5_605dv")]
 
 [node name="Terminal" parent="World" instance=ExtResource("6_rq1bm")]
 position = Vector2(206.667, 119)
@@ -1687,12 +1429,18 @@ position = Vector2(337.667, 112.667)
 
 [node name="Desk" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(346, -32)
+disabled = true
+loot = SubResource("Resource_g6cdm")
 
 [node name="Desk2" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(346, 0)
+disabled = true
+loot = SubResource("Resource_2qi1w")
 
 [node name="Desk3" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(346, 32)
+disabled = true
+loot = SubResource("Resource_3daxw")
 
 [node name="Desk4" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(166, -32)
@@ -1795,6 +1543,7 @@ inv = ExtResource("6_pnrst")
 metadata/myname = "hud_quick_inventory"
 
 [node name="FullInventory" type="HBoxContainer" parent="HUD"]
+visible = false
 z_index = 1000
 anchors_preset = 15
 anchor_right = 1.0
@@ -1876,8 +1625,9 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
 
-[connection signal="do_activate" from="World/Terminal" to="World/Door-0-0" method="_on_do_activate"]
-[connection signal="do_deactivate" from="World/Terminal" to="World/Door-0-0" method="_on_do_deactivate"]
+[connection signal="do_toggle" from="World/Terminal" to="World/Door-0-0" method="_on_do_toggle"]
+[connection signal="do_activate" from="World/Desk7" to="World/Door-0-0" method="_on_do_activate"]
+[connection signal="do_deactivate" from="World/Desk7" to="World/Door-0-0" method="_on_do_deactivate"]
 [connection signal="mouse_entered" from="HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer" to="." method="_on_ui_mouse_entered"]
 [connection signal="mouse_exited" from="HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer" to="." method="_on_ui_mouse_exited"]
 [connection signal="mouse_entered" from="HUD/QuickInventory/InventoryItems" to="." method="_on_ui_mouse_entered"]

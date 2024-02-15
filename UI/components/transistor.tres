@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="Component" load_steps=4 format=3 uid="uid://cvssbof027imj"]
+
+[ext_resource type="Script" path="res://UI/Component.gd" id="1_18pem"]
+[ext_resource type="Texture2D" uid="uid://b3t85menwedlh" path="res://assets/tileset_electronics.png" id="2_lnocx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7q4cr"]
+atlas = ExtResource("2_lnocx")
+region = Rect2(0, 32, 16, 16)
+
+[resource]
+script = ExtResource("1_18pem")
+name = "Transistor"
+short_name = "transistor"
+texture = SubResource("AtlasTexture_7q4cr")
+value = 100
+is_input = false
+is_output = false
+is_ground = false
+pnp = true
+connections = {
+"bottom": 2,
+"left": 1,
+"right": 3,
+"top": -1
+}
