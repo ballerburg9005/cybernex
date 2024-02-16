@@ -39,3 +39,11 @@ func switch_aspect_aspect_mode(mode):
 			if obj is Label and obj.name != "title":
 				obj.add_theme_font_size_override("font_size", size)
 	aspect_mode = mode
+
+
+func _on_start_button_up():
+	get_tree().change_scene_to_file("res://main.tscn")
+	
+func _on_quit_button_up():
+	get_tree().change_scene_to_file("res://donate.tscn")
+

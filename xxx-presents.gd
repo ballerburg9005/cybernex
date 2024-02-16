@@ -57,9 +57,12 @@ func _physics_process(delta):
 			menu_fade_in = false
 	if menu_fade_out == true && menu_fade_in == false:
 		set_modulate(lerp(get_modulate(), Color(1,1,1,0), 0.02))
+		if get_modulate().a < 0.8:
+			mouse_filter = Control.MOUSE_FILTER_IGNORE
 		if get_modulate().a < 0.1:
 			set_modulate(Color(1,1,1,0))
 			menu_fade_out = false
+			visible = false
 	if text_fade_out == true:
 		$VBoxContainer2.set_modulate(lerp($VBoxContainer2.get_modulate(), Color(1,1,1,0), 0.02))
 		if $VBoxContainer2.get_modulate().a < 0.1:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://c1ncb7yj4ovtl"]
+[gd_scene load_steps=20 format=3 uid="uid://c1ncb7yj4ovtl"]
 
 [ext_resource type="Texture2D" uid="uid://xn5mq6c1axim" path="res://assets/title.jpg" id="1_mypru"]
 [ext_resource type="Script" path="res://title.gd" id="1_oybu7"]
@@ -18,6 +18,16 @@ size = Vector2(2048, 4600)
 shader = ExtResource("1_s062n")
 shader_parameter/iChannel0 = ExtResource("1_mypru")
 shader_parameter/iChannel1 = ExtResource("3_lwcpk")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3f4h4"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jantl"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wotss"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b8ym8"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6os0q"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_oiss6"]
 shader = ExtResource("6_hfgwi")
@@ -99,36 +109,57 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="start" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+[node name="start" type="Button" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_shadow_color = Color(1, 1, 1, 1)
-theme_override_constants/shadow_outline_size = 32
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.317647, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0.298039, 0, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 32
 theme_override_fonts/font = ExtResource("4_j2lti")
 theme_override_font_sizes/font_size = 120
+theme_override_styles/normal = SubResource("StyleBoxEmpty_3f4h4")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_jantl")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_wotss")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_b8ym8")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_6os0q")
 text = "start"
-horizontal_alignment = 1
 
-[node name="options" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+[node name="options" type="Button" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_shadow_color = Color(1, 1, 1, 1)
-theme_override_constants/shadow_outline_size = 32
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.317647, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0.298039, 0, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 32
 theme_override_fonts/font = ExtResource("4_j2lti")
 theme_override_font_sizes/font_size = 120
+theme_override_styles/normal = SubResource("StyleBoxEmpty_3f4h4")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_jantl")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_wotss")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_b8ym8")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_6os0q")
 text = "options"
-horizontal_alignment = 1
 
-[node name="quit" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+[node name="quit" type="Button" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_shadow_color = Color(1, 1, 1, 1)
-theme_override_constants/shadow_outline_size = 32
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.317647, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0.298039, 0, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 32
 theme_override_fonts/font = ExtResource("4_j2lti")
 theme_override_font_sizes/font_size = 120
+theme_override_styles/normal = SubResource("StyleBoxEmpty_3f4h4")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_jantl")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_wotss")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_b8ym8")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_6os0q")
 text = "quit
 "
-horizontal_alignment = 1
 
 [node name="Control" type="Control" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
@@ -147,10 +178,11 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -2.0
-offset_bottom = 502.0
+offset_top = -30.0
+offset_bottom = 530.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 texture = SubResource("PlaceholderTexture2D_vyu0c")
 expand_mode = 5
 stretch_mode = 5
@@ -167,6 +199,7 @@ offset_left = -448.0
 offset_top = -1976.0
 offset_right = 2914.0
 offset_bottom = 2624.0
+mouse_filter = 2
 texture = SubResource("PlaceholderTexture2D_geqxp")
 
 [node name="xxx-presents" type="CenterContainer" parent="."]
@@ -224,3 +257,6 @@ offset_top = 2640.0
 offset_right = 1007.0
 offset_bottom = 3040.0
 texture = ExtResource("10_sb32c")
+
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/VBoxContainer/start" to="." method="_on_start_button_up"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/VBoxContainer/quit" to="." method="_on_quit_button_up"]

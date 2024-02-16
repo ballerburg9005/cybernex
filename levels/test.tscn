@@ -1,37 +1,23 @@
-[gd_scene load_steps=36 format=3 uid="uid://ctfh5rdwvcfap"]
+[gd_scene load_steps=25 format=3 uid="uid://bbggkof55lsp3"]
 
-[ext_resource type="Texture2D" uid="uid://dhubr6ejtmom2" path="res://assets/tileset x1.png" id="1_brfee"]
-[ext_resource type="Shader" path="res://flowing_squares.gdshader" id="1_rtrpn"]
-[ext_resource type="Script" path="res://main.gd" id="1_rw06d"]
-[ext_resource type="PackedScene" uid="uid://b5tvsd06gu6sx" path="res://enemies/enemy.tscn" id="4_i0gwi"]
-[ext_resource type="Resource" uid="uid://belbro1hfjjh3" path="res://playerinventory.tres" id="4_vxhr8"]
-[ext_resource type="PackedScene" uid="uid://c1bhreaem7qlk" path="res://player.tscn" id="5_605dv"]
-[ext_resource type="PackedScene" uid="uid://bteu1klgy2kto" path="res://interactibles/door_2x.tscn" id="5_gs8tt"]
-[ext_resource type="Resource" uid="uid://dba0oafttyvuv" path="res://quickinventory.tres" id="6_pnrst"]
-[ext_resource type="PackedScene" uid="uid://c0yc3rxh2tqpx" path="res://interactibles/terminal.tscn" id="6_rq1bm"]
-[ext_resource type="PackedScene" uid="uid://bax3ydx4vf0i5" path="res://items/item_world.tscn" id="7_n8dxg"]
-[ext_resource type="Resource" uid="uid://djrjkdayl2olj" path="res://items/side_cutters.tres" id="9_bamd0"]
-[ext_resource type="PackedScene" uid="uid://btv4v1ibnrmla" path="res://UI/Inventory.tscn" id="10_vg8hb"]
-[ext_resource type="Texture2D" uid="uid://dfvjd8p1p1lc3" path="res://assets/noise.jpg" id="12_3inrd"]
-[ext_resource type="Script" path="res://inventory_slot.gd" id="12_26g80"]
-[ext_resource type="Resource" uid="uid://c1rm8ll7i4il7" path="res://items/wires.tres" id="14_vb2n3"]
-[ext_resource type="PackedScene" uid="uid://cfhmk4tjehyse" path="res://interactibles/desk.tscn" id="16_5p6vc"]
-[ext_resource type="PackedScene" uid="uid://c7fsimpojygjv" path="res://interactibles/object.tscn" id="16_h2lng"]
-[ext_resource type="Resource" uid="uid://c7oecn17tljh4" path="res://items/big_wire.tres" id="18_k8fjm"]
-[ext_resource type="Resource" uid="uid://cpfp0qm7rdmoc" path="res://items/junk.tres" id="18_rwox7"]
-[ext_resource type="Script" path="res://inventory.gd" id="19_gesh8"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ew5hl"]
-shader = ExtResource("1_rtrpn")
-shader_parameter/SCALE = 1.3
-
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_270hh"]
-size = Vector2(2048, 2048)
+[ext_resource type="Texture2D" uid="uid://dhubr6ejtmom2" path="res://assets/tileset x1.png" id="1_aq8sp"]
+[ext_resource type="PackedScene" uid="uid://b5tvsd06gu6sx" path="res://enemies/enemy.tscn" id="2_ic7v6"]
+[ext_resource type="PackedScene" uid="uid://c1bhreaem7qlk" path="res://player.tscn" id="3_ywtyh"]
+[ext_resource type="PackedScene" uid="uid://c0yc3rxh2tqpx" path="res://interactibles/terminal.tscn" id="4_p82i1"]
+[ext_resource type="PackedScene" uid="uid://bteu1klgy2kto" path="res://interactibles/door_2x.tscn" id="5_sbqfa"]
+[ext_resource type="PackedScene" uid="uid://bax3ydx4vf0i5" path="res://items/item_world.tscn" id="6_6r41k"]
+[ext_resource type="Resource" uid="uid://djrjkdayl2olj" path="res://items/side_cutters.tres" id="7_5a8v4"]
+[ext_resource type="Script" path="res://inventory_slot.gd" id="8_4red3"]
+[ext_resource type="PackedScene" uid="uid://c7fsimpojygjv" path="res://interactibles/object.tscn" id="9_qc2ak"]
+[ext_resource type="PackedScene" uid="uid://cfhmk4tjehyse" path="res://interactibles/desk.tscn" id="10_bh128"]
+[ext_resource type="Resource" uid="uid://cpfp0qm7rdmoc" path="res://items/junk.tres" id="11_i13xi"]
+[ext_resource type="Resource" uid="uid://c1rm8ll7i4il7" path="res://items/wires.tres" id="12_ov8vl"]
+[ext_resource type="Script" path="res://inventory.gd" id="13_yoxg5"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_02l8j"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tc4v3"]
-texture = ExtResource("1_brfee")
+texture = ExtResource("1_aq8sp")
 texture_region_size = Vector2i(32, 32)
 2:0/0 = 0
 2:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
@@ -379,6 +365,11 @@ texture_region_size = Vector2i(32, 32)
 9:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 16, 8, 16, 16, 8, 16)
 9:4/0/physics_layer_1/linear_velocity = Vector2(0, 0)
 9:4/0/physics_layer_1/angular_velocity = 0.0
+13:4/0 = 0
+13:4/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+13:4/0/physics_layer_0/angular_velocity = 0.0
+13:4/0/physics_layer_1/linear_velocity = Vector2(0, 0)
+13:4/0/physics_layer_1/angular_velocity = 0.0
 35:4/0 = 0
 35:4/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 35:4/0/physics_layer_0/angular_velocity = 0.0
@@ -474,6 +465,11 @@ texture_region_size = Vector2i(32, 32)
 9:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, 8, -16, 16, 16, 16, 16, -16, 8, -16, 8, 8)
 9:6/0/physics_layer_1/linear_velocity = Vector2(0, 0)
 9:6/0/physics_layer_1/angular_velocity = 0.0
+11:6/0 = 0
+11:6/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+11:6/0/physics_layer_0/angular_velocity = 0.0
+11:6/0/physics_layer_1/linear_velocity = Vector2(0, 0)
+11:6/0/physics_layer_1/angular_velocity = 0.0
 12:6/0 = 0
 12:6/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 12:6/0/physics_layer_0/angular_velocity = 0.0
@@ -1282,66 +1278,6 @@ texture_region_size = Vector2i(32, 32)
 1:23/0/physics_layer_0/angular_velocity = 0.0
 1:23/0/physics_layer_1/linear_velocity = Vector2(0, 0)
 1:23/0/physics_layer_1/angular_velocity = 0.0
-32:3/0 = 0
-32:3/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-32:3/0/physics_layer_0/angular_velocity = 0.0
-32:3/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-32:3/0/physics_layer_1/angular_velocity = 0.0
-33:3/0 = 0
-33:3/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-33:3/0/physics_layer_0/angular_velocity = 0.0
-33:3/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-33:3/0/physics_layer_1/angular_velocity = 0.0
-32:4/0 = 0
-32:4/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-32:4/0/physics_layer_0/angular_velocity = 0.0
-32:4/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-32:4/0/physics_layer_1/angular_velocity = 0.0
-33:4/0 = 0
-33:4/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-33:4/0/physics_layer_0/angular_velocity = 0.0
-33:4/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-33:4/0/physics_layer_1/angular_velocity = 0.0
-34:4/0 = 0
-34:4/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-34:4/0/physics_layer_0/angular_velocity = 0.0
-34:4/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-34:4/0/physics_layer_1/angular_velocity = 0.0
-33:5/0 = 0
-33:5/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-33:5/0/physics_layer_0/angular_velocity = 0.0
-33:5/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-33:5/0/physics_layer_1/angular_velocity = 0.0
-34:5/0 = 0
-34:5/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-34:5/0/physics_layer_0/angular_velocity = 0.0
-34:5/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-34:5/0/physics_layer_1/angular_velocity = 0.0
-33:6/0 = 0
-33:6/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-33:6/0/physics_layer_0/angular_velocity = 0.0
-33:6/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-33:6/0/physics_layer_1/angular_velocity = 0.0
-34:6/0 = 0
-34:6/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-34:6/0/physics_layer_0/angular_velocity = 0.0
-34:6/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-34:6/0/physics_layer_1/angular_velocity = 0.0
-33:7/0 = 0
-33:7/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-33:7/0/physics_layer_0/angular_velocity = 0.0
-33:7/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-33:7/0/physics_layer_1/angular_velocity = 0.0
-34:7/0 = 0
-34:7/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-34:7/0/physics_layer_0/angular_velocity = 0.0
-34:7/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-34:7/0/physics_layer_1/angular_velocity = 0.0
-2:23/0 = 0
-2:23/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-2:23/0/physics_layer_0/angular_velocity = 0.0
-2:23/0/physics_layer_1/linear_velocity = Vector2(0, 0)
-2:23/0/physics_layer_1/angular_velocity = 0.0
 
 [sub_resource type="TileSet" id="TileSet_jmx86"]
 tile_size = Vector2i(32, 32)
@@ -1353,78 +1289,46 @@ physics_layer_1/collision_mask = 536870912
 sources/0 = SubResource("TileSetAtlasSource_tc4v3")
 
 [sub_resource type="Resource" id="Resource_kfjae"]
-script = ExtResource("12_26g80")
-item = ExtResource("9_bamd0")
+script = ExtResource("8_4red3")
+item = ExtResource("7_5a8v4")
 count = 1
 
 [sub_resource type="Resource" id="Resource_ha1qs"]
-script = ExtResource("12_26g80")
-item = ExtResource("18_rwox7")
+script = ExtResource("8_4red3")
+item = ExtResource("11_i13xi")
 count = 1
 
 [sub_resource type="Resource" id="Resource_7lir4"]
-script = ExtResource("12_26g80")
-item = ExtResource("14_vb2n3")
+script = ExtResource("8_4red3")
+item = ExtResource("12_ov8vl")
 count = 1
 
 [sub_resource type="Resource" id="Resource_g6cdm"]
-script = ExtResource("19_gesh8")
-items = Array[ExtResource("12_26g80")]([SubResource("Resource_ha1qs"), SubResource("Resource_7lir4")])
+script = ExtResource("13_yoxg5")
+items = Array[ExtResource("8_4red3")]([SubResource("Resource_ha1qs"), SubResource("Resource_7lir4")])
 
 [sub_resource type="Resource" id="Resource_2qi1w"]
-script = ExtResource("19_gesh8")
-items = Array[ExtResource("12_26g80")]([])
+script = ExtResource("13_yoxg5")
+items = Array[ExtResource("8_4red3")]([])
 
 [sub_resource type="Resource" id="Resource_3daxw"]
-script = ExtResource("19_gesh8")
-items = Array[ExtResource("12_26g80")]([])
-
-[sub_resource type="Resource" id="Resource_boupi"]
-script = ExtResource("12_26g80")
-item = ExtResource("18_k8fjm")
-count = 3
-
-[sub_resource type="Resource" id="Resource_grmg7"]
-script = ExtResource("19_gesh8")
-items = Array[ExtResource("12_26g80")]([SubResource("Resource_boupi")])
+script = ExtResource("13_yoxg5")
+items = Array[ExtResource("8_4red3")]([])
 
 [sub_resource type="Resource" id="Resource_3funf"]
-script = ExtResource("12_26g80")
-item = ExtResource("18_rwox7")
+script = ExtResource("8_4red3")
+item = ExtResource("11_i13xi")
 count = 10
 
 [sub_resource type="Resource" id="Resource_lkee5"]
-script = ExtResource("19_gesh8")
-items = Array[ExtResource("12_26g80")]([SubResource("Resource_3funf")])
+script = ExtResource("13_yoxg5")
+items = Array[ExtResource("8_4red3")]([SubResource("Resource_3funf")])
 
-[node name="main" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_rw06d")
-
-[node name="WorldBackground" type="CanvasLayer" parent="."]
-layer = -1
-
-[node name="TextureRect" type="TextureRect" parent="WorldBackground"]
-material = SubResource("ShaderMaterial_ew5hl")
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 0.333333
-offset_right = 0.333374
-offset_bottom = 2304.0
-grow_horizontal = 2
-texture = SubResource("PlaceholderTexture2D_270hh")
-expand_mode = 5
-
-[node name="World" type="Node2D" parent="."]
+[node name="World" type="Node2D"]
 y_sort_enabled = true
 scale = Vector2(3, 3)
 
-[node name="TileMap" type="TileMap" parent="World"]
+[node name="TileMap" type="TileMap" parent="."]
 y_sort_enabled = true
 tile_set = SubResource("TileSet_jmx86")
 rendering_quadrant_size = 32
@@ -1451,238 +1355,57 @@ layer_5/y_sort_enabled = true
 layer_5/z_index = 1010
 layer_5/tile_data = PackedInt32Array(1835009, 1310720, 14, 1835010, 1376256, 12, 1835011, 1376256, 12, 1835012, 1376256, 12, 1835013, 1376256, 12, 1835014, 1376256, 12, 1835015, 1376256, 12, 1835016, 1376256, 12, 1835017, 1376256, 12, 1835018, 1376256, 12, 1835019, 1441792, 14, 1048597, 393216, 14, 1048592, 262144, 14, 1048593, 458752, 12, 1048596, 327680, 12, 655363, 1114112, 9, 655364, 1376256, 10, 655365, 1376256, 10, 655366, 1376256, 10, 655367, 1376256, 10, 655368, 1376256, 10, 655369, 1376256, 10, 655370, 1376256, 10, 655371, 1376256, 10, 655372, 1638400, 9)
 
-[node name="Enemy" parent="World" instance=ExtResource("4_i0gwi")]
+[node name="Enemy" parent="." instance=ExtResource("2_ic7v6")]
 position = Vector2(366, 132)
 health = 20.0
 hostile_towards = "enemies"
 
-[node name="Enemy2" parent="World" instance=ExtResource("4_i0gwi")]
+[node name="Enemy2" parent="." instance=ExtResource("2_ic7v6")]
 position = Vector2(300, 200)
 health = 2.0
 stationary = false
 hostile_towards = "enemies"
 
-[node name="Player" parent="World" instance=ExtResource("5_605dv")]
+[node name="Player" parent="." instance=ExtResource("3_ywtyh")]
 
-[node name="Terminal" parent="World" instance=ExtResource("6_rq1bm")]
+[node name="Terminal" parent="." instance=ExtResource("4_p82i1")]
 position = Vector2(206.667, 119)
 
-[node name="Door-0-0" parent="World" instance=ExtResource("5_gs8tt")]
+[node name="Door-0-0" parent="." instance=ExtResource("5_sbqfa")]
 position = Vector2(256.333, 111.667)
 
-[node name="Item_Pliers" parent="World" instance=ExtResource("7_n8dxg")]
+[node name="Item_Pliers" parent="." instance=ExtResource("6_6r41k")]
 position = Vector2(143.667, 176.333)
 itemslot = SubResource("Resource_kfjae")
 
-[node name="Object" parent="World" instance=ExtResource("16_h2lng")]
+[node name="Object" parent="." instance=ExtResource("9_qc2ak")]
 position = Vector2(337.667, 112.667)
 
-[node name="Desk" parent="World" instance=ExtResource("16_5p6vc")]
+[node name="Desk" parent="." instance=ExtResource("10_bh128")]
 position = Vector2(346, -32)
 disabled = true
 loot = SubResource("Resource_g6cdm")
 
-[node name="Desk2" parent="World" instance=ExtResource("16_5p6vc")]
+[node name="Desk2" parent="." instance=ExtResource("10_bh128")]
 position = Vector2(346, 0)
 disabled = true
 loot = SubResource("Resource_2qi1w")
 
-[node name="Desk3" parent="World" instance=ExtResource("16_5p6vc")]
+[node name="Desk3" parent="." instance=ExtResource("10_bh128")]
 position = Vector2(346, 32)
 disabled = true
 loot = SubResource("Resource_3daxw")
 
-[node name="Desk4" parent="World" instance=ExtResource("16_5p6vc")]
+[node name="Desk4" parent="." instance=ExtResource("10_bh128")]
 position = Vector2(166, -32)
 
-[node name="Desk5" parent="World" instance=ExtResource("16_5p6vc")]
+[node name="Desk5" parent="." instance=ExtResource("10_bh128")]
 position = Vector2(166, 0)
 
-[node name="Desk6" parent="World" instance=ExtResource("16_5p6vc")]
-position = Vector2(166, 32)
-loot = SubResource("Resource_grmg7")
-
-[node name="Desk7" parent="World" instance=ExtResource("16_5p6vc")]
+[node name="Desk7" parent="." instance=ExtResource("10_bh128")]
 position = Vector2(258.333, 4.66667)
 loot = SubResource("Resource_lkee5")
 
-[node name="HUD" type="CanvasLayer" parent="."]
-
-[node name="TextBox" type="VBoxContainer" parent="HUD"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="S2" type="Control" parent="HUD/TextBox"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 6.0
-mouse_filter = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/TextBox"]
-layout_mode = 2
-size_flags_vertical = 3
-mouse_filter = 2
-
-[node name="S3" type="Control" parent="HUD/TextBox/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-size_flags_stretch_ratio = 2.5
-mouse_filter = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="HUD/TextBox/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="PanelContainer" type="PanelContainer" parent="HUD/TextBox/HBoxContainer/MarginContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="RichTextLabel" type="RichTextLabel" parent="HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-mouse_filter = 2
-theme_override_font_sizes/normal_font_size = 24
-theme_override_font_sizes/bold_font_size = 24
-theme_override_font_sizes/italics_font_size = 24
-theme_override_font_sizes/bold_italics_font_size = 24
-theme_override_font_sizes/mono_font_size = 24
-text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-Donec orci nisl, malesuada eu odio ut, molestie hendrerit lectus. Suspendisse potenti. 
-Nulla dignissim ut ante eu aliquet.
-Aliquam suscipit venenatis eros, nec dictum metus consequat a. Aliquam tristique ante lacus, vitae semper dolor ornare vitae. 
-Pellentesque faucibus, purus pellentesque tempor scelerisque, quam augue lacinia leo, nec elementum ante sapien ac magna. Sed commodo vel nunc ut mollis. 
-Pellentesque est sapien, porttitor at bibendum sed, porta in nunc. 
-Curabitur convallis, elit vel mattis fermentum, lectus odio imperdiet orci, quis egestas massa ligula et tortor. 
-Proin dapibus, orci id efficitur posuere, nisl nisi mattis odio, sed auctor erat nibh et dui. Nulla convallis arcu a convallis blandit. 
-In iaculis, mauris et pharetra facilisis, nulla sapien ultrices ex, quis cursus elit arcu vel mauris. "
-scroll_following = true
-shortcut_keys_enabled = false
-metadata/myname = "hud_textbox"
-
-[node name="QuickInventory" type="VBoxContainer" parent="HUD"]
-z_index = 1000
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="S" type="Control" parent="HUD/QuickInventory"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 6.0
-mouse_filter = 2
-
-[node name="InventoryItems" parent="HUD/QuickInventory" instance=ExtResource("10_vg8hb")]
-layout_mode = 2
-size_flags_vertical = 6
-size_flags_stretch_ratio = 1.0
-inv = ExtResource("6_pnrst")
-metadata/myname = "hud_quick_inventory"
-
-[node name="FullInventory" type="HBoxContainer" parent="HUD"]
-visible = false
-z_index = 1000
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HUD/FullInventory"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/FullInventory/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 8.0
-mouse_filter = 2
-
-[node name="S" type="Control" parent="HUD/FullInventory/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/FullInventory/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-
-[node name="InventoryItems" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer" instance=ExtResource("10_vg8hb")]
-layout_mode = 2
-inv = ExtResource("4_vxhr8")
-metadata/myname = "hud_full_inventory"
-
-[node name="S2" type="Control" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(64, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.2
-mouse_filter = 2
-
-[node name="PanelContainer" type="PanelContainer" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 6
-size_flags_vertical = 4
-
-[node name="MarginContainer" type="MarginContainer" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
-
-[node name="TextureRect" type="TextureRect" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer"]
-custom_minimum_size = Vector2(200, 300)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-mouse_filter = 2
-texture = ExtResource("12_3inrd")
-expand_mode = 1
-
-[node name="S3" type="Control" parent="HUD/FullInventory/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 2
-
-[node name="S" type="Control" parent="HUD/FullInventory/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-mouse_filter = 2
-
-[node name="MousePosition" type="Control" parent="HUD"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-mouse_filter = 2
-
-[connection signal="do_toggle" from="World/Terminal" to="World/Door-0-0" method="_on_do_toggle"]
-[connection signal="do_activate" from="World/Desk7" to="World/Door-0-0" method="_on_do_activate"]
-[connection signal="do_deactivate" from="World/Desk7" to="World/Door-0-0" method="_on_do_deactivate"]
-[connection signal="mouse_entered" from="HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer" to="." method="_on_ui_mouse_entered"]
-[connection signal="mouse_exited" from="HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer" to="." method="_on_ui_mouse_exited"]
-[connection signal="mouse_entered" from="HUD/QuickInventory/InventoryItems" to="." method="_on_ui_mouse_entered"]
-[connection signal="mouse_exited" from="HUD/QuickInventory/InventoryItems" to="." method="_on_ui_mouse_exited"]
-[connection signal="mouse_entered" from="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems" to="." method="_on_ui_mouse_entered"]
-[connection signal="mouse_exited" from="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems" to="." method="_on_ui_mouse_exited"]
-[connection signal="mouse_entered" from="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer" to="." method="_on_ui_mouse_entered"]
-[connection signal="mouse_exited" from="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer" to="." method="_on_ui_mouse_exited"]
+[connection signal="do_toggle" from="Terminal" to="Door-0-0" method="_on_do_toggle"]
+[connection signal="do_activate" from="Desk7" to="Door-0-0" method="_on_do_activate"]
+[connection signal="do_deactivate" from="Desk7" to="Door-0-0" method="_on_do_deactivate"]

@@ -1,0 +1,93 @@
+[gd_scene load_steps=5 format=3 uid="uid://c5hv4gc6sdsa2"]
+
+[ext_resource type="Script" path="res://donate.gd" id="1_b4gqv"]
+[ext_resource type="Texture2D" uid="uid://co38bwmhswi6b" path="res://assets/bitcoin.png" id="3_3oya5"]
+[ext_resource type="FontFile" uid="uid://cmdulbuu5ap81" path="res://fonts/AtariGames.ttf" id="6_yh7ud"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_geqxp"]
+size = Vector2(2048, 4600)
+
+[node name="Donate" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_b4gqv")
+
+[node name="black" type="TextureRect" parent="."]
+self_modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+offset_left = -448.0
+offset_top = -1976.0
+offset_right = 2929.0
+offset_bottom = 2624.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("PlaceholderTexture2D_geqxp")
+stretch_mode = 2
+
+[node name="xxx-presents" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="black" type="TextureRect" parent="xxx-presents"]
+self_modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+texture = SubResource("PlaceholderTexture2D_geqxp")
+stretch_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="xxx-presents"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="xxx-presents/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="Control2" type="Control" parent="xxx-presents/VBoxContainer2/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="donate1" type="Label" parent="xxx-presents/VBoxContainer2/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/shadow_outline_size = 32
+theme_override_fonts/font = ExtResource("6_yh7ud")
+theme_override_font_sizes/font_size = 100
+text = "Please keep awesome free 
+software games alive.
+
+"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="xxx-presents/VBoxContainer2/VBoxContainer"]
+layout_mode = 2
+
+[node name="donate2" type="Label" parent="xxx-presents/VBoxContainer2/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/shadow_outline_size = 32
+theme_override_fonts/font = ExtResource("6_yh7ud")
+theme_override_font_sizes/font_size = 72
+text = "Donate Bitcoin now:
+
+bc1qc4tjqj746gkstl4
+uj02mu5q5q6fjcaptyz98jf
+"
+horizontal_alignment = 1
+
+[node name="Control3" type="Control" parent="xxx-presents/VBoxContainer2/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureRect" type="TextureRect" parent="xxx-presents/VBoxContainer2/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("3_3oya5")
+stretch_mode = 3
