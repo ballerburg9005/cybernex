@@ -1,15 +1,20 @@
-[gd_scene load_steps=8 format=3 uid="uid://dpstxjqhpuh35"]
+[gd_scene load_steps=9 format=3 uid="uid://dpstxjqhpuh35"]
 
-[ext_resource type="Texture2D" uid="uid://b3t85menwedlh" path="res://assets/tileset_electronics.png" id="1_ebqsj"]
 [ext_resource type="Script" path="res://UI/PuzzleSlot.gd" id="2_nmkup"]
+[ext_resource type="Resource" uid="uid://fb1f2d2lrgim" path="res://UI/components/missing.tres" id="2_unxys"]
 [ext_resource type="FontFile" uid="uid://cq5bp63dlpg0n" path="res://fonts/GravityBold8.ttf" id="4_5wtvn"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_7q4cr"]
-atlas = ExtResource("1_ebqsj")
-region = Rect2(0, 32, 16, 16)
+[sub_resource type="Image" id="Image_ko2wk"]
+data = {
+"data": PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 0, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 0, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0, 178, 178, 178, 0),
+"format": "RGBA8",
+"height": 16,
+"mipmaps": false,
+"width": 16
+}
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_bdgw1"]
-size = Vector2(48, 48)
+[sub_resource type="ImageTexture" id="ImageTexture_cqonv"]
+image = SubResource("Image_ko2wk")
 
 [sub_resource type="LabelSettings" id="LabelSettings_pwemk"]
 line_spacing = 0.0
@@ -17,24 +22,28 @@ font = ExtResource("4_5wtvn")
 font_size = 8
 shadow_size = 0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1cyqy"]
+size = Vector2(48, 48)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iejd0"]
 
-[node name="CircuitComponent" type="TextureRect"]
+[node name="CircuitComponent" type="MarginContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("2_nmkup")
+component = ExtResource("2_unxys")
+
+[node name="TextureRect" type="TextureRect" parent="."]
 z_index = 1000
 custom_minimum_size = Vector2(48, 48)
-texture = SubResource("AtlasTexture_7q4cr")
+layout_mode = 2
+texture = SubResource("ImageTexture_cqonv")
 expand_mode = 1
-script = ExtResource("2_nmkup")
 
-[node name="influence" type="Area2D" parent="."]
-collision_layer = 1073741824
-collision_mask = 536870912
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="influence"]
-position = Vector2(24, 24)
-shape = SubResource("RectangleShape2D_bdgw1")
-
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="TextureRect"]
+visible = false
 custom_minimum_size = Vector2(8, 8)
 layout_mode = 1
 anchors_preset = 3
@@ -46,8 +55,9 @@ offset_left = -8.0
 offset_top = -10.0
 grow_horizontal = 0
 grow_vertical = 0
+mouse_filter = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="TextureRect/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -56,7 +66,7 @@ theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 1
 theme_override_constants/margin_bottom = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer"]
+[node name="Label" type="Label" parent="TextureRect/PanelContainer/MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "pnp"
@@ -65,38 +75,40 @@ horizontal_alignment = 1
 vertical_alignment = 1
 justification_flags = 0
 
+[node name="influence" type="Area2D" parent="."]
+position = Vector2(24, 24)
+collision_layer = 1073741824
+collision_mask = 536870912
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="influence"]
+shape = SubResource("RectangleShape2D_1cyqy")
+
 [node name="left" type="Area2D" parent="."]
 position = Vector2(0, 24)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="left"]
-visible = false
 shape = SubResource("RectangleShape2D_iejd0")
 
 [node name="top" type="Area2D" parent="."]
 position = Vector2(24, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="top"]
-visible = false
 shape = SubResource("RectangleShape2D_iejd0")
 
 [node name="right" type="Area2D" parent="."]
 position = Vector2(48, 24)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="right"]
-visible = false
 shape = SubResource("RectangleShape2D_iejd0")
 
 [node name="bottom" type="Area2D" parent="."]
 position = Vector2(24, 48)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="bottom"]
-visible = false
 shape = SubResource("RectangleShape2D_iejd0")
 
 [connection signal="focus_entered" from="." to="." method="_on_focus_entered"]
 [connection signal="focus_exited" from="." to="." method="_on_focus_exited"]
-[connection signal="gui_input" from="." to="." method="_on_gui_input"]
-[connection signal="mouse_entered" from="." to="." method="_on_focus_entered"]
-[connection signal="mouse_exited" from="." to="." method="_on_focus_exited"]
-[connection signal="body_entered" from="influence" to="." method="_on_body_entered"]
-[connection signal="body_exited" from="influence" to="." method="_on_body_exited"]
+[connection signal="gui_input" from="TextureRect" to="." method="_on_gui_input"]
+[connection signal="area_shape_entered" from="influence" to="." method="_on_area_shape_entered"]
+[connection signal="area_shape_exited" from="influence" to="." method="_on_area_shape_exited"]

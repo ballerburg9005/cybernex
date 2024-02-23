@@ -49,9 +49,17 @@ func _started():
 			item.name = itemname
 			item.is_world = is_world
 			item.component = component_array[i]
-			component_node_array.append(item)
 			grid_container.add_child(item)
 			item.set_owner(get_tree().get_edited_scene_root())
+		component_node_array.append(grid_container.get_node("./"+itemname))
+	
+	for i in range(0,component_node_array.size()):
+		if component_node_array[i].component.texture:
+			var oversized = ceil(component_node_array[i].component.texture.get_size()/component_node_array[i].NORMAL_SIZE)
+			for k in range(0, oversized.y):
+				for j in range(0, oversized.x):
+					if not k+j == 0:
+						component_node_array[i+j+k*grid_width].relay_to_node = component_node_array[i]
 		
 
 
