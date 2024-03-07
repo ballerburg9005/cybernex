@@ -153,7 +153,7 @@ position = Vector2(166, 0)
 position = Vector2(166, 32)
 loot = SubResource("Resource_grmg7")
 
-[node name="Desk7" parent="World" instance=ExtResource("16_5p6vc")]
+[node name="Desk8" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(258.333, 4.66667)
 loot = SubResource("Resource_lkee5")
 
@@ -327,8 +327,8 @@ size_flags_vertical = 3
 mouse_filter = 2
 
 [connection signal="do_toggle" from="World/Terminal" to="World/Door-0-0" method="_on_do_toggle"]
-[connection signal="do_activate" from="World/Desk7" to="World/Door-0-0" method="_on_do_activate"]
-[connection signal="do_deactivate" from="World/Desk7" to="World/Door-0-0" method="_on_do_deactivate"]
+[connection signal="do_activate" from="World/Desk8" to="World/Door-0-0" method="_on_do_activate"]
+[connection signal="do_deactivate" from="World/Desk8" to="World/Door-0-0" method="_on_do_deactivate"]
 [connection signal="mouse_entered" from="HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer" to="." method="_on_ui_mouse_entered"]
 [connection signal="mouse_exited" from="HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer" to="." method="_on_ui_mouse_exited"]
 [connection signal="mouse_entered" from="HUD/QuickInventory/InventoryItems" to="." method="_on_ui_mouse_entered"]
