@@ -8,10 +8,14 @@ class_name Component
 
 @export var value: int = 100
 
-@export var is_input = false
+@export var no_rotate = false
+@export var no_drag   = true
+
+@export var is_input  = false
 @export var is_output = false
 @export var is_ground = false
 
 @export var pnp: bool = true
 
-@export var connections: Dictionary = {"left": -1,"top": -1, "right": -1, "bottom": -1}
+@export var connections: Dictionary = {"left": [],"top": [], "right": [], "bottom": []}
+

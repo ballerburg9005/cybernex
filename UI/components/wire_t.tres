@@ -13,13 +13,15 @@ name = "wire"
 short_name = "wire"
 texture = SubResource("AtlasTexture_k6r8x")
 value = 0
+no_rotate = false
+no_drag = true
 is_input = false
 is_output = false
 is_ground = false
 pnp = true
 connections = {
-"bottom": 1,
-"left": 1,
-"right": -1,
-"top": -1
+"bottom": [1],
+"left": [1],
+"right": [1],
+"top": []
 }

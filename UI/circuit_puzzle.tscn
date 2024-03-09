@@ -1,12 +1,14 @@
-[gd_scene load_steps=8 format=3 uid="uid://cgrwe5v21erxo"]
+[gd_scene load_steps=10 format=3 uid="uid://cgrwe5v21erxo"]
 
 [ext_resource type="Script" path="res://UI/circuit_puzzle.gd" id="1_0ax0w"]
 [ext_resource type="PackedScene" uid="uid://dpstxjqhpuh35" path="res://UI/CircuitComponent.tscn" id="2_kuuos"]
-[ext_resource type="Resource" uid="uid://bobdv0rbnegi5" path="res://UI/components/blank.tres" id="3_76v2x"]
 [ext_resource type="Resource" uid="uid://i6xm0ou06hgt" path="res://UI/components/input.tres" id="4_1cp3b"]
+[ext_resource type="Resource" uid="uid://dp68x2ko8trgp" path="res://UI/components/wire_l.tres" id="5_gjm16"]
+[ext_resource type="Resource" uid="uid://ugoy6q4cd6ur" path="res://UI/components/resistor.tres" id="6_2f44m"]
+[ext_resource type="Resource" uid="uid://dwkplbeccydmr" path="res://UI/components/wire_t.tres" id="6_s0ihe"]
 [ext_resource type="Resource" uid="uid://ctal2snapm64p" path="res://UI/components/wire.tres" id="6_vs0e4"]
+[ext_resource type="Resource" uid="uid://ci2hfitw2nw14" path="res://UI/components/rectifier.tres" id="7_1ocxn"]
 [ext_resource type="Resource" uid="uid://cftu346umcsmi" path="res://UI/components/output.tres" id="7_6kd2r"]
-[ext_resource type="Resource" uid="uid://sw0rqeu6g3wh" path="res://UI/components/mosfet.tres" id="8_qufh7"]
 
 [node name="CircuitPuzzle" type="PanelContainer"]
 size_flags_horizontal = 6
@@ -24,146 +26,168 @@ columns = 6
 
 [node name="CircuitComponent0" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent1" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent2" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent3" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent4" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent5" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent6" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
+my_varrrr = 1
+value = 5.0
 component = ExtResource("4_1cp3b")
 
 [node name="CircuitComponent7" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("6_vs0e4")
+my_varrrr = 1
+component = ExtResource("6_s0ihe")
 
 [node name="CircuitComponent8" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("6_vs0e4")
+theme_override_constants/margin_right = -48
+my_varrrr = 1
+value = 100.0
+component = ExtResource("6_2f44m")
 
 [node name="CircuitComponent9" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent10" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
+component = ExtResource("5_gjm16")
 
 [node name="CircuitComponent11" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent12" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent13" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
+rotate = "180"
+component = ExtResource("6_vs0e4")
 
 [node name="CircuitComponent14" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
 theme_override_constants/margin_right = -48
 theme_override_constants/margin_bottom = -48
-component = ExtResource("8_qufh7")
+my_varrrr = 1
+component = ExtResource("7_1ocxn")
 
 [node name="CircuitComponent15" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent16" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
+value = 5000.0
+rotate = "90"
 
 [node name="CircuitComponent17" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent18" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent19" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
+rotate = "90"
+component = ExtResource("6_vs0e4")
 
 [node name="CircuitComponent20" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent21" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent22" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
+rotate = "270"
 
 [node name="CircuitComponent23" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent24" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent25" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
+rotate = "180"
+component = ExtResource("5_gjm16")
 
 [node name="CircuitComponent26" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent27" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent28" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
+rotate = "180"
+component = ExtResource("6_vs0e4")
 
 [node name="CircuitComponent29" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
+my_varrrr = 1
 component = ExtResource("7_6kd2r")
 
 [node name="CircuitComponent30" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent31" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent32" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent33" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
+rotate = "90"
+component = ExtResource("6_vs0e4")
 
 [node name="CircuitComponent34" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1
 
 [node name="CircuitComponent35" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-component = ExtResource("3_76v2x")
+my_varrrr = 1

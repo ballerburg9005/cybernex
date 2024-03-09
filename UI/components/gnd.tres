@@ -13,13 +13,15 @@ name = "ground"
 short_name = "gnd"
 texture = SubResource("AtlasTexture_4jkln")
 value = 0
+no_rotate = true
+no_drag = true
 is_input = false
 is_output = false
 is_ground = true
 pnp = true
 connections = {
-"bottom": -1,
-"left": 1,
-"right": -1,
-"top": -1
+"bottom": [],
+"left": [],
+"right": [],
+"top": [1]
 }

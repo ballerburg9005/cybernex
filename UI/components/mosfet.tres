@@ -18,8 +18,8 @@ is_output = false
 is_ground = false
 pnp = true
 connections = {
-"bottom": 2,
-"left": 1,
-"right": 3,
-"top": -1
+"bottom": [null, 3],
+"left": [null, 2],
+"right": [null, 1],
+"top": []
 }

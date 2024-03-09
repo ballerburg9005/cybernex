@@ -9,17 +9,19 @@ region = Rect2(128, 32, 16, 16)
 
 [resource]
 script = ExtResource("1_y23fq")
-name = "wire"
-short_name = "wire"
+name = "input"
+short_name = "input"
 texture = SubResource("AtlasTexture_4jkln")
 value = 5
+no_rotate = true
+no_drag = true
 is_input = true
 is_output = false
 is_ground = false
 pnp = true
 connections = {
-"bottom": -1,
-"left": -1,
-"right": 1,
-"top": -1
+"bottom": [],
+"left": [],
+"right": [1],
+"top": []
 }

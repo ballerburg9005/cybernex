@@ -13,13 +13,15 @@ name = "crossed wire"
 short_name = "crossedwire"
 texture = SubResource("AtlasTexture_4jkln")
 value = 0
+no_rotate = true
+no_drag = true
 is_input = false
 is_output = false
 is_ground = false
 pnp = true
 connections = {
-"bottom": 2,
-"left": 1,
-"right": 1,
-"top": 2
+"bottom": [1],
+"left": [1],
+"right": [1],
+"top": [1]
 }

@@ -13,13 +13,15 @@ name = "Transistor"
 short_name = "transistor"
 texture = SubResource("AtlasTexture_7q4cr")
 value = 100
+no_rotate = false
+no_drag = true
 is_input = false
 is_output = false
 is_ground = false
 pnp = true
 connections = {
-"bottom": 2,
-"left": 1,
-"right": 3,
-"top": -1
+"bottom": [2],
+"left": [1],
+"right": [3],
+"top": []
 }

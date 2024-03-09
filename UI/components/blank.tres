@@ -7,13 +7,15 @@ script = ExtResource("1_wnmru")
 name = "blank"
 short_name = "blank"
 value = 0
+no_rotate = true
+no_drag = true
 is_input = false
 is_output = false
 is_ground = false
 pnp = true
 connections = {
-"bottom": -1,
-"left": -1,
-"right": -1,
-"top": -1
+"bottom": [],
+"left": [],
+"right": [],
+"top": []
 }
