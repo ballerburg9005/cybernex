@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://ctfh5rdwvcfap"]
+[gd_scene load_steps=34 format=3 uid="uid://ctfh5rdwvcfap"]
 
 [ext_resource type="Shader" path="res://flowing_squares.gdshader" id="1_rtrpn"]
 [ext_resource type="Script" path="res://main.gd" id="1_rw06d"]
@@ -20,6 +20,7 @@
 [ext_resource type="Resource" uid="uid://c7oecn17tljh4" path="res://items/big_wire.tres" id="18_k8fjm"]
 [ext_resource type="Resource" uid="uid://cpfp0qm7rdmoc" path="res://items/junk.tres" id="18_rwox7"]
 [ext_resource type="Script" path="res://inventory.gd" id="19_gesh8"]
+[ext_resource type="AudioStream" uid="uid://w832muqvnwm8" path="res://music/Unstablenew.Ogg" id="21_nvl1y"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ew5hl"]
 shader = ExtResource("1_rtrpn")
@@ -325,6 +326,11 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("21_nvl1y")
+volume_db = 0.4
+autoplay = true
 
 [connection signal="do_toggle" from="World/Terminal" to="World/Door-0-0" method="_on_do_toggle"]
 [connection signal="do_activate" from="World/Desk8" to="World/Door-0-0" method="_on_do_activate"]

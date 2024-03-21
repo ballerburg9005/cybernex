@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://vn4nontreaiq"
+path="res://.godot/imported/ambient (5).Ogg-f738e99ce32aca9494092692ebdbf43e.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/ambient (5).Ogg"
+dest_files=["res://.godot/imported/ambient (5).Ogg-f738e99ce32aca9494092692ebdbf43e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

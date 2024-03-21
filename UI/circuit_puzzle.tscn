@@ -7,8 +7,8 @@
 [ext_resource type="Resource" uid="uid://ugoy6q4cd6ur" path="res://UI/components/resistor.tres" id="6_2f44m"]
 [ext_resource type="Resource" uid="uid://dwkplbeccydmr" path="res://UI/components/wire_t.tres" id="6_s0ihe"]
 [ext_resource type="Resource" uid="uid://ctal2snapm64p" path="res://UI/components/wire.tres" id="6_vs0e4"]
-[ext_resource type="Resource" uid="uid://ci2hfitw2nw14" path="res://UI/components/rectifier.tres" id="7_1ocxn"]
 [ext_resource type="Resource" uid="uid://cftu346umcsmi" path="res://UI/components/output.tres" id="7_6kd2r"]
+[ext_resource type="Resource" uid="uid://bhrpmpfp45nge" path="res://UI/components/gnd.tres" id="8_i1qdi"]
 
 [node name="CircuitPuzzle" type="PanelContainer"]
 size_flags_horizontal = 6
@@ -63,7 +63,7 @@ component = ExtResource("6_s0ihe")
 layout_mode = 2
 theme_override_constants/margin_right = -48
 my_varrrr = 1
-value = 100.0
+value = 56000.0
 component = ExtResource("6_2f44m")
 
 [node name="CircuitComponent9" parent="GridContainer" instance=ExtResource("2_kuuos")]
@@ -91,20 +91,20 @@ component = ExtResource("6_vs0e4")
 
 [node name="CircuitComponent14" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
-theme_override_constants/margin_right = -48
-theme_override_constants/margin_bottom = -48
 my_varrrr = 1
-component = ExtResource("7_1ocxn")
+component = ExtResource("6_vs0e4")
 
 [node name="CircuitComponent15" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
 my_varrrr = 1
+component = ExtResource("6_vs0e4")
 
 [node name="CircuitComponent16" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
 my_varrrr = 1
 value = 5000.0
 rotate = "90"
+component = ExtResource("6_s0ihe")
 
 [node name="CircuitComponent17" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
@@ -131,7 +131,7 @@ my_varrrr = 1
 [node name="CircuitComponent22" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2
 my_varrrr = 1
-rotate = "270"
+component = ExtResource("8_i1qdi")
 
 [node name="CircuitComponent23" parent="GridContainer" instance=ExtResource("2_kuuos")]
 layout_mode = 2

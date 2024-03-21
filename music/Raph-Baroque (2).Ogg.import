@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://8og3xykcdtmi"
+path="res://.godot/imported/Raph-Baroque (2).Ogg-75a099563c7a8950d9187140da704889.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Raph-Baroque (2).Ogg"
+dest_files=["res://.godot/imported/Raph-Baroque (2).Ogg-75a099563c7a8950d9187140da704889.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

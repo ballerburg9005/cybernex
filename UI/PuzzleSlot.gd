@@ -104,7 +104,7 @@ func _ready():
 			timer_update.one_shot = true
 			timer_update.timeout.connect(_ready)
 			add_child(timer_update)
-		#timer_update.start(0.5)
+		timer_update.start(0.5)
 	
 	call_deferred("_started")
 

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://x7ftxri2ucwq"
+path="res://.godot/imported/lirik (1).Ogg-948bd7e50d30b6157fe9e415c687f274.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/lirik (1).Ogg"
+dest_files=["res://.godot/imported/lirik (1).Ogg-948bd7e50d30b6157fe9e415c687f274.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

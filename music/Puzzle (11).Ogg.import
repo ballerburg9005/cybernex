@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bx7trnecpfytd"
+path="res://.godot/imported/Puzzle (11).Ogg-3a9dbcf39ebbb7d124464afcc298767a.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Puzzle (11).Ogg"
+dest_files=["res://.godot/imported/Puzzle (11).Ogg-3a9dbcf39ebbb7d124464afcc298767a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
