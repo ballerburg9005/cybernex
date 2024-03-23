@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bimoo62dj5tho"
+path="res://.godot/imported/Chiptune for Cybernex.Ogg-8cabf8d8bf7e27119e2c86b0c7b7868e.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/tracks/Chiptune for Cybernex.Ogg"
+dest_files=["res://.godot/imported/Chiptune for Cybernex.Ogg-8cabf8d8bf7e27119e2c86b0c7b7868e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
