@@ -330,11 +330,11 @@ mouse_filter = 2
 
 [node name="StartMusic" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("21_nvl1y")
-volume_db = -21.884
+volume_db = -10.892
 autoplay = true
 
 [node name="timeout" type="Timer" parent="StartMusic"]
-wait_time = 3.0
+wait_time = 20.0
 one_shot = true
 autostart = true
 
@@ -344,7 +344,7 @@ one_shot = true
 
 [node name="BackgroundMusic" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("22_pxttp")
-volume_db = -30.439
+volume_db = -19.337
 
 [connection signal="do_toggle" from="World/Terminal" to="World/Door-0-0" method="_on_do_toggle"]
 [connection signal="do_activate" from="World/Desk8" to="World/Door-0-0" method="_on_do_activate"]

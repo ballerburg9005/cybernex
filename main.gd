@@ -142,14 +142,14 @@ func _process(delta):
 	if not $StartMusic/timeout/fadeout.is_stopped():
 		var fade_duration = $StartMusic/timeout/fadeout.wait_time
 		var fade_timer = $StartMusic/timeout/fadeout.time_left
-		if fade_timer > 0.1:
-			$StartMusic.set_volume_db(lerp(start_music_volume_temp, -60.0, 1.0 - fade_timer / fade_duration))
-			print($StartMusic.volume_db)
-		if fade_timer / fade_duration < 0.5:
-			$BackgroundMusic.set_volume_db(lerp(-60.0, background_music_volume_temp, fade_timer / fade_duration))
-			if background_music_trigger:
-				background_music_trigger = false
-				$BackgroundMusic.play()
+		if fade_timer > 0.01:
+			$StartMusic.volume_db = start_music_volume_temp + 10.0*log(fade_timer / fade_duration)
+			if fade_timer / fade_duration < 0.5:
+				$BackgroundMusic.volume_db = background_music_volume_temp + 10.0*log(0.5 + fade_timer / fade_duration)
+				if background_music_trigger:
+					background_music_trigger = false
+					$BackgroundMusic.play()
 		else:
 			$StartMusic.stop()
 			$StartMusic.volume_db = start_music_volume_temp
+			$BackgroundMusic.volume_db = background_music_volume_temp 
