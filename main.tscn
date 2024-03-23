@@ -328,7 +328,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="StartMusic" type="AudioStreamPlayer2D" parent="."]
+[node name="StartMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("21_nvl1y")
 volume_db = -10.892
 autoplay = true
@@ -342,9 +342,9 @@ autostart = true
 wait_time = 6.0
 one_shot = true
 
-[node name="BackgroundMusic" type="AudioStreamPlayer2D" parent="."]
+[node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("22_pxttp")
-volume_db = -19.337
+volume_db = -22.72
 
 [connection signal="do_toggle" from="World/Terminal" to="World/Door-0-0" method="_on_do_toggle"]
 [connection signal="do_activate" from="World/Desk8" to="World/Door-0-0" method="_on_do_activate"]
