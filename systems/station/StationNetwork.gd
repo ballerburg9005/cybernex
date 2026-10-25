@@ -17,6 +17,7 @@ var device_online: Dictionary = {}
 var denial_reasons: Dictionary = {}
 var granted_protocols: Dictionary = {}
 var repaired_modules: Dictionary = {}
+var conditions: Dictionary = {}
 var last_available_watts: Dictionary = {}
 
 func _process(delta: float) -> void:
@@ -44,6 +45,10 @@ func grant_protocol(protocol: String, allowed: bool = true) -> void:
 
 func set_repaired_module(module_id: String, repaired: bool = true) -> void:
     repaired_modules[module_id] = repaired
+    evaluate()
+
+func set_condition(condition_id: String, satisfied: bool) -> void:
+    conditions[condition_id] = satisfied
     evaluate()
 
 func set_bus_enabled(bus_id: String, enabled: bool) -> void:
@@ -132,6 +137,11 @@ func evaluate() -> void:
                 if not bool(repaired_modules.get(module_id, false)):
                     reason = "Hardware diagnostic failed: " + module_id
                     break
+        if reason.is_empty():
+            for condition_id in device.required_conditions:
+                if not bool(conditions.get(condition_id, false)):
+                    reason = "Interlock condition unsatisfied: " + condition_id
+                    break
         if reason.is_empty() and float(available.get(device.supply_bus, 0.0)) < device.demand_watts:
             reason = "Insufficient power from " + device.supply_bus
         if reason.is_empty():
@@ -168,7 +178,8 @@ func snapshot() -> Dictionary:
     return {
         "time": time_seconds, "buses": power_flags, "devices": device_flags,
         "protocols": granted_protocols.duplicate(true),
-        "modules": repaired_modules.duplicate(true)
+        "modules": repaired_modules.duplicate(true),
+        "conditions": conditions.duplicate(true)
     }
 
 func restore(data: Dictionary) -> void:
@@ -185,4 +196,5 @@ func restore(data: Dictionary) -> void:
             device.operator_enabled = bool(state.get("enabled", device.operator_enabled))
     granted_protocols = data.get("protocols", {}).duplicate(true)
     repaired_modules = data.get("modules", {}).duplicate(true)
+    conditions = data.get("conditions", {}).duplicate(true)
     evaluate()
