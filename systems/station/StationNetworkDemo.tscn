@@ -67,6 +67,7 @@ supply_bus = "DC_48"
 demand_watts = 200.0
 required_devices = PackedStringArray("security_controller")
 required_modules = PackedStringArray("door_driver")
+required_conditions = PackedStringArray("safe_atmosphere")
 requires_protocol = "SEC_BULKHEAD_7"
 intact = true
 
