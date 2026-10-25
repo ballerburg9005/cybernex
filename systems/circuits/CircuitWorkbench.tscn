@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://systems/circuits/CircuitWorkbench.gd" id="workbench"]
 [ext_resource type="Script" path="res://systems/circuits/CircuitBoardView.gd" id="view"]
@@ -15,6 +15,9 @@
 [ext_resource type="Resource" path="res://systems/circuits/parts/nmos.tres" id="nmos"]
 [ext_resource type="Resource" path="res://systems/circuits/parts/pmos.tres" id="pmos"]
 
+[ext_resource type="Resource" path="res://systems/circuits/parts/capacitor_20mf.tres" id="capacitor"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/inductor_100h.tres" id="inductor"]
+
 [node name="CircuitWorkbench" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -24,7 +27,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("workbench")
 authored_board = ExtResource("board")
-catalog = Array[ExtResource("part_script")]([ExtResource("r"), ExtResource("wire"), ExtResource("corner"), ExtResource("junction"), ExtResource("crossover"), ExtResource("diode"), ExtResource("npn"), ExtResource("pnp"), ExtResource("nmos"), ExtResource("pmos")])
+catalog = Array[ExtResource("part_script")]([ExtResource("r"), ExtResource("wire"), ExtResource("corner"), ExtResource("junction"), ExtResource("crossover"), ExtResource("diode"), ExtResource("npn"), ExtResource("pnp"), ExtResource("nmos"), ExtResource("pmos"), ExtResource("capacitor"), ExtResource("inductor")])
 
 [node name="Padding" type="MarginContainer" parent="."]
 layout_mode = 1
