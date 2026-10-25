@@ -9,7 +9,7 @@ class_name SalvageInventory
 func amount(item_id: String) -> int:
     var total: int = 0
     for stock in stocks:
-        if stock != null and stock.item_id == item_id:
+        if stock != null and stock.item_id == item_id and not stock.is_tool:
             total += stock.quantity
     return total
 
