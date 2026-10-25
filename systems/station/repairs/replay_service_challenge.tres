@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RepairProcedure" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://systems/station/RepairProcedure.gd" id="repair"]
+
+[resource]
+script = ExtResource("repair")
+procedure_id = "replay_challenge"
+label = "Inject captured service challenge"
+service_note = "The bulkhead's security PLC requires the current service handshake. Recovery isn't just a door switch: an analyzer must obtain the bus frame, and the security controller must be live."
+target_device_id = "security_controller"
+needs_tools = PackedStringArray("protocol_probe")
+requires_power_isolated = false
+granted_protocol = "SEC_BULKHEAD_7"
