@@ -12,5 +12,7 @@ class_name StationDeviceSpec
 @export_range(0.01, 1.0, 0.01) var efficiency: float = 0.85
 @export var required_devices: PackedStringArray = PackedStringArray()
 @export var requires_protocol: String = ""
+## Independent hardware proof, e.g. a solved relay board; protocols alone cannot substitute.
+@export var required_modules: PackedStringArray = PackedStringArray()
 @export var intact: bool = true
 @export var operator_enabled: bool = true
