@@ -126,7 +126,7 @@ func _physics_process(delta):
 		$Sprite.play("death")
 		if dropped_item and do_drop:
 			dropped_item.move_and_collide(Vector2(0,200) * delta)
-		return true
+		return
 	counter = (counter+1)%9999999999
 	if counter%10 == 0:
 		# set health color
