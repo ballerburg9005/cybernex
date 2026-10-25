@@ -1,14 +1,45 @@
 [gd_scene load_steps=2 format=3 uid="uid://btv4v1ibnrmla"]
 
-[ext_resource type="Script" path="res://UI/Inventory.gd" id="1_32n6p"]
+[ext_resource type="Script" path="res://UI/Inventory.gd" id="view_script"]
 
 [node name="InventoryItems" type="PanelContainer"]
-size_flags_horizontal = 6
-size_flags_vertical = 4
-size_flags_stretch_ratio = 6.0
-script = ExtResource("1_32n6p")
+custom_minimum_size = Vector2(365, 190)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("view_script")
+preferred_columns = 7
+empty_slots_to_show = 10
 
-[node name="GridContainer" type="GridContainer" parent="."]
-custom_minimum_size = Vector2(48, 0)
+[node name="Layout" type="VBoxContainer" parent="."]
 layout_mode = 2
-columns = 6
+theme_override_constants/separation = 5
+
+[node name="Toolbar" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+
+[node name="Counter" type="Label" parent="Layout/Toolbar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "INVENTORY INDEX"
+
+[node name="Filter" type="OptionButton" parent="Layout/Toolbar"]
+layout_mode = 2
+
+[node name="Sort" type="Button" parent="Layout/Toolbar"]
+layout_mode = 2
+text = "SORT / GROUP"
+
+[node name="Scroll" type="ScrollContainer" parent="Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="GridContainer" type="GridContainer" parent="Layout/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 7
+
+[node name="Feedback" type="Label" parent="Layout"]
+layout_mode = 2
+text = "Drag items together to combine. Drag gear to body sockets."
+autowrap_mode = 3
