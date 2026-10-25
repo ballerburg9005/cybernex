@@ -28,6 +28,7 @@ func test_open_and_repaired_actuator() -> void:
     var board: CircuitBoard = base_board()
     var simulation := CircuitSimulation.new()
     var open_result: Dictionary = simulation.step(board, 1.0)
+    print("OPEN STATE: ", open_result["loads"], " faults=", board.placements[1].failed_open)
     check(open_result["errors"].is_empty(), "Burned resistor should still make a valid circuit.")
     check(absf(float(open_result["loads"].get("door_motor", 99.0))) < 0.01, "Burned series resistor must block load voltage.")
     check(not open_result["solved"], "Open actuator must not solve.")
