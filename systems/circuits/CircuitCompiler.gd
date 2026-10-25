@@ -55,7 +55,7 @@ static func compile(board: CircuitBoard) -> Dictionary:
                     })
         elif part.model != "ground":
             elements.append({
-                "id": part.part_id if not part.part_id.is_empty() else str(i),
+                "id": "%d:%s" % [i, part.part_id],
                 "part_index": i, "kind": part.model, "pin_keys": pin_keys,
                 "part": part, "failed": placement.failed_open
             })
