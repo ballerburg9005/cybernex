@@ -5,6 +5,9 @@ extends SceneTree
 var failures: int = 0
 
 func _initialize() -> void:
+    call_deferred("_run")
+
+func _run() -> void:
     test_open_and_repaired_actuator()
     test_insulated_crossover()
     test_thermal_failure()
