@@ -14,5 +14,7 @@ class_name StationDeviceSpec
 @export var requires_protocol: String = ""
 ## Independent hardware proof, e.g. a solved relay board; protocols alone cannot substitute.
 @export var required_modules: PackedStringArray = PackedStringArray()
+## Sensor/state checks (e.g. safe pressure), independent of hardware repairs.
+@export var required_conditions: PackedStringArray = PackedStringArray()
 @export var intact: bool = true
 @export var operator_enabled: bool = true
