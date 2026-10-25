@@ -12,6 +12,7 @@ signal puzzle_solved
 @onready var status: Label = %Status
 @onready var run_button: Button = %RunButton
 @onready var timer: Timer = %SolveTimer
+@onready var probe_report: Label = %ProbeReport
 
 var board: CircuitBoard
 ## Optional shared resource from the station bay. Standalone mode remains unlimited.
@@ -20,6 +21,7 @@ var require_salvage: bool = false
 var simulation := CircuitSimulation.new()
 var selected_index: int = -1
 var already_solved: bool = false
+var last_measurement: Dictionary = {}
 
 func _ready() -> void:
     if authored_board == null:
@@ -46,7 +48,10 @@ func _on_board_click(cell: Vector2i) -> void:
     var index: int = board.placement_at(cell)
     if index >= 0:
         selected_index = index
+        _refresh_probe()
         status.text = "Selected: %s. Drag to reposition, or rotate." % board.placements[index].part.label
+        return
+    if not timer.is_stopped():
         return
     if catalog.is_empty() or palette.selected < 0:
         return
@@ -63,6 +68,8 @@ func _on_board_click(cell: Vector2i) -> void:
         status.text = "No room: footprint overlaps an occupied cell."
 
 func _rotate_selected() -> void:
+    if not timer.is_stopped():
+        return
     if selected_index < 0 or selected_index >= board.placements.size():
         return
     var old: CircuitPlacement = board.placements[selected_index]
@@ -76,6 +83,8 @@ func _rotate_selected() -> void:
         _topology_changed()
 
 func _remove_selected() -> void:
+    if not timer.is_stopped():
+        return
     if selected_index < 0 or selected_index >= board.placements.size():
         return
     if board.placements[selected_index].fixed_to_board or not board.placements[selected_index].part.can_remove:
@@ -96,6 +105,9 @@ func _topology_changed() -> void:
     timer.stop()
     run_button.text = "RUN"
     simulation = CircuitSimulation.new()
+    last_measurement = {}
+    if is_node_ready():
+        probe_report.text = "No measurement: board changed."
     already_solved = false
     status.text = "Layout changed. RUN to measure voltage and temperature."
     board_view.queue_redraw()
@@ -116,6 +128,7 @@ func _on_simulation_tick() -> void:
     if board == null:
         return
     var state: Dictionary = simulation.step(board, timer.wait_time)
+    last_measurement = state
     if not state["errors"].is_empty():
         status.text = "Solver: " + "; ".join(state["errors"])
         timer.stop()
@@ -132,6 +145,10 @@ func _on_simulation_tick() -> void:
             index = int(key)
     board_view.hottest_part = index if highest > 50.0 else -1
     board_view.queue_redraw()
+    _refresh_probe()
+    if state.has("newly_failed") and not state["newly_failed"].is_empty():
+        status.text = "Overcurrent/thermal failure destroyed part(s): %s" % str(state["newly_failed"])
+        return
     status.text = "Load: %.3f V | hottest: %.1f C | stable: %.2fs" % [voltage, highest, state["hold_seconds"]]
     if state["solved"] and not already_solved:
         already_solved = true
@@ -220,3 +237,36 @@ func restore(data: Dictionary) -> bool:
     selected_index = -1
     _topology_changed()
     return true
+
+func _refresh_probe() -> void:
+    if not is_node_ready() or probe_report == null:
+        return
+    if selected_index < 0 or board == null or selected_index >= board.placements.size():
+        probe_report.text = "Click a part to probe. Run circuit for live readings."
+        return
+    var placement: CircuitPlacement = board.placements[selected_index]
+    var part: CircuitPart = placement.part
+    var lines := PackedStringArray()
+    lines.append("DMM // %s" % part.label)
+    lines.append("ID %s | %s" % [part.part_id, "FAILED OPEN" if placement.failed_open else "present"])
+    if last_measurement.has("voltages"):
+        var voltages: Array = last_measurement["voltages"]
+        var compiled: Dictionary = CircuitCompiler.compile(board)
+        for element in compiled["elements"]:
+            if int(element["part_index"]) != selected_index:
+                continue
+            if element.has("pins"):
+                var pins: Dictionary = element["pins"]
+                for pin_name in pins:
+                    var node_idx: int = int(pins[pin_name])
+                    if node_idx >= 0 and node_idx < voltages.size():
+                        lines.append("%s = %.4f V" % [pin_name, float(voltages[node_idx])])
+            elif element.has("a"):
+                lines.append("wire %s: %.4f V → %.4f V" % [
+                    element["id"], float(voltages[element["a"]]), float(voltages[element["b"]])])
+            var amperes: float = float(last_measurement.get("currents", {}).get(element["id"], 0.0))
+            lines.append("I = %.5f A" % amperes)
+        var watts: float = float(last_measurement.get("watts", {}).get(selected_index, 0.0))
+        var temperature: float = float(last_measurement.get("temperatures_c", {}).get(selected_index, 23.0))
+        lines.append("P = %.4f W  |  T = %.1f C" % [watts, temperature])
+    probe_report.text = "\n".join(lines)
