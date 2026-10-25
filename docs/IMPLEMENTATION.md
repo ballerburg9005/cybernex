@@ -52,7 +52,7 @@ The older Godot/Camera2D behavior has **not** been reproducibly retested against
 - BJTs use simplified base-emitter conduction and beta-limited collector-emitter conductance. MOSFETs have a gate-threshold-controlled channel and zero ideal gate current. These are **game-level approximations** and **not SPICE-equivalent transistor models**.
 - Each tick solves for node voltages, derives branch powers, integrates heat storage/cooling and burns components open at a temperature limit.
 - Floating branches are stabilized by a tiny shunt-to-reference for numerical conditioning; use actual meter/current diagnostics to verify consistency.
-- Simulation is DC/quasi-static. No capacitors, inductors, switching transients, AC phases, hysteresis, mechanical contacts, arcs, internal conductor voltage gradients, or non-ideal diode recovery are yet implemented.
+- Simulation is DC/quasi-static. Backward-Euler capacitors and inductors are implemented, but no high-frequency switching transients, AC phases, hysteresis, mechanical contacts, arcs, internal conductor voltage gradients, or non-ideal diode recovery are yet implemented.
 - A circuit editor is authored as regular Godot `Resource` and `Control` objects. The old per-cell 2D physics layout is deliberately not reused.
 - Live board editing is intentionally disabled while solving. Later, add a safe "de-energize / pull live wire" mode with arc and burn events.
 - Solver validation and current/thermal ratings are preliminary; some semiconductor configurations may fail to converge and will report that fact instead of claiming a valid solution.
@@ -76,6 +76,32 @@ Power buses carry `domain`, nominal voltage, capacity and intermittent duty cycl
 **M5 — systemic adversary and survival economy.** A station AI with visibility, reachability and finite authority, sabotage capabilities, event trace and counterfactual player options. Real tool heads, solder, consumables, extraction and salvage quality. Track persistent global state and route-dependent consequences.
 
 **M6 — content.** Author 20+ interdependent repair scenarios with several non-prescribed solutions each, technical documents and interesting failure cascades. Avoid direct combat as the assumed route.
+
+
+## Integrated playable station slice (added)
+
+`res://systems/station/StationMaintenanceBay.tscn` is the new Godot-native **systems gameplay integration scene**. It contains an instance of `StationNetworkDemo.tscn`, a single-compartment atmosphere, a finite-capability station security AI, the reusable circuit workbench and an operations/inventory/journal UI. It is not yet integrated with the original 2D exploration map.
+
+The station has three authored power domains (AC industrial, 48V service, pulsed HV), an AC-to-DC converter, a damaged ventilation drive, a security controller, gas injection valve, robot charge station and a maintenance bulkhead.
+
+The bulkhead requires **four independent conditions**: sufficient DC power, a successful repair of its electrical actuator driver, a service-protocol authorization and safe atmosphere. Repairing a relay cannot bypass the protocol; spoofing the protocol cannot power a motor; a live AC isolation procedure prevents safe ventilation repair; a halted fan cannot clear the security AI's inert gas.
+
+The level starts with finite solder, resistors and wire, but no Robertson screwdriver or protocol analyzer. A service-deck salvage excursion acquires the screwdriver at the cost of station time and AI attention. A power-isolated repair consumes solder and wiring; assembling a replacement circuit component also costs solder. Service tools survive use; failed components become scrap. There is no generic infinite inventory when this workbench is embedded in the bay.
+
+The gameplay scene records events, displays denial reasons and measurement diagnostics, and supports JSON-safe snapshots in `user://maintenance_bay_v1.json`. Data is authored as Godot `.tres` resources (inventory, equipment, repair procedures, circuit parts) and `.tscn` scenes (station graph, UI and workbench). No per-slot physics Areas are needed.
+
+The workbench now supports Inspector-authored capacitor/inductor parts, backward-Euler companion equations for RC/RL transient behavior with series resistance, and a live component meter with pin voltage, current, heat and wattage. Its semiconductor approximations remain intentionally less accurate than the linear/reactive solver.
+
+CI covers the entire maintenance chain, scarcity transactions, converter failure, contaminated-air purge, inventory and circuit snapshot restoration, RC/RL response, isolated crossings, thermal failure, and camera pan/zoom picking. The CI workflow explicitly rejects script exceptions. There has been **no manual graphical playtest** of this scene.
+
+### Known limitations in this slice
+
+- The simulated "backtracking" is currently a timed service-deck action; there is not yet traversable deck-level layout or a physical screwdriver pickup.
+- The security handshake is a tool-gated logical simulation; an actual packet-level challenge/response puzzle is future work.
+- AI gas attack is resource-bounded and tied to a powered device, but the opponent does not yet plan across an entire station graph.
+- Atmosphere is a well-mixed single compartment, not a 3D fluid dynamics simulation.
+- Thermal energy is integrated using fixed steps, but engine physics, short-circuit arcs and AC power flow remain simplified.
+- Gameplay visuals and accessibility/legibility require graphical validation before replacing the existing main scene.
 
 ## Legacy audit
 
