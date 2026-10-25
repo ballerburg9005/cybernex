@@ -1,0 +1,173 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://systems/station/StationMaintenanceBay.gd" id="bay"]
+[ext_resource type="PackedScene" path="res://systems/station/StationNetworkDemo.tscn" id="station"]
+[ext_resource type="Script" path="res://systems/station/StationAtmosphere.gd" id="air"]
+[ext_resource type="Script" path="res://systems/station/StationAdversary.gd" id="ai"]
+[ext_resource type="Resource" path="res://systems/inventory/field_inventory.tres" id="inventory"]
+[ext_resource type="Resource" path="res://systems/station/repairs/ventilation_rewire.tres" id="vent"]
+[ext_resource type="Resource" path="res://systems/station/repairs/replay_service_challenge.tres" id="security"]
+[ext_resource type="PackedScene" path="res://systems/circuits/CircuitWorkbench.tscn" id="workbench"]
+
+[node name="StationMaintenanceBay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("bay")
+initial_inventory = ExtResource("inventory")
+ventilation_procedure = ExtResource("vent")
+security_procedure = ExtResource("security")
+
+[node name="Station" parent="." instance=ExtResource("station")]
+unique_name_in_owner = true
+
+[node name="Atmosphere" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("air")
+initial_oxygen_fraction = 0.209
+initial_hazard_fraction = 0.0
+
+[node name="Adversary" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("ai")
+initial_action_budget = 2
+minimum_interval_seconds = 25.0
+attack_injection_rate = 0.05
+
+[node name="SystemClock" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 1.0
+
+[node name="UI" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Layout" type="HBoxContainer" parent="UI"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Left" type="ScrollContainer" parent="UI/Layout"]
+custom_minimum_size = Vector2(335, 0)
+layout_mode = 2
+
+[node name="Operations" type="VBoxContainer" parent="UI/Layout/Left"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="UI/Layout/Left/Operations"]
+layout_mode = 2
+text = "CYBERNEX — SERVICE BAY / DECK 07"
+
+[node name="Intro" type="Label" parent="UI/Layout/Left/Operations"]
+layout_mode = 2
+text = "The bulkhead requires a working motor driver, correct PLC challenge, 48V DC and a safe air-pressure interlock. Industrial AC also feeds the ventilation and DC rectifier. Repairs use real supplies."
+autowrap_mode = 3
+
+[node name="ActionsHeader" type="Label" parent="UI/Layout/Left/Operations"]
+layout_mode = 2
+text = "MAINTENANCE ACTIONS"
+
+[node name="SearchDeck" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Backtrack to deck 03 salvage"
+
+[node name="ArchiveTrace" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Recover service-bus trace"
+
+[node name="CutPower" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Isolate industrial AC (lockout)"
+
+[node name="RepairVent" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Rewire ventilation motor controller"
+
+[node name="RestorePower" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Restore industrial AC"
+
+[node name="Authenticate" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Replay captured PLC handshake"
+
+[node name="CloseGas" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Close security gas injection valve"
+
+[node name="OpenDoor" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "TRY OPEN BULKHEAD"
+
+[node name="SaveProgress" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save maintenance state"
+
+[node name="LoadProgress" type="Button" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Load maintenance state"
+
+[node name="DiagnosticsHeader" type="Label" parent="UI/Layout/Left/Operations"]
+layout_mode = 2
+text = "SYSTEM DIAGNOSTICS"
+
+[node name="Diagnostics" type="RichTextLabel" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(315, 220)
+layout_mode = 2
+fit_content = true
+scroll_active = false
+text = "Diagnostics pending..."
+
+[node name="InventoryHeader" type="Label" parent="UI/Layout/Left/Operations"]
+layout_mode = 2
+text = "PHYSICAL STOCK"
+
+[node name="StockReport" type="Label" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Inventory pending..."
+
+[node name="JournalHeader" type="Label" parent="UI/Layout/Left/Operations"]
+layout_mode = 2
+text = "MAINTENANCE LOG"
+
+[node name="Journal" type="RichTextLabel" parent="UI/Layout/Left/Operations"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(315, 170)
+layout_mode = 2
+fit_content = true
+scroll_active = true
+text = "Log pending..."
+
+[node name="Right" type="PanelContainer" parent="UI/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Workbench" parent="UI/Layout/Right" instance=ExtResource("workbench")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
