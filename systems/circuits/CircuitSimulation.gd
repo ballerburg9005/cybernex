@@ -195,7 +195,7 @@ static func _diode(matrix: Array, rhs: Array[float], a: int, k: int, v: Array[fl
     var g: float = 1.0 if on else 1e-9
     _stamp(matrix, rhs, a, k, g)
     if on:
-        _inject(rhs, a, k, -g * forward_drop)
+        _inject(rhs, a, k, g * forward_drop)
 
 static func _solve(matrix: Array, rhs: Array[float]) -> Array[float]:
     var n: int = rhs.size()
