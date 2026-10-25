@@ -14,6 +14,9 @@ signal puzzle_solved
 @onready var timer: Timer = %SolveTimer
 
 var board: CircuitBoard
+## Optional shared resource from the station bay. Standalone mode remains unlimited.
+var supplied_inventory: SalvageInventory
+var require_salvage: bool = false
 var simulation := CircuitSimulation.new()
 var selected_index: int = -1
 var already_solved: bool = false
@@ -27,6 +30,7 @@ func _ready() -> void:
     for part in catalog:
         if part != null:
             palette.add_item(part.label)
+    _refresh_palette_labels()
     board_view.cell_clicked.connect(_on_board_click)
     timer.timeout.connect(_on_simulation_tick)
     %RotateButton.pressed.connect(_rotate_selected)
@@ -49,6 +53,8 @@ func _on_board_click(cell: Vector2i) -> void:
     new_part.part = catalog[palette.selected]
     new_part.cell = cell
     if board.can_place(new_part):
+        if not _spend_component(new_part.part):
+            return
         board.placements.append(new_part)
         selected_index = board.placements.size() - 1
         _topology_changed()
@@ -74,6 +80,12 @@ func _remove_selected() -> void:
     if board.placements[selected_index].fixed_to_board or not board.placements[selected_index].part.can_remove:
         status.text = "This board component cannot be removed."
         return
+    var removed: CircuitPlacement = board.placements[selected_index]
+    if require_salvage and supplied_inventory != null:
+        if removed.failed_open:
+            supplied_inventory.add("electronic_scrap", 1, "Burnt electronic scrap")
+        else:
+            supplied_inventory.add(removed.part.part_id, 1, removed.part.label)
     board.placements.remove_at(selected_index)
     selected_index = -1
     _topology_changed()
@@ -86,14 +98,18 @@ func _topology_changed() -> void:
     already_solved = false
     status.text = "Layout changed. RUN to measure voltage and temperature."
     board_view.queue_redraw()
+    board_view.allow_dragging = true
+    _refresh_palette_labels()
 
 func _toggle_running() -> void:
     if timer.is_stopped():
         timer.start()
         run_button.text = "PAUSE"
+        board_view.allow_dragging = false
     else:
         timer.stop()
         run_button.text = "RUN"
+        board_view.allow_dragging = true
 
 func _on_simulation_tick() -> void:
     if board == null:
@@ -103,6 +119,7 @@ func _on_simulation_tick() -> void:
         status.text = "Solver: " + "; ".join(state["errors"])
         timer.stop()
         run_button.text = "RUN"
+        board_view.allow_dragging = true
         return
     var voltage: float = float(state["loads"].get(board.required_load_part_id, 0.0))
     var highest: float = 0.0
@@ -119,3 +136,35 @@ func _on_simulation_tick() -> void:
         already_solved = true
         status.text += " | ACCESS ACTUATOR READY"
         puzzle_solved.emit()
+
+func set_inventory(stock: SalvageInventory) -> void:
+    # Called by the owning gameplay scene after this Control enters the tree.
+    supplied_inventory = stock
+    require_salvage = stock != null
+    _refresh_palette_labels()
+
+func _refresh_palette_labels() -> void:
+    if not is_node_ready():
+        return
+    var i: int = 0
+    for part in catalog:
+        if part == null:
+            continue
+        var text: String = part.label
+        if require_salvage and supplied_inventory != null:
+            text += "  [×%d]" % supplied_inventory.amount(part.part_id)
+        if i < palette.item_count:
+            palette.set_item_text(i, text)
+        i += 1
+
+func _spend_component(part: CircuitPart) -> bool:
+    if not require_salvage or supplied_inventory == null:
+        return true
+    var requirement := MaterialRequirement.new()
+    requirement.item_id = part.part_id
+    requirement.quantity = 1
+    if not supplied_inventory.consume([requirement]):
+        status.text = "No %s available. Scavenge a spare or improvise." % part.label
+        return false
+    _refresh_palette_labels()
+    return true
