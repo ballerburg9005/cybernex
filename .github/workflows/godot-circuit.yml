@@ -17,11 +17,19 @@ jobs:
       - name: Import Godot project
         run: godot --headless --path . --editor --import --quit
       - name: Run headless electrical tests
-        run: godot --headless --path . --script res://tests/circuit_smoke.gd
+        run: |
+          godot --headless --path . --script res://tests/circuit_smoke.gd 2>&1 | tee /tmp/circuits.log
+          ! grep -q "SCRIPT ERROR\|Parse Error: A void" /tmp/circuits.log
       - name: Verify HUD/world coordinates while camera pans and zooms
         run: godot --headless --path . --script res://tests/coordinate_smoke.gd
       - name: Instantiate Godot-native workbench scene
-        run: godot --headless --path . --quit-after 8 res://systems/circuits/CircuitWorkbench.tscn
+        run: |
+          godot --headless --path . --quit-after 8 res://systems/circuits/CircuitWorkbench.tscn 2>&1 | tee /tmp/workbench.log
+          ! grep -q "SCRIPT ERROR" /tmp/workbench.log
+      - name: Launch integrated maintenance bay
+        run: |
+          godot --headless --path . --quit-after 8 res://systems/station/StationMaintenanceBay.tscn 2>&1 | tee /tmp/maintenance.log
+          ! grep -q "SCRIPT ERROR" /tmp/maintenance.log
       - name: Launch original world scene
         continue-on-error: true
         run: godot --headless --path . --quit-after 8 res://main.tscn
