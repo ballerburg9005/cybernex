@@ -34,7 +34,7 @@ func step(board: CircuitBoard, delta_seconds: float = 0.05) -> Dictionary:
             if element.get("failed", false):
                 continue
             var kind: String = element["kind"]
-            if kind == "resistor":
+            if kind == "resistor" and element.has("a"):
                 _stamp(matrix, rhs, element["a"], element["b"], 1.0 / maxf(element["ohms"], 0.00001))
                 continue
             var pins: Dictionary = element["pins"]
