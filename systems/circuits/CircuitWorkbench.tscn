@@ -104,6 +104,13 @@ layout_mode = 2
 text = "Open in Godot 4.7.2"
 autowrap_mode = 3
 
+[node name="ProbeReport" type="Label" parent="Padding/Layout/MainRow/SidePanel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 110)
+layout_mode = 2
+autowrap_mode = 3
+text = "DMM / select a board component, run circuit."
+
 [node name="Footnote" type="Label" parent="Padding/Layout"]
 layout_mode = 2
 text = "Proof of concept — part values and pin geometry are editable .tres Resources in Godot Inspector."
