@@ -4,7 +4,7 @@
 
 This is an intentionally separate migration branch. The existing main world scene and old inventory gameplay are not yet replaced. The branch updates the Godot project feature level to **4.7**, disables the old GitPlugin's automatic startup, and introduces a runnable **CircuitWorkbench.tscn** that can be opened separately from the legacy main scene.
 
-No local Godot executable was available in the authoring environment. Headless CI regression tests are provided, but actual import, runtime and visual UI validation must be performed with Godot 4.7.2. This is a technical foundation, not a claim that the whole game is migrated.
+No local Godot executable was available in the authoring environment. GitHub Actions has now successfully run **Godot 4.7.2** headless import, circuit/thermal/station unit tests, a camera-pan/zoom world picking regression with a HUD CanvasLayer, and scene startup for the workbench and legacy main world. Interactive Inspector editing, rendering, mouse drag-and-drop, and full gameplay still require manual visual testing. This is a technical foundation, not a claim that the whole game is migrated.
 
 ### Run the prototype
 
