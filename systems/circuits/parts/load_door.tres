@@ -19,7 +19,7 @@ wire_group = 0
 
 [resource]
 script = ExtResource("part")
-part_id = "load_door"
+part_id = "door_motor"
 label = "Door motor control"
 model = "load"
 footprint = Vector2i(1, 1)
