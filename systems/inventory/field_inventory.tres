@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SalvageInventory" load_steps=10 format=3]
+[gd_resource type="Resource" script_class="SalvageInventory" load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://systems/inventory/SalvageInventory.gd" id="inventory"]
 [ext_resource type="Script" path="res://systems/inventory/SalvageStock.gd" id="stock"]
@@ -40,6 +40,18 @@ display_name = "Side cutters"
 quantity = 1
 is_tool = true
 
+[sub_resource type="Resource" id="capacitor"]
+script = ExtResource("stock")
+item_id = "capacitor_20mf"
+display_name = "20mF reclaimed electrolytic"
+quantity = 1
+
+[sub_resource type="Resource" id="inductor"]
+script = ExtResource("stock")
+item_id = "inductor_100h"
+display_name = "Heavy experimental coil"
+quantity = 1
+
 [resource]
 script = ExtResource("inventory")
-stocks = Array[ExtResource("stock")]([SubResource("resistor"), SubResource("wire"), SubResource("corner"), SubResource("solder"), SubResource("wire_length"), SubResource("cutters")])
+stocks = Array[ExtResource("stock")]([SubResource("resistor"), SubResource("wire"), SubResource("corner"), SubResource("solder"), SubResource("wire_length"), SubResource("cutters"), SubResource("capacitor"), SubResource("inductor")])
