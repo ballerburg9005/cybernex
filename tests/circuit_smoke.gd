@@ -8,6 +8,8 @@ func _initialize() -> void:
     test_open_and_repaired_actuator()
     test_insulated_crossover()
     test_thermal_failure()
+    test_station_power_and_protocols()
+    test_rotated_oversized_footprint()
     if failures > 0:
         push_error("%d CIRCUIT TESTS FAILED" % failures)
         quit(1)
@@ -75,3 +77,34 @@ func test_thermal_failure() -> void:
     var result: Dictionary = simulation.step(board, 1.0)
     check(result["errors"].is_empty(), "Overheating test should be electrically solvable.")
     check(board.placements[1].failed_open, "Excess Joule heat should burn component open.")
+
+func test_station_power_and_protocols() -> void:
+    var station: StationNetwork = load("res://systems/station/StationNetworkDemo.tscn").instantiate()
+    station.evaluate()
+    check(bool(station.device_online.get("rectifier_ac_to_dc", false)), "AC->DC converter must supply the isolated DC bus.")
+    check(bool(station.device_online.get("security_controller", false)), "Security controller needs DC feed.")
+    check(not bool(station.device_online.get("maintenance_bulkhead", false)), "Power must not bypass security protocol.")
+    station.grant_protocol("SEC_BULKHEAD_7", true)
+    check(bool(station.device_online.get("maintenance_bulkhead", false)), "Valid protocol and DC + security should open door interlock.")
+    station.damage_device("rectifier_ac_to_dc")
+    check(not bool(station.device_online.get("security_controller", false)), "Converter loss should remove DC supply.")
+    check(not bool(station.device_online.get("maintenance_bulkhead", false)), "Previously authenticated bulkhead must still require power.")
+    station.time_seconds = 2.0
+    station.evaluate()
+    check(not bool(station.bus_online.get("PULSE_HV", true)), "Pulsed rail must observe configured duty cycle.")
+    station.free()
+
+func test_rotated_oversized_footprint() -> void:
+    var part := CircuitPart.new()
+    part.footprint = Vector2i(2, 1)
+    var pin := CircuitPin.new()
+    pin.side = 2
+    pin.offset = 0
+    part.pins.append(pin)
+    var placement := CircuitPlacement.new()
+    placement.part = part
+    placement.cell = Vector2i(3, 3)
+    placement.rotation = 1
+    check(placement.footprint() == Vector2i(1, 2), "90 degree rotation must swap wide footprint dimensions.")
+    var rotated: Dictionary = placement.rotated_pin(pin)
+    check(rotated["cell"] == Vector2i(3, 4) and rotated["side"] == 3, "Rotated right pin must become bottom pin at far cell.")
