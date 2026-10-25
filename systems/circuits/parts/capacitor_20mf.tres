@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="CircuitPart" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://systems/circuits/CircuitPart.gd" id="part"]
+[ext_resource type="Script" path="res://systems/circuits/CircuitPin.gd" id="pin"]
+
+[sub_resource type="Resource" id="A"]
+script = ExtResource("pin")
+side = 0
+name = "A"
+
+[sub_resource type="Resource" id="B"]
+script = ExtResource("pin")
+side = 2
+name = "B"
+
+[resource]
+script = ExtResource("part")
+part_id = "capacitor_20mf"
+label = "20mF capacitor"
+model = "capacitor"
+footprint = Vector2i(1, 1)
+pins = Array[ExtResource("pin")]([SubResource("A"), SubResource("B")])
+value = 0.02
+secondary_value = 0.05
+rated_watts = 2.0
+thermal_capacity = 1.5
+cooling_watts_per_kelvin = 0.06
+failure_temperature_c = 110.0
