@@ -7,6 +7,8 @@ class_name CircuitSimulation
 var temperatures_c: Dictionary = {}
 var last_voltages: Array[float] = []
 var stable_seconds: float = 0.0
+## One stored voltage (C) or current (L) per physical part placement.
+var reactive_history: Dictionary = {}
 var ambient_c: float = 23.0
 
 func step(board: CircuitBoard, delta_seconds: float = 0.05) -> Dictionary:
@@ -42,6 +44,22 @@ func step(board: CircuitBoard, delta_seconds: float = 0.05) -> Dictionary:
             match kind:
                 "resistor", "load":
                     _stamp(matrix, rhs, _pin(pins, "A"), _pin(pins, "B"), 1.0 / maxf(part.value, 0.00001))
+                "capacitor", "inductor":
+                    var a: int = _pin(pins, "A")
+                    var b: int = _pin(pins, "B")
+                    var prev: float = float(reactive_history.get(element["id"], 0.0))
+                    var series_r: float = maxf(part.secondary_value, 0.000001)
+                    var reactance: float = 0.0
+                    if kind == "capacitor":
+                        reactance = maxf(delta_seconds, 0.000001) / maxf(part.value, 0.000000001)
+                    else:
+                        reactance = maxf(part.value, 0.000000001) / maxf(delta_seconds, 0.000001)
+                    var g: float = 1.0 / (series_r + reactance)
+                    _stamp(matrix, rhs, a, b, g)
+                    if kind == "capacitor":
+                        _inject(rhs, a, b, g * prev)
+                    else:
+                        _inject(rhs, a, b, -g * reactance * prev)
                 "source":
                     var p: int = _pin(pins, "P")
                     var m: int = _pin(pins, "N")
@@ -117,6 +135,21 @@ func step(board: CircuitBoard, delta_seconds: float = 0.05) -> Dictionary:
                         effective_r = maxf(part.value, 0.00001)
                         current = (voltages[a] - voltages[b]) / effective_r
                         heat = current * current * effective_r
+                    "capacitor", "inductor":
+                        a = _pin(pins, "A")
+                        b = _pin(pins, "B")
+                        var prev: float = float(reactive_history.get(element["id"], 0.0))
+                        var series_r: float = maxf(part.secondary_value, 0.000001)
+                        var reactance: float = 0.0
+                        if kind == "capacitor":
+                            reactance = maxf(delta_seconds, 0.000001) / maxf(part.value, 0.000000001)
+                            current = (voltages[a] - voltages[b] - prev) / (series_r + reactance)
+                            reactive_history[element["id"]] = prev + reactance * current
+                        else:
+                            reactance = maxf(part.value, 0.000000001) / maxf(delta_seconds, 0.000001)
+                            current = (voltages[a] - voltages[b] + reactance * prev) / (series_r + reactance)
+                            reactive_history[element["id"]] = current
+                        heat = current * current * series_r
                     "source":
                         a = _pin(pins, "P")
                         b = _pin(pins, "N")
