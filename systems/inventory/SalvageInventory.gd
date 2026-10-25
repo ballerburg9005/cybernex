@@ -68,6 +68,16 @@ func add(item_id: String, quantity: int, display_name: String = "") -> void:
     new_stock.quantity = quantity
     stocks.append(new_stock)
 
+func add_tool(item_id: String, display_name: String) -> void:
+    if has_tool(item_id):
+        return
+    var new_stock := SalvageStock.new()
+    new_stock.item_id = item_id
+    new_stock.display_name = display_name
+    new_stock.is_tool = true
+    new_stock.quantity = 1
+    stocks.append(new_stock)
+
 func describe() -> String:
     var lines := PackedStringArray()
     for stock in stocks:
@@ -77,13 +87,23 @@ func describe() -> String:
     return "\n".join(lines)
 
 func snapshot() -> Dictionary:
-    var counts: Dictionary = {}
+    var entries: Array[Dictionary] = []
     for stock in stocks:
         if stock != null:
-            counts[stock.item_id] = stock.quantity
-    return counts
+            entries.append({
+                "id": stock.item_id, "name": stock.display_name,
+                "quantity": stock.quantity, "is_tool": stock.is_tool
+            })
+    return {"entries": entries}
 
-func restore(counts: Dictionary) -> void:
-    for stock in stocks:
-        if stock != null and counts.has(stock.item_id):
-            stock.quantity = maxi(0, int(counts[stock.item_id]))
+func restore(data: Dictionary) -> void:
+    stocks.clear()
+    for entry in data.get("entries", []):
+        if typeof(entry) != TYPE_DICTIONARY:
+            continue
+        var stock := SalvageStock.new()
+        stock.item_id = str(entry.get("id", ""))
+        stock.display_name = str(entry.get("name", stock.item_id))
+        stock.quantity = maxi(0, int(entry.get("quantity", 0)))
+        stock.is_tool = bool(entry.get("is_tool", false))
+        stocks.append(stock)
