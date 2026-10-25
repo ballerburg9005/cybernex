@@ -32,6 +32,7 @@ func _ready() -> void:
             palette.add_item(part.label)
     _refresh_palette_labels()
     board_view.cell_clicked.connect(_on_board_click)
+    board_view.board_changed.connect(_topology_changed)
     timer.timeout.connect(_on_simulation_tick)
     %RotateButton.pressed.connect(_rotate_selected)
     %RemoveButton.pressed.connect(_remove_selected)
@@ -163,8 +164,11 @@ func _spend_component(part: CircuitPart) -> bool:
     var requirement := MaterialRequirement.new()
     requirement.item_id = part.part_id
     requirement.quantity = 1
-    if not supplied_inventory.consume([requirement]):
-        status.text = "No %s available. Scavenge a spare or improvise." % part.label
+    var solder := MaterialRequirement.new()
+    solder.item_id = "solder"
+    solder.quantity = 1
+    if not supplied_inventory.consume([requirement, solder]):
+        status.text = "Requires %s and one unit of solder. Check salvage." % part.label
         return false
     _refresh_palette_labels()
     return true
