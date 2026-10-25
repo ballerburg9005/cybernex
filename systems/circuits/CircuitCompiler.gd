@@ -62,7 +62,7 @@ static func compile(board: CircuitBoard) -> Dictionary:
     # Adjacent footprints connect only at matching physical edges.
     # In particular, a crossover's independent wire groups never short.
     for edge_key in endpoints:
-        var values: Array = edge_key.split(",")
+        var values: PackedStringArray = edge_key.split(",")
         var x: int = int(values[0])
         var y: int = int(values[1])
         var side: int = int(values[2])
