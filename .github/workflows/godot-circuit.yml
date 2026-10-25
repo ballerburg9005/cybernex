@@ -18,6 +18,8 @@ jobs:
         run: godot --headless --path . --editor --import --quit
       - name: Run headless electrical tests
         run: godot --headless --path . --script res://tests/circuit_smoke.gd
+      - name: Verify HUD/world coordinates while camera pans and zooms
+        run: godot --headless --path . --script res://tests/coordinate_smoke.gd
       - name: Instantiate Godot-native workbench scene
         run: godot --headless --path . --quit-after 8 res://systems/circuits/CircuitWorkbench.tscn
       - name: Launch original world scene
