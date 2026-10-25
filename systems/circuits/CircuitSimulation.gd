@@ -149,6 +149,7 @@ func step(board: CircuitBoard, delta_seconds: float = 0.05) -> Dictionary:
                     load_voltages[part.part_id] = voltages[a] - voltages[b]
         currents[element["id"]] = current
         watts[index] = float(watts.get(index, 0.0)) + heat
+    var newly_failed: Array[int] = []
     for i in range(board.placements.size()):
         var placement: CircuitPlacement = board.placements[i]
         if placement == null or placement.part == null:
@@ -160,16 +161,18 @@ func step(board: CircuitBoard, delta_seconds: float = 0.05) -> Dictionary:
         var heat_flow: float = power - part.cooling_watts_per_kelvin * (temp - ambient_c)
         temp += heat_flow * maxf(delta_seconds, 0.0) / maxf(part.thermal_capacity, 0.001)
         temperatures_c[i] = temp
-        if temp >= part.failure_temperature_c:
+        if temp >= part.failure_temperature_c and not placement.failed_open:
             placement.failed_open = true
+            newly_failed.append(i)
     var target: float = float(load_voltages.get(board.required_load_part_id, -1e30))
-    var within_limits: bool = errors.is_empty() and target >= board.min_load_volts and target <= board.max_load_volts
+    var within_limits: bool = errors.is_empty() and newly_failed.is_empty() and target >= board.min_load_volts and target <= board.max_load_volts
     stable_seconds = stable_seconds + maxf(delta_seconds, 0.0) if within_limits else 0.0
     return {
         "errors": errors, "solved": within_limits and stable_seconds >= board.minimum_hold_seconds,
         "voltages": voltages, "currents": currents, "watts": watts,
         "temperatures_c": temperatures_c.duplicate(), "loads": load_voltages,
-        "hold_seconds": stable_seconds, "converged": converged
+        "hold_seconds": stable_seconds, "converged": converged,
+        "newly_failed": newly_failed
     }
 
 static func _pin(pins: Dictionary, name: String) -> int:
