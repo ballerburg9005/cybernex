@@ -1,0 +1,90 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://systems/station/StationNetwork.gd" id="network"]
+[ext_resource type="Script" path="res://systems/station/PowerBusSpec.gd" id="bus"]
+[ext_resource type="Script" path="res://systems/station/StationDeviceSpec.gd" id="device"]
+
+[sub_resource type="Resource" id="ac"]
+script = ExtResource("bus")
+bus_id = "AC_400"
+domain = "industrial AC"
+nominal_volts = 230.0
+capacity_watts = 1800.0
+powered = true
+
+[sub_resource type="Resource" id="dc"]
+script = ExtResource("bus")
+bus_id = "DC_48"
+domain = "low voltage DC"
+nominal_volts = 48.0
+capacity_watts = 0.0
+powered = false
+
+[sub_resource type="Resource" id="pulse"]
+script = ExtResource("bus")
+bus_id = "PULSE_HV"
+domain = "pulsed HV"
+nominal_volts = 1500.0
+capacity_watts = 3000.0
+powered = true
+duty_period_seconds = 5.0
+duty_fraction = 0.2
+
+[sub_resource type="Resource" id="rectifier"]
+script = ExtResource("device")
+device_id = "rectifier_ac_to_dc"
+device_type = "converter"
+supply_bus = "AC_400"
+output_bus = "DC_48"
+demand_watts = 700.0
+conversion_capacity_watts = 600.0
+efficiency = 0.85
+intact = true
+
+[sub_resource type="Resource" id="security"]
+script = ExtResource("device")
+device_id = "security_controller"
+device_type = "security"
+supply_bus = "DC_48"
+demand_watts = 70.0
+intact = true
+
+[sub_resource type="Resource" id="vent"]
+script = ExtResource("device")
+device_id = "ventilation_drive"
+device_type = "ventilation"
+supply_bus = "AC_400"
+demand_watts = 300.0
+intact = true
+
+[sub_resource type="Resource" id="door"]
+script = ExtResource("device")
+device_id = "maintenance_bulkhead"
+device_type = "door"
+supply_bus = "DC_48"
+demand_watts = 200.0
+required_devices = PackedStringArray("security_controller")
+requires_protocol = "SEC_BULKHEAD_7"
+intact = true
+
+[sub_resource type="Resource" id="robot"]
+script = ExtResource("device")
+device_id = "robot_charge_station"
+device_type = "robotics"
+supply_bus = "DC_48"
+demand_watts = 80.0
+intact = true
+
+[sub_resource type="Resource" id="pulse_device"]
+script = ExtResource("device")
+device_id = "pulse_interlock"
+device_type = "consumer"
+supply_bus = "PULSE_HV"
+demand_watts = 1200.0
+intact = true
+
+[node name="StationNetworkDemo" type="Node"]
+script = ExtResource("network")
+buses = Array[ExtResource("bus")]([SubResource("ac"), SubResource("dc"), SubResource("pulse")])
+devices = Array[ExtResource("device")]([SubResource("rectifier"), SubResource("security"), SubResource("vent"), SubResource("door"), SubResource("robot"), SubResource("pulse_device")])
+tick_seconds = 0.2
