@@ -1,0 +1,20 @@
+name: Godot 4.7 circuit checks
+on:
+  push:
+    branches: [refactor/godot-4.7-station-systems]
+  pull_request:
+
+jobs:
+  circuit-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+      - name: Import Godot project
+        run: godot --headless --path . --editor --import --quit
+      - name: Run headless electrical tests
+        run: godot --headless --path . --script res://tests/circuit_smoke.gd
