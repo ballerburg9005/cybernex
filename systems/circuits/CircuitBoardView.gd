@@ -5,6 +5,7 @@ class_name CircuitBoardView
 ## One lightweight Control renders a whole board; no per-cell Area2Ds,
 ## duplicate sprites, per-cell _ready() loops or polling timers.
 signal cell_clicked(cell: Vector2i)
+signal board_changed
 
 @export var board: CircuitBoard:
     set(next):
@@ -13,6 +14,7 @@ signal cell_clicked(cell: Vector2i)
             update_minimum_size()
             queue_redraw()
 @export_range(24, 128, 4) var cell_size: int = 68
+var allow_dragging: bool = true
 var inspected_voltages: Array = []
 var hottest_part: int = -1
 
@@ -74,7 +76,7 @@ func _inside(cell: Vector2i) -> bool:
     return board != null and cell.x >= 0 and cell.y >= 0 and cell.x < board.width and cell.y < board.height
 
 func _gui_input(event: InputEvent) -> void:
-    if Engine.is_editor_hint():
+    if Engine.is_editor_hint() or not allow_dragging:
         return
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
         var cell: Vector2i = _cell_from_position(event.position)
@@ -83,7 +85,7 @@ func _gui_input(event: InputEvent) -> void:
             accept_event()
 
 func _get_drag_data(at_position: Vector2) -> Variant:
-    if Engine.is_editor_hint() or board == null:
+    if Engine.is_editor_hint() or board == null or not allow_dragging:
         return null
     var cell: Vector2i = _cell_from_position(at_position)
     if not _inside(cell):
@@ -99,7 +101,7 @@ func _get_drag_data(at_position: Vector2) -> Variant:
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
     if typeof(data) != TYPE_DICTIONARY or data.get("kind", "") != "circuit_part":
         return false
-    if data.get("source") != self or board == null:
+    if data.get("source") != self or board == null or not allow_dragging:
         return false
     var index: int = int(data["index"])
     if index < 0 or index >= board.placements.size():
@@ -114,3 +116,4 @@ func _drop_data(at_position: Vector2, data: Variant) -> void:
     var index: int = int(data["index"])
     board.placements[index].cell = _cell_from_position(at_position)
     queue_redraw()
+    board_changed.emit()
