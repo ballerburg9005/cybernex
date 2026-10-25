@@ -76,11 +76,11 @@ func _inside(cell: Vector2i) -> bool:
     return board != null and cell.x >= 0 and cell.y >= 0 and cell.x < board.width and cell.y < board.height
 
 func _gui_input(event: InputEvent) -> void:
-    if Engine.is_editor_hint() or not allow_dragging:
+    if Engine.is_editor_hint():
         return
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
         var cell: Vector2i = _cell_from_position(event.position)
-        if _inside(cell):
+        if _inside(cell) and (allow_dragging or board.placement_at(cell) >= 0):
             cell_clicked.emit(cell)
             accept_event()
 
