@@ -172,3 +172,51 @@ func _spend_component(part: CircuitPart) -> bool:
         return false
     _refresh_palette_labels()
     return true
+
+func snapshot() -> Dictionary:
+    var parts: Array[Dictionary] = []
+    if board != null:
+        for placement in board.placements:
+            if placement == null or placement.part == null:
+                continue
+            parts.append({
+                "part_id": placement.part.part_id,
+                "x": placement.cell.x, "y": placement.cell.y,
+                "rotation": placement.rotation,
+                "fixed": placement.fixed_to_board,
+                "failed": placement.failed_open
+            })
+    return {"placements": parts}
+
+func restore(data: Dictionary) -> bool:
+    if authored_board == null or not data.has("placements"):
+        return false
+    var catalog_by_id: Dictionary = {}
+    for part in catalog:
+        if part != null:
+            catalog_by_id[part.part_id] = part
+    for placement in authored_board.placements:
+        if placement != null and placement.part != null:
+            catalog_by_id[placement.part.part_id] = placement.part
+    var restored: CircuitBoard = authored_board.duplicate(true)
+    restored.placements.clear()
+    for saved in data["placements"]:
+        if typeof(saved) != TYPE_DICTIONARY:
+            return false
+        var part_id: String = str(saved.get("part_id", ""))
+        if not catalog_by_id.has(part_id):
+            return false
+        var placement := CircuitPlacement.new()
+        placement.part = catalog_by_id[part_id]
+        placement.cell = Vector2i(int(saved.get("x", -1)), int(saved.get("y", -1)))
+        placement.rotation = posmod(int(saved.get("rotation", 0)), 4)
+        placement.fixed_to_board = bool(saved.get("fixed", false))
+        placement.failed_open = bool(saved.get("failed", false))
+        if not restored.can_place(placement):
+            return false
+        restored.placements.append(placement)
+    board = restored
+    board_view.board = restored
+    selected_index = -1
+    _topology_changed()
+    return true
