@@ -1,90 +1,130 @@
-@tool
 extends PanelContainer
+class_name InventoryView
 
-@export var inv : Inv
+## One inventory is the source of truth. Change signals rebuild only visible
+## controls, replacing 200ms polling and per-cell physics collisions.
+signal feedback(message: String)
+@export var inv: Inv
+@export_enum("backpack", "hotbar") var mode: String = "backpack"
+@export_range(1, 12, 1) var preferred_columns: int = 7
+@export_range(1, 20, 1) var empty_slots_to_show: int = 10
 
-var item_scene = preload("res://UI/InventoryItem.tscn")
+@onready var grid_container: GridContainer = $Layout/Scroll/GridContainer
+@onready var counter: Label = $Layout/Toolbar/Counter
+@onready var filter_button: OptionButton = $Layout/Toolbar/Filter
+@onready var sort_button: Button = $Layout/Toolbar/Sort
+@onready var info: Label = $Layout/Feedback
 
-var timer_update := Timer.new()
+var backpack: Inv
+var cells_scene: PackedScene = preload("res://UI/InventoryItem.tscn")
+var filtering: int = 0
 
-var is_world = false
+func _ready() -> void:
+    filter_button.add_item("ALL ITEMS")
+    filter_button.add_item("TOOLS")
+    filter_button.add_item("WEAPONS")
+    filter_button.add_item("AUGMENTS")
+    filter_button.add_item("MATERIALS / JUNK")
+    filter_button.add_item("FOOD")
+    filter_button.item_selected.connect(func(idx: int) -> void:
+        filtering = idx
+        refresh()
+    )
+    sort_button.pressed.connect(func() -> void:
+        if inv != null and mode != "hotbar":
+            inv.sort_by_category()
+    )
+    if inv == null:
+        inv = Inv.new()
+    configure(inv, null, mode)
 
-@onready var grid_container = $GridContainer
+func configure(model: Inv, owner_inventory: Inv = null, display_mode: String = "backpack") -> void:
+    if inv != null and inv.changed.is_connected(refresh):
+        inv.changed.disconnect(refresh)
+    if backpack != null and backpack != inv and backpack.changed.is_connected(_backpack_updated):
+        backpack.changed.disconnect(_backpack_updated)
+    inv = model
+    backpack = owner_inventory if owner_inventory != null else model
+    mode = display_mode
+    if inv == null:
+        return
+    inv.ensure_slots()
+    if mode != "hotbar":
+        inv.normalize()
+    else:
+        # Quickbar entries are references to backpack items, never duplicated stock.
+        for i in range(inv.size()):
+            if inv.items[i] == null:
+                inv.items[i] = InvSlot.new()
+    inv.changed.connect(refresh)
+    if backpack != null and backpack != inv:
+        backpack.changed.connect(_backpack_updated)
+    if is_node_ready():
+        refresh()
 
-func _update_items():
+func _backpack_updated() -> void:
+    # Expire linked quickslots when the last actual item is consumed.
+    if mode == "hotbar" and backpack != null:
+        var modified: bool = false
+        for i in range(inv.size()):
+            var stack: InvSlot = inv.slot_at(i)
+            if stack != null and not backpack.has(stack.item):
+                inv.items[i] = InvSlot.new()
+                modified = true
+        if modified:
+            inv.changed.emit()
+    refresh()
 
-	for i in range(0, inv.items.size()):
-		var node_name = "./InventoryItem"+str(i)
-		if grid_container.has_node(node_name):
-			var ui_inv_item = grid_container.get_node(node_name)
-			if not ui_inv_item.itemslot == inv.items[i]:
-				ui_inv_item.itemslot = inv.items[i]
-				ui_inv_item.disabled = false
-			if ui_inv_item.inv == preload("res://quickinventory.tres"):
-				var playerinv = preload("res://playerinventory.tres")
-				if not playerinv.has(ui_inv_item.itemslot.item):
-					ui_inv_item.disabled = true
-					ui_inv_item.itemslot = InvSlot.new()
-				else:
-					var playerinvslot = playerinv.items[playerinv.find(ui_inv_item.itemslot.item)]
-					if playerinvslot != ui_inv_item.itemslot:
-						ui_inv_item.itemslot = playerinvslot
-			ui_inv_item._ready()
+func _allowed(item: InvItem) -> bool:
+    if filtering == 0 or mode == "hotbar":
+        return true
+    match filtering:
+        1: return item.type & InvItem.IS_TOOL != 0
+        2: return item.type & InvItem.IS_WEAPON != 0
+        3: return item.type & InvItem.IS_AUGMENTATION != 0
+        4: return item.type & InvItem.IS_JUNK != 0 or item.type == 0
+        5: return item.type & InvItem.IS_FOOD != 0
+    return true
 
+func refresh() -> void:
+    if not is_node_ready() or inv == null:
+        return
+    var occupied: Array[int] = []
+    var available: Array[int] = []
+    for i in range(inv.size()):
+        var slot: InvSlot = inv.slot_at(i)
+        if slot != null:
+            if _allowed(slot.item):
+                occupied.append(i)
+        else:
+            available.append(i)
+    var indices: Array[int] = []
+    if mode == "hotbar":
+        for i in range(inv.size()):
+            indices.append(i)
+    else:
+        indices.append_array(occupied)
+        if filtering == 0:
+            for i in range(mini(empty_slots_to_show, available.size())):
+                indices.append(available[i])
+    grid_container.columns = 9 if mode == "hotbar" else preferred_columns
+    for child in grid_container.get_children():
+        grid_container.remove_child(child)
+        child.queue_free()
+    for i in indices:
+        var cell: InventoryCell = cells_scene.instantiate()
+        grid_container.add_child(cell)
+        cell.configure(inv, i, self, mode == "hotbar", backpack)
+        cell.refresh()
+    var actual_stacks: int = inv.size() - available.size()
+    var item_count: int = 0
+    for i in occupied:
+        var stack: InvSlot = inv.slot_at(i)
+        item_count += stack.count if stack != null else 0
+    counter.text = ("%d/%d stacks  |  %d items" % [actual_stacks, inv.size(), item_count]) if mode != "hotbar" else "QUICK ACCESS"
+    sort_button.visible = mode != "hotbar"
+    filter_button.visible = mode != "hotbar"
 
-func _ready():
-	if not inv:
-		inv = Inv.new()
-
-	grid_container.columns = int(ceil(sqrt(inv.items.size())))
-	grid_container.size = Vector2(0,0)
-	
-#	if not Engine.is_editor_hint():
-	call_deferred("_started")
-	
-
-func _started():
-	if inv == preload("res://playerinventory.tres"):
-		grid_container.columns = int(ceil(sqrt(inv.items.size())))
-	elif inv == preload("res://quickinventory.tres"):
-		grid_container.columns = 9
-	
-	if grid_container.columns < 3:
-		grid_container.columns = 3
-
-	if not inv == preload("res://quickinventory.tres"):
-		for i in range(inv.items.size(), grid_container.columns * grid_container.columns):
-			inv.items.append(InvSlot.new(preload("res://items/missing.tres")))
-
-	if not Engine.is_editor_hint():
-		timer_update.one_shot = false
-		timer_update.timeout.connect(_update_items)
-		add_child(timer_update)
-		timer_update.start(0.2)
-
-
-	for i in range(0, inv.items.size()):
-		var item = item_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE)
-		item.name = "InventoryItem"+str(i)
-		item.itemslot = inv.items[i]
-		item.inv = inv
-		item.is_world = is_world
-
-		if grid_container.has_node("./"+item.name):
-			var oldnode = grid_container.get_node("./"+item.name)
-			grid_container.remove_child(oldnode)
-			oldnode.queue_free()
-			oldnode = null
-			
-		grid_container.add_child(item)
-		item.set_owner(get_tree().get_edited_scene_root())
-		
-
-
-## not needed!
-#func disconnect_all_signals(node):
-#		for cur_signal in node.get_signal_list():
-#			for cur_conn in node.get_signal_connection_list(cur_signal.name):
-#				if cur_conn.callable.get_object() == node and node.is_connected(cur_conn.signal.get_name(), cur_conn.callable):
-#					print("is connected: "+str(cur_conn.signal.get_name())+" in "+str(cur_signal.name))
-#					disconnect(cur_conn.signal.get_name(), cur_conn.callable)
+func message(value: String) -> void:
+    info.text = value
+    feedback.emit(value)
