@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="RepairProcedure" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://systems/station/RepairProcedure.gd" id="repair"]
+[ext_resource type="Script" path="res://systems/inventory/MaterialRequirement.gd" id="material"]
+
+[sub_resource type="Resource" id="solder"]
+script = ExtResource("material")
+item_id = "solder"
+quantity = 1
+
+[sub_resource type="Resource" id="wire"]
+script = ExtResource("material")
+item_id = "wire_length"
+quantity = 1
+
+[resource]
+script = ExtResource("repair")
+procedure_id = "fix_ventilation"
+label = "Rewire ventilation controller"
+service_note = "Disconnect AC distribution. Remove the Robertson #2 service bolts, splice the severed control cable and resolder the fan driver's contact. Restore power before expecting the fan to run."
+target_device_id = "ventilation_drive"
+needs_materials = Array[ExtResource("material")]([SubResource("solder"), SubResource("wire")])
+needs_tools = PackedStringArray("robertson_2", "side_cutters")
+requires_power_isolated = true
