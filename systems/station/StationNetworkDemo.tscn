@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://systems/station/StationNetwork.gd" id="network"]
 [ext_resource type="Script" path="res://systems/station/PowerBusSpec.gd" id="bus"]
 [ext_resource type="Script" path="res://systems/station/StationDeviceSpec.gd" id="device"]
 
 [sub_resource type="Resource" id="ac"]
+resource_local_to_scene = true
 script = ExtResource("bus")
 bus_id = "AC_400"
 domain = "industrial AC"
@@ -31,6 +32,7 @@ duty_period_seconds = 5.0
 duty_fraction = 0.2
 
 [sub_resource type="Resource" id="rectifier"]
+resource_local_to_scene = true
 script = ExtResource("device")
 device_id = "rectifier_ac_to_dc"
 device_type = "converter"
@@ -55,7 +57,7 @@ device_id = "ventilation_drive"
 device_type = "ventilation"
 supply_bus = "AC_400"
 demand_watts = 300.0
-intact = true
+intact = false
 
 [sub_resource type="Resource" id="door"]
 script = ExtResource("device")
@@ -64,6 +66,7 @@ device_type = "door"
 supply_bus = "DC_48"
 demand_watts = 200.0
 required_devices = PackedStringArray("security_controller")
+required_modules = PackedStringArray("door_driver")
 requires_protocol = "SEC_BULKHEAD_7"
 intact = true
 
@@ -83,8 +86,17 @@ supply_bus = "PULSE_HV"
 demand_watts = 1200.0
 intact = true
 
+[sub_resource type="Resource" id="gas_valve"]
+resource_local_to_scene = true
+script = ExtResource("device")
+device_id = "security_gas_valve"
+device_type = "consumer"
+supply_bus = "DC_48"
+demand_watts = 20.0
+intact = true
+
 [node name="StationNetworkDemo" type="Node"]
 script = ExtResource("network")
 buses = Array[ExtResource("bus")]([SubResource("ac"), SubResource("dc"), SubResource("pulse")])
-devices = Array[ExtResource("device")]([SubResource("rectifier"), SubResource("security"), SubResource("vent"), SubResource("door"), SubResource("robot"), SubResource("pulse_device")])
+devices = Array[ExtResource("device")]([SubResource("rectifier"), SubResource("security"), SubResource("vent"), SubResource("door"), SubResource("robot"), SubResource("pulse_device"), SubResource("gas_valve")])
 tick_seconds = 0.2
