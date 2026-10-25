@@ -14,6 +14,7 @@ func _run() -> void:
     test_station_power_and_protocols()
     test_rotated_oversized_footprint()
     test_transactional_inventory()
+    test_capacitor_and_inductor_transients()
     test_playable_maintenance_chain()
     if failures > 0:
         push_error("%d CIRCUIT TESTS FAILED" % failures)
@@ -172,3 +173,29 @@ func test_playable_maintenance_chain() -> void:
     check(bay.apply_snapshot(snapshot), "Scene should restore a serializable maintenance snapshot.")
     check(bool(bay.station.device_online.get("maintenance_bulkhead", false)), "Restored converter and interlocks must restore bulkhead status.")
     bay.free()
+
+func test_capacitor_and_inductor_transients() -> void:
+    var board: CircuitBoard = base_board()
+    board.placements[1].part = load("res://systems/circuits/parts/capacitor_20mf.tres")
+    board.placements[1].failed_open = false
+    var simulator := CircuitSimulation.new()
+    var result: Dictionary = simulator.step(board, 0.05)
+    var first: float = float(result["loads"].get("door_motor", -1.0))
+    check(result["errors"].is_empty(), "RC startup must produce finite node voltages.")
+    check(first > 4.0, "Initially uncharged 20mF series capacitor should pass a charging pulse.")
+    for i in range(250):
+        result = simulator.step(board, 0.05)
+    var later: float = float(result["loads"].get("door_motor", -1.0))
+    check(later < 0.1, "DC current through charged series capacitor must decay to near zero.")
+    board = base_board()
+    board.placements[1].part = load("res://systems/circuits/parts/inductor_100h.tres")
+    board.placements[1].failed_open = false
+    simulator = CircuitSimulation.new()
+    result = simulator.step(board, 0.05)
+    first = float(result["loads"].get("door_motor", -1.0))
+    check(result["errors"].is_empty(), "RL startup must produce finite node voltages.")
+    check(first < 0.5, "100H inductor must oppose immediate current change.")
+    for i in range(250):
+        result = simulator.step(board, 0.05)
+    later = float(result["loads"].get("door_motor", -1.0))
+    check(later > 4.5, "DC current through a settled inductor should approach resistive steady state.")
