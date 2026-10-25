@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="SalvageInventory" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://systems/inventory/SalvageInventory.gd" id="inventory"]
+[ext_resource type="Script" path="res://systems/inventory/SalvageStock.gd" id="stock"]
+
+[sub_resource type="Resource" id="resistor"]
+script = ExtResource("stock")
+item_id = "resistor_10"
+display_name = "10Ω salvaged resistor"
+quantity = 1
+
+[sub_resource type="Resource" id="wire"]
+script = ExtResource("stock")
+item_id = "wire_straight"
+display_name = "Light-gauge wire"
+quantity = 2
+
+[sub_resource type="Resource" id="corner"]
+script = ExtResource("stock")
+item_id = "wire_corner"
+display_name = "Angled copper bridge"
+quantity = 1
+
+[sub_resource type="Resource" id="solder"]
+script = ExtResource("stock")
+item_id = "solder"
+display_name = "Solder segments"
+quantity = 1
+
+[sub_resource type="Resource" id="wire_length"]
+script = ExtResource("stock")
+item_id = "wire_length"
+display_name = "Loose wiring"
+quantity = 1
+
+[sub_resource type="Resource" id="cutters"]
+script = ExtResource("stock")
+item_id = "side_cutters"
+display_name = "Side cutters"
+quantity = 1
+is_tool = true
+
+[resource]
+script = ExtResource("inventory")
+stocks = Array[ExtResource("stock")]([SubResource("resistor"), SubResource("wire"), SubResource("corner"), SubResource("solder"), SubResource("wire_length"), SubResource("cutters")])
