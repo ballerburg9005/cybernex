@@ -116,6 +116,8 @@ func test_loadout_counts() -> void:
     bag.remove_item(pistol, 1)
     body.reconcile(bag)
     check(body.item_at("weapon_primary") != null and body.item_at("weapon_secondary") == null, "Equipment should unequip unsupported duplicate after item loss.")
+    check(body.relocate("weapon_primary", "weapon_secondary", bag), "A lone pistol must be movable between compatible hands.")
+    check(body.item_at("weapon_primary") == null and body.item_at("weapon_secondary") == pistol, "Relocation should move reference, never clone an equipped copy.")
     bag.remove_item(regulator, 1)
     body.reconcile(bag)
     check(body.item_at("augment_neural") == null, "Lost augmentation must not remain equipped.")
