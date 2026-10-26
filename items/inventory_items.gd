@@ -33,6 +33,10 @@ const IS_AUGMENTATION = 32
 ## Slot ID strings are displayed in the Godot mannequin scene.
 ## Weapons can occupy both hands; augmentations can target their own sockets.
 @export var equipment_slots: PackedStringArray = PackedStringArray()
+## Some conductive, rigid tools can rest directly across exposed circuit contacts.
+## Zero means electrically unsuitable; the true tool temporarily leaves stock.
+@export_range(0.0, 1000.0, 0.01) var contact_resistance_ohms: float = 0.0
+@export_range(0.0, 250.0, 0.01) var contact_rated_watts: float = 0.0
 ## Salvaged circuit parts resolve to an actual authored Godot electronic model.
 @export var circuit_part: CircuitPart
 @export_multiline var description: String = ""
