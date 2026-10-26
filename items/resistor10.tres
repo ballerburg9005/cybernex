@@ -11,6 +11,7 @@ region = Rect2(80, 0, 16, 16)
 [resource]
 script = ExtResource("item")
 name = "10-ohm salvage resistor"
+item_id = "resistor_10ohm"
 short_name = "10Ω resistor"
 texture = SubResource("icon")
 type = 0
