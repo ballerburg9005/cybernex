@@ -135,6 +135,6 @@ func _notification(what: int) -> void:
         return
     var released: InvItem = _pending_world_item
     _pending_world_item = null
-    if not get_viewport().gui_is_drag_successful() and (get_viewport().gui_get_drag_data() == null or true):
+    if not get_viewport().gui_is_drag_successful():
         if parent_view != null and parent_view.has_method("request_world_drop"):
             parent_view.request_world_drop(inventory, index, released, get_viewport().get_mouse_position())
