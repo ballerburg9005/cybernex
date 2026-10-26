@@ -68,6 +68,9 @@ func normalize() -> void:
             out[write] = {"item": by_item[i], "count": amount}
             remaining -= amount
             write += 1
+        if remaining > 0:
+            push_error("Cannot normalize inventory: stack quantities exceed all available slots.")
+            return
     _commit(out)
 
 func sort_by_category() -> void:
