@@ -13,6 +13,7 @@ func _run() -> void:
     test_thermal_failure()
     test_station_power_and_protocols()
     test_rotated_oversized_footprint()
+    test_original_sprite_geometry_and_taped_joint()
     test_transactional_inventory()
     test_capacitor_and_inductor_transients()
     test_playable_maintenance_chain()
@@ -199,3 +200,50 @@ func test_capacitor_and_inductor_transients() -> void:
         result = simulator.step(board, 0.05)
     later = float(result["loads"].get("door_motor", -1.0))
     check(later > 4.5, "DC current through a settled inductor should approach resistive steady state.")
+
+func test_original_sprite_geometry_and_taped_joint() -> void:
+    var resistor: CircuitPart = load("res://systems/circuits/parts/resistor_10.tres")
+    var mosfet: CircuitPart = load("res://systems/circuits/parts/nmos.tres")
+    check(resistor.sprite != null and resistor.sprite.get_size() == Vector2(32, 16),
+        "Original hand-drawn 32x16 resistor art must survive into new circuit model.")
+    check(mosfet.sprite != null and mosfet.sprite.get_size() == Vector2(32, 32),
+        "New board must draw original hand-drawn 32x32 MOSFET art.")
+    check(mosfet.footprint == Vector2i(2, 2), "MOSFET occupies original two-by-two cells.")
+    var rotated := CircuitPlacement.new()
+    rotated.part = mosfet
+    rotated.cell = Vector2i(4, 3)
+    rotated.rotation = 1
+    check(rotated.footprint() == Vector2i(2, 2), "MOSFET rotation preserves oversized footprint.")
+    var gate: Dictionary = rotated.rotated_pin(mosfet.pins[0])
+    var drain: Dictionary = rotated.rotated_pin(mosfet.pins[1])
+    check(gate["cell"] == Vector2i(4, 3) and gate["side"] == 1,
+        "Rotated gate must appear on expected upper lead rather than central cell.")
+    check(drain["cell"] == Vector2i(4, 4) and drain["side"] == 3,
+        "Rotated MOSFET drain must appear on lower lead cell.")
+    var pack := Inv.new(7)
+    var tape: InvItem = load("res://items/insulation_tape.tres")
+    var bridge: InvItem = load("res://items/wire_bridge.tres")
+    pack.add_item(bridge, 1)
+    pack.add_item(tape, 1)
+    var scene: PackedScene = load("res://systems/circuits/CircuitWorkbench.tscn")
+    var workbench: CircuitWorkbench = scene.instantiate()
+    root.add_child(workbench)
+    workbench.set_field_inventory(pack)
+    var before: int = workbench.board.placements.size()
+    workbench._install_inventory_part(bridge, Vector2i(5, 4))
+    check(workbench.board.placements.size() == before + 1, "Insulating tape should attach a wire without solder.")
+    check(pack.count(tape) == 0 and pack.count(bridge) == 0, "Tape and actual jumper must both be consumed exactly once.")
+    if workbench.board.placements.size() == before + 1:
+        var joint: CircuitPlacement = workbench.board.placements.back()
+        check(joint.joint_resistance_ohms >= 0.30, "Taped cold splice must have explicit electrical contact penalty.")
+        var network: Dictionary = CircuitCompiler.compile(workbench.board)
+        var found_resistance: bool = false
+        for element in network["elements"]:
+            if int(element["part_index"]) == before and element.has("ohms"):
+                found_resistance = found_resistance or float(element["ohms"]) > 0.15
+        check(found_resistance, "Circuit solver must include the tape penalty in real resistor branches.")
+        var record: Dictionary = workbench.snapshot()
+        joint.joint_resistance_ohms = 0.0
+        check(workbench.restore(record), "Taped splice must roundtrip through board snapshot.")
+        check(workbench.board.placements.back().joint_resistance_ohms > 0.3, "Joint quality survives save/load.")
+    workbench.queue_free()
