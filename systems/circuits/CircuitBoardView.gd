@@ -26,6 +26,7 @@ const INK := Color("#d3e2df")
 const SAFE_EDGE := Color("#426a53")
 const FAULT := Color("#aa4544")
 const SIDES := [Vector2.LEFT, Vector2.UP, Vector2.RIGHT, Vector2.DOWN]
+const RESISTOR_BANDS: Texture2D = preload("res://UI/resistor_color_atlas.tres")
 
 func _get_minimum_size() -> Vector2:
     if board == null:
@@ -124,13 +125,11 @@ func _draw_color_bands(body: Rect2, resistance: float) -> void:
     var decade: int = floori(log(resistance) / log(10.0))
     var significant: int = clampi(roundi(resistance / pow(10.0, decade - 1)), 10, 99)
     var digits := [significant / 10, significant % 10, clampi(decade - 1, 0, 9), 10]
+    # The mask shapes are the original hand-drawn 4-band overlays from the
+    # 128x16 legacy resistor atlas, tinted with standard EIA band colours.
     for i in range(4):
-        var center_x: float = lerpf(body.position.x + body.size.x * 0.31,
-            body.end.x - body.size.x * 0.31, float(i) / 3.0)
-        var stripe := Rect2(center_x - maxf(1, body.size.x * 0.025),
-            body.position.y + body.size.y * 0.25,
-            maxf(2, body.size.x * 0.05), body.size.y * 0.50)
-        draw_rect(stripe, _band_color(int(digits[i])), true)
+        draw_texture_rect_region(RESISTOR_BANDS, body,
+            Rect2(i * 32, 0, 32, 16), _band_color(int(digits[i])))
 
 func _cell_from_position(local: Vector2) -> Vector2i:
     return Vector2i(floori(local.x / cell_size), floori(local.y / cell_size))
