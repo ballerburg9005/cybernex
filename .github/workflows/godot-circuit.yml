@@ -20,6 +20,11 @@ jobs:
         run: |
           godot --headless --path . --script res://tests/circuit_smoke.gd 2>&1 | tee /tmp/circuits.log
           ! grep -q "SCRIPT ERROR\|Parse Error: A void" /tmp/circuits.log
+      - name: Verify inventory, craft recipes, groups and mannequin
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/inventory_smoke.gd 2>&1 | tee /tmp/inventory.log
+          ! grep -q "SCRIPT ERROR\|INVENTORY TESTS FAILED" /tmp/inventory.log
       - name: Verify HUD/world coordinates while camera pans and zooms
         run: godot --headless --path . --script res://tests/coordinate_smoke.gd
       - name: Instantiate Godot-native workbench scene
@@ -30,6 +35,7 @@ jobs:
         run: |
           godot --headless --path . --quit-after 8 res://systems/station/StationMaintenanceBay.tscn 2>&1 | tee /tmp/maintenance.log
           ! grep -q "SCRIPT ERROR" /tmp/maintenance.log
-      - name: Launch original world scene
-        continue-on-error: true
-        run: godot --headless --path . --quit-after 8 res://main.tscn
+      - name: Launch original world scene with reworked HUD
+        run: |
+          godot --headless --path . --quit-after 8 res://main.tscn 2>&1 | tee /tmp/main.log
+          ! grep -q "SCRIPT ERROR" /tmp/main.log
