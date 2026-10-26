@@ -23,6 +23,7 @@ func _run() -> void:
     test_search_filter_count()
     test_crafting_index()
     test_equipment_identity_and_manual_grouping()
+    test_physical_slot_positions_and_gesture_amounts()
     if failures != 0:
         push_error("INVENTORY TESTS FAILED: " + str(failures))
         quit(1)
@@ -302,3 +303,43 @@ func test_equipment_identity_and_manual_grouping() -> void:
     separate.items[3] = InvSlot.new(alias, 1)
     check(separate.normalize(), "Explicit normalize must succeed regardless of automatic grouping policy.")
     check(separate.slot_at(0).count == 3 and separate.slot_at(1) == null, "Manual Normalize must group equivalent item ID piles without changing total.")
+
+func test_physical_slot_positions_and_gesture_amounts() -> void:
+    var bag := Inv.new(50)
+    bag.auto_group_stacks = false
+    var copper: InvItem = item("wires")
+    check(bag.add_item(copper, 7, 8), "An item can be placed in an arbitrary empty slot.")
+    check(bag.slot_at(0) == null and bag.slot_at(8) != null,
+        "No inventory normalization may move a manually placed pile to slot zero.")
+    var one: Dictionary = InventoryOperations.move_or_combine(bag, 8, bag, 27, 1)
+    check(bool(one.get("ok", false)) and bag.slot_at(8).count == 6
+        and bag.slot_at(27).count == 1,
+        "Left-button drag takes one item, preserving all other source items and empty slots.")
+    var all: Dictionary = InventoryOperations.move_or_combine(bag, 8, bag, 35)
+    check(bool(all.get("ok", false)) and bag.slot_at(8) == null and bag.slot_at(35).count == 6,
+        "Right-button whole-pile move keeps exact destination without repacking to first slot.")
+    var saved: Array[Dictionary] = WorldSave._capture_inventory(bag)
+    var loaded: Inv = WorldSave._prepare_inventory(saved, bag.size(), bag.max_stack,
+        WorldSave._catalogue())
+    check(loaded != null and not loaded.auto_group_stacks and loaded.slot_at(35) != null
+        and loaded.slot_at(27) != null and loaded.slot_at(0) == null,
+        "World save/load preserves occupied slot indices and deliberately empty gaps.")
+    var inventory_ui: InventoryView = load("res://UI/Inventory.tscn").instantiate()
+    root.add_child(inventory_ui)
+    inventory_ui.configure(bag)
+    var occupied_slot: InventoryCell = inventory_ui.grid_container.get_child(35)
+    var left_payload: Dictionary = occupied_slot._make_drag_payload(false)
+    var right_payload: Dictionary = occupied_slot._make_drag_payload(true)
+    check(left_payload["amount"] == 1 and right_payload["amount"] == 6,
+        "Godot physical drag payloads distinguish left one versus right whole pile.")
+    check(inventory_ui.grid_container.get_child(0).index == 0
+        and inventory_ui.grid_container.get_child(35).index == 35,
+        "Inventory grid must render by authored index instead of packing only occupied icons.")
+    var filler: InventoryCell = inventory_ui.grid_container.get_child(inventory_ui.grid_container.get_child_count() - 1)
+    check(filler.index == -1 and filler.disabled and filler.number.text == "×",
+        "Grid extends below storage capacity with dark disabled X-marked cells.")
+    var preview: Control = occupied_slot._make_preview(copper, 6)
+    check(preview.z_index >= 2000 and preview.get_child(0).get_child(0).texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,
+        "Mouse-held pixel art must render visibly above HUD at original crisp integer scale.")
+    preview.free()
+    inventory_ui.queue_free()
