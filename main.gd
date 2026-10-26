@@ -39,6 +39,8 @@ func _ready():
 	full_index.feedback.connect(p)
 	quick_index.feedback.connect(p)
 	mannequin.feedback.connect(p)
+	full_index.world_drop_requested.connect(_handle_world_drop)
+	quick_index.world_drop_requested.connect(_handle_world_drop)
 
 	tooltip_timer.one_shot = false
 	tooltip_timer.timeout.connect(tooltip_timer_update)
@@ -163,3 +165,27 @@ func _process(delta):
 			$StartMusic.stop()
 			$StartMusic.volume_db = start_music_volume_temp
 			$BackgroundMusic.volume_db = background_music_volume_temp 
+
+## A GUI drag is only an item Resource payload. If released over valid world
+## ground, create exactly one proper world body at the camera-converted point.
+## No UI collision shapes or world-side drag clones are ever involved.
+func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_position: Vector2) -> void:
+    if item == null or player == null or world == null:
+        return
+    if mouse_over_ui:
+        return
+    if source != player.inventory and source != player.quickinventory:
+        return
+    if not player.inventory.has(item):
+        return
+    var world_point: Vector2 = world.get_global_transform_with_canvas().affine_inverse() * viewport_position
+    if world_point.distance_to(player.global_position) > 200.0:
+        p("Out of reach. Walk nearer before dropping supplies.")
+        return
+    if not player.inventory.remove_item(item, 1):
+        return
+    var dropped: AnimatableBody2D = preload("res://items/item_world.tscn").instantiate()
+    dropped.itemslot = InvSlot.new(item, 1)
+    world.add_child(dropped)
+    dropped.global_position = world_point
+    p("Put %s on the floor. Remaining: %d." % [item.name, player.inventory.count(item)])
