@@ -44,6 +44,19 @@ func _run() -> void:
     check(game.ui_captures_world_input(), "Open inventory must suppress world-action keys.")
     game.toggle_inventory()
     check(not game.ui_captures_world_input(), "Closing UI should restore world controls.")
+    root.size = Vector2i(1920, 1080)
+    drawer.visible = true
+    game._layout_hud()
+    check(drawer.get_global_rect().end.x < 1920.0 and drawer.get_global_rect().position.x <= 12.0,
+        "1080p exploration drawer must stay fully onscreen at fixed left margin.")
+    game._select_drawer_page(1)
+    var mannequin: Control = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer/Equipment")
+    check(mannequin.get_global_rect().end.x <= drawer.get_global_rect().end.x + 3.0,
+        "The mannequin and its physical sockets must fit within the drawer at 1080p.")
+    game._select_drawer_page(0)
+    drawer.visible = false
+    root.size = Vector2i(1280, 720)
+    game._layout_hud()
     drawer.visible = false
     var item: InvItem = load("res://items/wires.tres")
     var player = game.get_node("World/Player")
