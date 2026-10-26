@@ -31,6 +31,18 @@ var _layout_indices: Array[int] = []
 var _display_rows: int = -1
 
 func _ready() -> void:
+    # Every instance (pack, storage, shortcut binding and companion) shares
+    # one inset. Remove theme-imposed asymmetric right padding.
+    var inset := StyleBoxFlat.new()
+    inset.bg_color = Color(0.11, 0.15, 0.18, 0.96)
+    inset.border_color = Color(0.26, 0.32, 0.36)
+    inset.set_border_width_all(1)
+    inset.set_corner_radius_all(7)
+    inset.content_margin_left = 2
+    inset.content_margin_right = 2
+    inset.content_margin_top = 2
+    inset.content_margin_bottom = 2
+    add_theme_stylebox_override("panel", inset)
     filter_button.add_item("ALL ITEMS")
     filter_button.add_item("TOOLS")
     filter_button.add_item("WEAPONS")
