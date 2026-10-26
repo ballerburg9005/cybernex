@@ -257,7 +257,7 @@ size_flags_stretch_ratio = 1.0
 inv = ExtResource("6_pnrst")
 metadata/myname = "hud_quick_inventory"
 
-[node name="FullInventory" type="HBoxContainer" parent="HUD"]
+[node name="FullInventory" type="PanelContainer" parent="HUD"]
 visible = false
 z_index = 1000
 anchors_preset = 15
