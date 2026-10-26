@@ -15,7 +15,7 @@ func _equipped(loadout: EquipmentLoadout, backpack: Inv) -> Array[InvItem]:
     loadout.reconcile(backpack)
     for socket in EquipmentLoadout.SOCKETS:
         var item: InvItem = loadout.item_at(socket)
-        if item != null:
+        if item != null and item.equipment_slots.has(socket):
             result.append(item)
     return result
 
