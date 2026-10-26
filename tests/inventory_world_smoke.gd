@@ -24,6 +24,7 @@ func _run() -> void:
     var drawer: Control = game.get_node("HUD/FullInventory")
     drawer.visible = true
     game._layout_hud()
+    await process_frame # Let Godot sort nested native Containers after root offsets.
     print("HUD 720: viewport=", game.get_viewport_rect().size, " drawer=", drawer.get_global_rect())
     check(drawer.size.x >= 505.0 and drawer.size.x <= 555.0,
         "Original 3x art requires 10 complete 48-pixel cells in the drawer without clipping.")
@@ -53,7 +54,7 @@ func _run() -> void:
         and log.mouse_filter == Control.MOUSE_FILTER_STOP,
         "Opaque HUD background, navigation, shortcut bar and journal must consume GUI mouse events.")
     var journal: RichTextLabel = game.hud_textbox
-    print("JOURNAL 720: label=", journal.get_global_rect(), " text=", journal.text, " richbox=", journal.get_parent().get_global_rect())
+    print("JOURNAL 720: label=", journal.get_global_rect(), " text=", journal.text, " richbox=", journal.get_parent().get_global_rect(), " hbox=", log.get_node("HBoxContainer").get_global_rect())
     check(journal.get_global_rect().position.y >= 0.0
         and journal.get_global_rect().size.y >= 65.0
         and journal.get_global_rect().end.y <= 720.0
