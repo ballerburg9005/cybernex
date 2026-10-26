@@ -27,9 +27,10 @@ static func _catalogue() -> Dictionary:
 
 static func _capture_inventory(inventory: Inv) -> Array[Dictionary]:
     var entries: Array[Dictionary] = []
-    for cell in inventory.items:
+    for i in range(inventory.items.size()):
+        var cell: InvSlot = inventory.items[i]
         if cell != null and cell.occupied():
-            entries.append({"item": Inv.item_key(cell.item), "count": cell.count})
+            entries.append({"item": Inv.item_key(cell.item), "count": cell.count, "slot": i})
     return entries
 
 static func _prepare_inventory(entries: Variant, capacity: int, limit: int, catalogue: Dictionary) -> Inv:
@@ -37,6 +38,10 @@ static func _prepare_inventory(entries: Variant, capacity: int, limit: int, cata
         return null
     var prepared := Inv.new(capacity)
     prepared.max_stack = limit
+    prepared.auto_group_stacks = false
+    var positional: bool = not entries.is_empty() and entries[0] is Dictionary and entries[0].has("slot")
+    var proposed: Array[Dictionary] = prepared._state()
+    var used: Dictionary = {}
     for entry in entries:
         if typeof(entry) != TYPE_DICTIONARY:
             return null
@@ -44,8 +49,18 @@ static func _prepare_inventory(entries: Variant, capacity: int, limit: int, cata
         var quantity: int = int(entry.get("count", 0))
         if not catalogue.has(id) or quantity < 1 or quantity > 100000:
             return null
-        if not prepared.add_item(catalogue[id], quantity):
+        if positional:
+            if not entry.has("slot"):
+                return null
+            var index: int = int(entry["slot"])
+            if index < 0 or index >= capacity or used.has(index) or quantity > limit:
+                return null
+            used[index] = true
+            proposed[index] = {"item": catalogue[id], "count": quantity}
+        elif not prepared.add_item(catalogue[id], quantity):
             return null
+    if positional and not prepared._commit(proposed, false, false):
+        return null
     return prepared
 
 static func _quickbar_keys(bar: Inv) -> Array[String]:
