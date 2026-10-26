@@ -138,4 +138,33 @@ func test_world_save() -> void:
     var before_equipment: InvItem = player.equipment.item_at("weapon_primary")
     check(not player.use_quickslot(1), "Quickbar must not automatically attach gear to body sockets.")
     check(player.equipment.item_at("weapon_primary") == before_equipment, "Only manual mannequin dragging should alter a weapon socket.")
+    player.equipment.assign("weapon_primary", null, player.inventory)
+    check(player.equipment.assign("weapon_primary", pistol, player.inventory),
+        "Real owned pistol must manually equip before firing.")
+    var flashes_before: int = 0
+    for child in game.world.get_children():
+        if child is ArcFlash:
+            flashes_before += 1
+    var enter := InputEventKey.new()
+    enter.pressed = true
+    enter.physical_keycode = KEY_ENTER
+    player._input(enter)
+    var flashes_after_enter: int = 0
+    for child in game.world.get_children():
+        if child is ArcFlash:
+            flashes_after_enter += 1
+    check(flashes_after_enter == flashes_before,
+        "Enter must not discharge a weapon.")
+    var x_key := InputEventKey.new()
+    x_key.pressed = true
+    x_key.physical_keycode = KEY_X
+    player._input(x_key)
+    var flash_visible: bool = false
+    for child in game.world.get_children():
+        if child is ArcFlash:
+            flash_visible = child.get_child_count() >= 2
+    check(flash_visible, "Pressing X with a powered gun must spawn visible arc bolt and spark particles.")
+    check(InputMap.action_has_event("action_2", x_key)
+        and not InputMap.action_has_event("action_2", enter),
+        "Project input map must bind weapon to physical X rather than Return/Enter.")
     game.queue_free()
