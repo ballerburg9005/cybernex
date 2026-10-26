@@ -3,7 +3,6 @@ class_name Inv
 
 ## Author slot capacity and contents in Inspector. All mutations use methods;
 ## they emit 'changed' rather than asking UI nodes to poll or invoke _ready().
-signal changed
 
 @export var items: Array[InvSlot] = []
 @export_range(1, 100000, 1) var max_stack: int = 999
@@ -136,7 +135,7 @@ func _commit(state: Array[Dictionary]) -> void:
         var item: InvItem = state[i]["item"]
         var quantity: int = int(state[i]["count"])
         items[i] = InvSlot.new(item, quantity) if item != null and quantity > 0 else InvSlot.new()
-    changed.emit()
+    emit_changed()
 
 func _put(state: Array[Dictionary], item: InvItem, amount: int, preferred_index: int) -> bool:
     if item == null or item.type & InvItem.IS_NOT or amount < 1:
