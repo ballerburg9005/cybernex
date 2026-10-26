@@ -184,8 +184,8 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
         return
     if not player.inventory.remove_item(item, 1):
         return
-    var dropped: AnimatableBody2D = preload("res://items/item_world.tscn").instantiate()
-    dropped.itemslot = InvSlot.new(item, 1)
+    var dropped: Node2D = preload("res://items/item_world.tscn").instantiate()
+    dropped.set("itemslot", InvSlot.new(item, 1))
     world.add_child(dropped)
     dropped.global_position = world_point
     p("Put %s on the floor. Remaining: %d." % [item.name, player.inventory.count(item)])
