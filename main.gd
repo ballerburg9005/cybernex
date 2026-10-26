@@ -259,6 +259,8 @@ func _hover_target_name(collider: CollisionObject2D) -> String:
     if not ("myname" in node):
         return ""
     var result: String = str(node.get("myname"))
+    if node == player:
+        return result # Self-label identifies a world actor, without intrusive diagnostics.
     if "itemslot" in node and node.itemslot != null and node.itemslot.occupied():
         result += "  %dx" % node.itemslot.count
     if player.diagnostic_level() > 0:
