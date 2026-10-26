@@ -30,6 +30,11 @@ jobs:
           set -o pipefail
           godot --headless --path . --script res://tests/inventory_world_smoke.gd 2>&1 | tee /tmp/world-inventory.log
           ! grep -q "SCRIPT ERROR\|WORLD INVENTORY TESTS FAILED" /tmp/world-inventory.log
+      - name: Verify powered augments and world save roundtrips
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/equipment_save_smoke.gd 2>&1 | tee /tmp/equipment-save.log
+          ! grep -q "SCRIPT ERROR\\|EQUIPMENT + SAVE TESTS FAILED" /tmp/equipment-save.log
       - name: Verify HUD/world coordinates while camera pans and zooms
         run: godot --headless --path . --script res://tests/coordinate_smoke.gd
       - name: Instantiate Godot-native workbench scene
