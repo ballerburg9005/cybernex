@@ -35,12 +35,14 @@ corner_radius_bottom_left = 6
 
 [node name="InventoryItem" type="Button"]
 custom_minimum_size = Vector2(33, 33)
+size_flags_horizontal = 3
 mouse_filter = 0
 focus_mode = 0
 theme_override_constants/icon_max_width = 30
 theme_override_styles/normal = SubResource("slot_normal")
 theme_override_styles/hover = SubResource("slot_hover")
 theme_override_styles/pressed = SubResource("slot_pressed")
+theme_override_styles/disabled = SubResource("slot_normal")
 script = ExtResource("slot_script")
 
 [node name="Icon" type="TextureRect" parent="."]
