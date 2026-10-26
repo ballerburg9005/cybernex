@@ -7,6 +7,8 @@ class_name CircuitPlacement
 @export_range(0, 3, 1) var rotation: int = 0
 @export var fixed_to_board: bool = false
 @export var failed_open: bool = false
+## Cold tape splices are not ideal contacts: explicit per-placement ohms.
+@export_range(0.0, 10.0, 0.01) var joint_resistance_ohms: float = 0.0
 
 func footprint() -> Vector2i:
     if part == null:
