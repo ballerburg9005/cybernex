@@ -38,6 +38,11 @@ jobs:
           set -o pipefail
           godot --headless --path . --script res://tests/inventory_world_smoke.gd 2>&1 | tee /tmp/world-inventory.log
           ! grep -q "SCRIPT ERROR\|WORLD INVENTORY TESTS FAILED" /tmp/world-inventory.log
+      - name: Verify world wire cutting and tool-on-robot interactions
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/world_interaction_smoke.gd 2>&1 | tee /tmp/world-actions.log
+          ! grep -q "SCRIPT ERROR\\|WORLD INTERACTION TESTS FAILED" /tmp/world-actions.log
       - name: Verify powered augments and world save roundtrips
         run: |
           set -o pipefail
