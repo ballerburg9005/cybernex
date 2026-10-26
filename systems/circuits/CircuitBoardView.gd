@@ -8,6 +8,7 @@ signal cell_clicked(cell: Vector2i)
 signal board_changed
 signal rotation_requested(index: int)
 signal incoming_part(item: InvItem, cell: Vector2i)
+signal tool_applied(item: InvItem, cell: Vector2i)
 
 @export var board: CircuitBoard:
     set(next):
@@ -177,7 +178,12 @@ func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
     var cell: Vector2i = _cell_from_position(at_position)
     if kind == "inventory_item":
         var item: InvItem = data.get("item")
-        if item == null or item.circuit_part == null or not _inside(cell):
+        if item == null or not _inside(cell):
+            return false
+        if Inv.matches(item, preload("res://items/side_cutters.tres")):
+            var target_index: int = board.placement_at(cell)
+            return target_index >= 0 and board.placements[target_index].failed_open and workbench != null and workbench.can_extract_to(target_index, workbench.field_inventory)
+        if item.circuit_part == null:
             return false
         var incoming := CircuitPlacement.new()
         incoming.part = item.circuit_part
@@ -197,7 +203,10 @@ func _drop_data(at_position: Vector2, data: Variant) -> void:
         return
     var cell: Vector2i = _cell_from_position(at_position)
     if data.get("kind") == "inventory_item":
-        incoming_part.emit(data["item"], cell)
+        if Inv.matches(data["item"], preload("res://items/side_cutters.tres")):
+            tool_applied.emit(data["item"], cell)
+        else:
+            incoming_part.emit(data["item"], cell)
         return
     var index: int = int(data["index"])
     board.placements[index].cell = cell
