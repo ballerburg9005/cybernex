@@ -111,7 +111,7 @@ scale = Vector2(3, 3)
 
 [node name="WorldHitTest" type="Node2D" parent="World"]
 script = ExtResource("40_world_hit")
-interactable_layers = 49264
+interactable_layers = 49776
 
 [node name="TileMap" parent="World" instance=ExtResource("3_5faoa")]
 
