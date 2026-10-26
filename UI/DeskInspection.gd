@@ -5,12 +5,15 @@ class_name DeskInspection
 ## The REAL backpack remains visible to the right on every page. No world
 ## physics item is ever created by dragging onto the pane.
 signal closed
+signal power_changed(powered: bool)
 
 var loot: Inv
 var backpack: Inv
 var journal: Callable
 var page_index: int = 0
 var computer_powered: bool = true
+var authored_notes: String = ""
+var authored_computer_readout: String = ""
 const PAGES := ["CONTENTS", "NOTES", "COMPUTER"]
 
 @onready var desk_view: InventoryView = $Layout/Contents/DeskItems
@@ -27,10 +30,14 @@ func _ready() -> void:
     get_viewport().size_changed.connect(reflow)
     reflow()
 
-func configure_contents(incoming: Inv, bag: Inv, on_event: Callable) -> void:
+func configure_contents(incoming: Inv, bag: Inv, on_event: Callable,
+        notes: String = "", computer_text: String = "", powered: bool = true) -> void:
     loot = incoming
     backpack = bag
     journal = on_event
+    authored_notes = notes
+    authored_computer_readout = computer_text
+    computer_powered = powered
     desk_view.configure(loot, null, "backpack")
     bag_view.configure(backpack, null, "backpack")
     _select_page(0)
@@ -54,12 +61,13 @@ func _select_page(next: int) -> void:
     $Layout/Bottom/TakeAll.visible = page_index == 0
     $Layout/Bottom/Power.visible = page_index == 2
     if page_index == 1:
-        $Layout/Contents/DetailPanel/Description.text = "Papers and loose sheets."
+        $Layout/Contents/DetailPanel/Description.text = authored_notes if not authored_notes.is_empty() else "Papers and loose sheets."
     elif page_index == 2:
-        $Layout/Contents/DetailPanel/Description.text = "Workstation PC, %s." % ("ON" if computer_powered else "OFF")
+        $Layout/Contents/DetailPanel/Description.text = (authored_computer_readout if not authored_computer_readout.is_empty() else "Workstation PC.") if computer_powered else "Black display."
 
 func toggle_power() -> void:
     computer_powered = not computer_powered
+    power_changed.emit(computer_powered)
     _select_page(page_index)
     _log("PC powers on." if computer_powered else "PC shuts off.")
 
