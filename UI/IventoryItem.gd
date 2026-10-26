@@ -31,8 +31,17 @@ func refresh() -> void:
         tooltip_text = "Empty slot"
         return
     image.texture = cell.item.texture
-    number.text = "×%d" % amount if amount > 1 else ""
-    tooltip_text = "%s   ×%d\n%s" % [cell.item.name, amount, cell.item.description]
+    number.text = "×%d" % amount
+    var lines := PackedStringArray()
+    lines.append("%s   ×%d" % [cell.item.name, amount])
+    if not cell.item.description.is_empty():
+        lines.append(cell.item.description)
+    for recipe in cell.item.combos:
+        if recipe != null and recipe.with != null and recipe.yields != null:
+            var tool_note: String = " [reusable]" if not recipe.eats_source else ""
+            lines.append("COMBINE WITH %s → %s ×%d%s" % [
+                recipe.with.name, recipe.yields.name, recipe.amount, tool_note])
+    tooltip_text = "\n".join(lines)
 
 func _get_drag_data(_at_position: Vector2) -> Variant:
     if inventory == null:
