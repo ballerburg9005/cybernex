@@ -32,7 +32,7 @@ func activate(caller: Node) -> void:
     if caller.add_inventory_item(itemslot):
         var main: Node = get_node_or_null("/root/main")
         if main != null and main.has_method("p"):
-            main.p("Picked up %s ×%d." % [itemslot.item.name, itemslot.count])
+            main.p("Picked up %s, %dx." % [itemslot.item.name, itemslot.count])
         queue_free()
 
 func _on_influence_body_shape_entered(_rid: RID, body: Node2D, _body_shape_index: int, _local_shape_index: int) -> void:
