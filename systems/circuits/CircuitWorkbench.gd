@@ -105,6 +105,9 @@ func _remove_selected() -> void:
     if board.placements[selected_index].fixed_to_board or not board.placements[selected_index].part.can_remove:
         _announce("The component cannot be extracted.")
         return
+    if field_inventory != null and not _can_store_extracted(selected_index, field_inventory):
+        _announce("There is no room to keep the recovered component.")
+        return
     if not _extraction_cost(selected_index):
         return
     var removed: CircuitPlacement = board.placements[selected_index]
@@ -374,10 +377,10 @@ func can_extract_to(index: int, pack: Inv) -> bool:
     if placement.fixed_to_board or not placement.part.can_remove:
         return false
     if placement.failed_open:
-        return pack.has(preload("res://items/side_cutters.tres"))
+        return pack.has(preload("res://items/side_cutters.tres")) and _can_store_extracted(index, pack)
     if placement.joint_resistance_ohms > 0.0:
-        return true # Peel cold tape off without heating a solder joint.
-    return pack.has(preload("res://items/solder.tres"))
+        return _can_store_extracted(index, pack) # Peel cold tape without solder.
+    return pack.has(preload("res://items/solder.tres")) and _can_store_extracted(index, pack)
 
 func extract_to_backpack(index: int, pack: Inv) -> bool:
     if pack != field_inventory or not can_extract_to(index, pack):
@@ -387,6 +390,16 @@ func extract_to_backpack(index: int, pack: Inv) -> bool:
     var previous: int = board.placements.size()
     _remove_selected()
     return board.placements.size() < previous
+
+func _can_store_extracted(index: int, stock: Inv) -> bool:
+    var placement: CircuitPlacement = board.placements[index]
+    var recovered: InvItem = preload("res://items/junk.tres") if placement.failed_open else _part_item(placement.part)
+    if recovered == null:
+        return true
+    var preview: Inv = stock.duplicate(true)
+    if not placement.failed_open and placement.joint_resistance_ohms <= 0.0:
+        preview.remove_item(preload("res://items/solder.tres"), 1)
+    return preview.can_add(recovered, 1)
 
 func _extraction_cost(index: int) -> bool:
     if field_inventory == null:
