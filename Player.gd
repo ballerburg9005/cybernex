@@ -134,7 +134,11 @@ func p(s):
     get_node("/root/main").p(s)
 
 func service_reach() -> float:
-    return 200.0 + equipment_runtime.service_reach_bonus(equipment, inventory)
+    # Use the actual original PlayerReach collision circle (49 world units),
+    # not an arbitrary 200-unit HUD drop radius.
+    var shape: CollisionShape2D = $PlayerReach/CollisionShape2D
+    var radius: float = shape.shape.radius if shape.shape is CircleShape2D else 49.0
+    return radius * shape.global_scale.x + equipment_runtime.service_reach_bonus(equipment, inventory)
 
 func diagnostic_level() -> int:
     return equipment_runtime.diagnostic_level(equipment, inventory)
