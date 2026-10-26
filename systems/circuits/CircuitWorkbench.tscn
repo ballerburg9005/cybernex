@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://systems/circuits/CircuitWorkbench.gd" id="workbench"]
 [ext_resource type="Script" path="res://systems/circuits/CircuitBoardView.gd" id="view"]
@@ -18,6 +18,10 @@
 [ext_resource type="Resource" path="res://systems/circuits/parts/capacitor_20mf.tres" id="capacitor"]
 [ext_resource type="Resource" path="res://systems/circuits/parts/inductor_100h.tres" id="inductor"]
 
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="item_script"]
+[ext_resource type="Resource" path="res://items/wire_bridge.tres" id="jumper_item"]
+[ext_resource type="Resource" path="res://items/resistor10.tres" id="resistor_item"]
+
 [node name="CircuitWorkbench" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -28,6 +32,7 @@ grow_vertical = 2
 script = ExtResource("workbench")
 authored_board = ExtResource("board")
 catalog = Array[ExtResource("part_script")]([ExtResource("r"), ExtResource("wire"), ExtResource("corner"), ExtResource("junction"), ExtResource("crossover"), ExtResource("diode"), ExtResource("npn"), ExtResource("pnp"), ExtResource("nmos"), ExtResource("pmos"), ExtResource("capacitor"), ExtResource("inductor")])
+item_catalog = Array[ExtResource("item_script")]([ExtResource("resistor_item"), ExtResource("jumper_item")])
 
 [node name="Padding" type="MarginContainer" parent="."]
 layout_mode = 1
