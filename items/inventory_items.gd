@@ -19,4 +19,6 @@ const IS_AUGMENTATION = 32
 ## Slot ID strings are displayed in the Godot mannequin scene.
 ## Weapons can occupy both hands; augmentations can target their own sockets.
 @export var equipment_slots: PackedStringArray = PackedStringArray()
+## Salvaged circuit parts resolve to an actual authored Godot electronic model.
+@export var circuit_part: CircuitPart
 @export_multiline var description: String = ""
