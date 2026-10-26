@@ -21,7 +21,8 @@ var active_circuit: CircuitWorkbench
 var current_drawer_page: int = 0
 var desk_inspection: Control
 const BACKPACK_DRAWER_WIDTH := 522.0
-const BODY_DRAWER_WIDTH := 872.0
+const BODY_DRAWER_WIDTH := 522.0
+var companion_drawer: CompanionDrawer
 const QUICKBAR_WIDTH := 510.0
 const DRAWER_PAGES := ["BACKPACK", "BODY SYSTEMS", "NOTES", "MAP", "MULTIMETER", "OSCILLOSCOPE"]
 
@@ -69,6 +70,12 @@ func _ready():
     $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Next.pressed.connect(func() -> void:
         cycle_drawer(1)
     )
+    $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Close.pressed.connect(toggle_inventory)
+    companion_drawer = preload("res://UI/CompanionDrawer.tscn").instantiate()
+    $HUD.add_child(companion_drawer)
+    companion_drawer.z_index = 1000
+    companion_drawer.bind_inventory(player.inventory)
+    companion_drawer.backpack_view.feedback.connect(p)
     $HUD/FullInventory/VBoxContainer.move_child($HUD/FullInventory/VBoxContainer/DrawerNav, 0)
     get_viewport().size_changed.connect(_layout_hud)
     $HUD/FullInventory.visibility_changed.connect(_layout_hud)
@@ -153,12 +160,17 @@ func _layout_hud() -> void:
     drawer_width = minf(drawer_width, viewport.x - 16.0)
     var drawer: Control = $HUD/FullInventory
     drawer.set_anchors_preset(Control.PRESET_TOP_LEFT)
-    # On the BODY page, one unified panel holds the actual mannequin LEFT and
-    # the same backpack RIGHT. Other pages use identical fixed-width panels.
-    drawer.offset_left = viewport.x - drawer_width - 8.0 if puzzle_active else (viewport.x - drawer_width) * 0.5 if body_page else 8.0
+    # Keep the entire primary drawer and its nav arrows fixed at left.
+    drawer.offset_left = viewport.x - drawer_width - 8.0 if puzzle_active else 8.0
     drawer.offset_right = drawer.offset_left + drawer_width
     drawer.offset_top = 6.0
     drawer.offset_bottom = maxf(360.0, viewport.y - 95.0)
+    if companion_drawer != null and is_instance_valid(companion_drawer):
+        companion_drawer.visible = body_page and drawer.visible and not puzzle_active
+        companion_drawer.set_anchors_preset(Control.PRESET_TOP_LEFT)
+        companion_drawer.position = Vector2(drawer.offset_right - 1.0, drawer.offset_top)
+        companion_drawer.size = Vector2(minf(BACKPACK_DRAWER_WIDTH, viewport.x - drawer.offset_right - 7.0),
+            drawer.offset_bottom - drawer.offset_top)
 
     var quick: Control = $HUD/QuickInventory
     quick.set_anchors_preset(Control.PRESET_TOP_LEFT)
@@ -189,7 +201,7 @@ func _select_drawer_page(index: int) -> void:
     var body: Control = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer
     var pda: RichTextLabel = $HUD/FullInventory/VBoxContainer/PdaPage
     row.visible = current_drawer_page < 2
-    backpack.visible = current_drawer_page <= 1
+    backpack.visible = current_drawer_page == 0
     body.visible = current_drawer_page == 1
     var contents: HBoxContainer = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer
     if current_drawer_page == 1:
@@ -354,6 +366,8 @@ func is_hud_drop_region(screen_point: Vector2) -> bool:
     var ui_panels: Array[Control] = [
         $HUD/FullInventory, $HUD/QuickInventory, $HUD/TextBox
     ]
+    if companion_drawer != null and is_instance_valid(companion_drawer):
+        ui_panels.append(companion_drawer)
     if active_circuit != null and is_instance_valid(active_circuit):
         ui_panels.append(active_circuit)
     if desk_inspection != null and is_instance_valid(desk_inspection):
@@ -488,5 +502,7 @@ func load_game() -> bool:
     quick_index.configure(player.quickinventory, player.inventory, "hotbar")
     mannequin.setup(player.inventory, player.equipment)
     mannequin.set_runtime(player.equipment_runtime)
+    if companion_drawer != null:
+        companion_drawer.bind_inventory(player.inventory)
     p("World slot loaded. Inventory, terminals, position and equipped systems restored.")
     return true
