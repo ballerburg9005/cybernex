@@ -1,7 +1,12 @@
-[gd_resource type="Resource" script_class="CircuitPart" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="CircuitPart" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://systems/circuits/CircuitPart.gd" id="part"]
 [ext_resource type="Script" path="res://systems/circuits/CircuitPin.gd" id="pin"]
+[ext_resource type="Texture2D" path="res://assets/tileset_electronics.png" id="original_atlas"]
+
+[sub_resource type="AtlasTexture" id="original_atlas_sprite"]
+atlas = ExtResource("original_atlas")
+region = Rect2(80, 32, 16, 16)
 
 [sub_resource type="Resource" id="Pin0"]
 script = ExtResource("pin")
@@ -21,6 +26,7 @@ wire_group = 0
 script = ExtResource("part")
 part_id = "wire_straight"
 label = "Thin salvaged wire"
+sprite = SubResource("original_atlas_sprite")
 model = "wire"
 footprint = Vector2i(1, 1)
 pins = Array[ExtResource("pin")]([SubResource("Pin0"), SubResource("Pin1")])
