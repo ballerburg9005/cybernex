@@ -27,8 +27,9 @@ func _run() -> void:
     check(picker.viewport_to_world(viewport_point).distance_to(player.global_position) < 0.1, "World hover projection must invert Camera2D canvas transforms on original map.")
     var quantity: int = player.inventory.count(item)
     check(quantity >= 2, "Starter inventory should contain wires for world drops.")
-    var screen_point: Vector2 = world.get_global_transform_with_canvas() * player.global_position + Vector2(30, 0)
+    var screen_point: Vector2 = picker.world_to_viewport(player.global_position + Vector2(30, 0))
     var old_children: int = world.get_child_count()
+    check(screen_point.distance_to(picker.world_to_viewport(player.global_position)) > 0.0, "Drop target is projected into viewport space, not transformed twice.")
     game.mouse_over_ui = false
     game._handle_world_drop(player.inventory, player.inventory.find(item), item, screen_point)
     check(player.inventory.count(item) == quantity - 1, "World drop should remove exactly one wire from stack.")
