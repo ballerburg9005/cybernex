@@ -51,7 +51,8 @@ func can_relocate(from_id: String, to_id: String, backpack: Inv) -> bool:
     var current: InvItem = item_at(from_id)
     if current == null or backpack == null or not SOCKETS.has(to_id):
         return false
-    if not can_assign(to_id, current, backpack) and item_at(to_id) != current:
+    var allowed: bool = bool(current.type & InvItem.IS_WEAPON) if to_id.begins_with("weapon_") else bool(current.type & InvItem.IS_AUGMENTATION)
+    if not allowed or not current.equipment_slots.has(to_id):
         return false
     var destination: InvItem = item_at(to_id)
     if destination == current:
