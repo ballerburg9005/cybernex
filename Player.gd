@@ -75,7 +75,7 @@ func _input(event: InputEvent) -> void:
         return
     if host.ui_captures_world_input():
         return
-    if event is InputEventMouseButton and (host.is_hud_drop_region(get_viewport().get_mouse_position())
+    if event is InputEventMouseButton and (host.is_hud_drop_region(event.position)
         or get_viewport().gui_get_drag_data() != null):
         return
     if event.is_action_pressed("action_1"):
