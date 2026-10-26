@@ -77,8 +77,19 @@ func _run() -> void:
     var solder: InvItem = load("res://items/solder.tres")
     var resistor_before: int = player.inventory.count(resistor)
     var solder_before: int = player.inventory.count(solder)
-    bench.selected_index = 1
-    bench._remove_selected()
+    var cutters: InvItem = load("res://items/side_cutters.tres")
+    # Burnt parts must be removed by physically applying pliers to the board;
+    # the tool is retained and the broken piece becomes scrap.
+    check(player.inventory.add_item(cutters, 1), "Player must be able to carry pliers to the panel.")
+    var cutters_before: int = player.inventory.count(cutters)
+    var tool_drop: Dictionary = {"kind": "inventory_item", "item": cutters,
+        "inventory": player.inventory, "index": player.inventory.find(cutters)}
+    var burnt_cell_position: Vector2 = Vector2(2.5, 1.5) * bench.board_view.cell_size
+    check(bench.board_view._can_drop_data(burnt_cell_position, tool_drop),
+        "Burnt leads must accept cutters dragged directly from the backpack.")
+    bench.board_view._drop_data(burnt_cell_position, tool_drop)
+    check(bench.board.placement_at(Vector2i(2, 1)) < 0 and player.inventory.count(cutters) == cutters_before,
+        "Snapping a burnt component must retain real cutters and leave an empty pad.")
     bench._install_inventory_part(resistor, Vector2i(2, 1))
     check(player.inventory.count(resistor) == resistor_before - 1, "Installing physical resistor should use one real item.")
     check(player.inventory.count(solder) == solder_before - 1, "Soldering should spend exactly one solder.")
