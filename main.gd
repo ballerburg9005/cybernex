@@ -173,23 +173,55 @@ func _process(delta):
 func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_position: Vector2) -> void:
     if item == null or player == null or world == null:
         return
-    if mouse_over_ui:
-        return
     if source != player.inventory and source != player.quickinventory:
         return
     if not player.inventory.has(item):
         return
-    var world_point: Vector2 = world.get_global_transform_with_canvas().affine_inverse() * viewport_position
-    if world_point.distance_to(player.global_position) > player.service_reach():
-        p("Out of reach. Walk nearer before dropping supplies.")
+    # GUI drag ends do not reliably emit mouse_exited; use the actual release
+    # point rather than a stale global mouse_over_ui flag.
+    if $HUD/FullInventory.visible and $HUD/FullInventory.get_global_rect().has_point(viewport_position):
         return
+    var picker: WorldHitTest = $World/WorldHitTest
+    # WorldHitTest returns global world-canvas positions, never World-local
+    # coordinates. Mixing those caused false "Out of reach" near wall wires.
+    var world_point: Vector2 = picker.viewport_to_world(viewport_position)
+    if world_point.distance_to(player.global_position) > player.service_reach():
+        p("The object is beyond your reach.")
+        return
+    var collider: CollisionObject2D = picker.pick_viewport_point(viewport_position)
+    if collider != null:
+        var world_target: Node = collider
+        if collider.get_parent() != null and collider.get_parent().has_method("combine"):
+            world_target = collider.get_parent()
+        if world_target.has_method("combine"):
+            var result: Variant = world_target.combine(InvSlot.new(item, 1))
+            if result is Array and result.size() > 0 and bool(result[0]):
+                p("%s made contact with %s." % [item.name, str(world_target.get("myname"))])
+                # The object's own combine procedure defines whether its
+                # physical tool/material is consumed. Reusable cutters survive.
+                if result.size() > 1 and bool(result[1]):
+                    player.inventory.remove_item(item, 1)
+                return
+        var robot: Node = collider
+        if not robot.is_in_group("enemies") and robot.get_parent() != null and robot.get_parent().is_in_group("enemies"):
+            robot = robot.get_parent()
+        if robot.is_in_group("enemies"):
+            if item.type & InvItem.IS_TOOL:
+                robot.health = maxf(0.0, float(robot.health) - 0.8)
+                if robot.has_method("stun_for"):
+                    robot.stun_for(0.25)
+                p("You struck the chassis with %s. Little damage." % item.name)
+            else:
+                p("%s bounced off the machine." % item.name)
+            return
+    # No valid target: drop exactly one physical object on the floor.
     if not player.inventory.remove_item(item, 1):
         return
     var dropped: Node2D = preload("res://items/item_world.tscn").instantiate()
     dropped.set("itemslot", InvSlot.new(item, 1))
     world.add_child(dropped)
     dropped.global_position = world_point
-    p("Put %s on the floor. Remaining: %d." % [item.name, player.inventory.count(item)])
+    p("%s dropped. Remaining: %d." % [item.name, player.inventory.count(item)])
 
 func _use_inventory_item(item: InvItem) -> void:
     if item == null:
