@@ -72,7 +72,10 @@ func _input(event: InputEvent) -> void:
         host.toggle_inventory()
         get_viewport().set_input_as_handled()
         return
-    if host.ui_captures_world_input() or host.mouse_over_ui:
+    if host.ui_captures_world_input():
+        return
+    if event is InputEventMouseButton and (host.is_hud_drop_region(get_viewport().get_mouse_position())
+        or get_viewport().gui_get_drag_data() != null):
         return
     if event.is_action_pressed("action_1"):
         for obj in activatables.duplicate():
@@ -183,6 +186,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
         return
     if event.keycode >= KEY_1 and event.keycode <= KEY_9:
         use_quickslot(event.keycode - KEY_1)
+    elif event.keycode == KEY_0:
+        use_quickslot(9)
 
 func use_quickslot(index: int) -> bool:
     if quickinventory == null or inventory == null or equipment == null:
