@@ -66,7 +66,7 @@ func pan_by(delta_pixels: Vector2) -> void:
 const FRAME := Color("#1a2731")
 const GRID := Color("#3a4a53")
 const INK := Color("#d3e2df")
-const SAFE_EDGE := Color("#426a53")
+const SAFE_EDGE := Color("#8094a9")
 const FAULT := Color("#aa4544")
 const SIDES := [Vector2.LEFT, Vector2.UP, Vector2.RIGHT, Vector2.DOWN]
 const RESISTOR_BANDS: Texture2D = preload("res://UI/resistor_color_atlas.tres")
