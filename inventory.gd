@@ -57,7 +57,10 @@ func ensure_slots() -> void:
 
 func normalize() -> bool:
     # Explicit normalization always merges, even if auto_group_stacks=false.
-    return _commit(_state(), true, true)
+    var packed: Dictionary = _packed_state(_state())
+    if not packed["ok"]:
+        return false
+    return _commit(packed["state"], true, false)
 
 func sort_by_category() -> void:
     var result: Dictionary = _packed_state(_state())
