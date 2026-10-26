@@ -76,12 +76,22 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
     if not (data is Dictionary) or inventory == null:
         return false
+    if data.get("kind", "") == "circuit_part":
+        if is_hotbar or backpack == null:
+            return false
+        var source: CircuitBoardView = data.get("source")
+        return source != null and source.workbench != null and source.workbench.can_extract_to(int(data.get("index", -1)), backpack)
     return data.get("kind", "") in ["inventory_item", "equipped_item"]
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
     if not _can_drop_data(_at_position, data):
         return
     var kind: String = data.get("kind", "")
+    if kind == "circuit_part":
+        var view: CircuitBoardView = data.get("source")
+        if view != null and view.workbench != null:
+            view.workbench.extract_to_backpack(int(data.get("index", -1)), backpack)
+        return
     if kind == "equipped_item":
         var loadout: EquipmentLoadout = data.get("loadout")
         if loadout != null:
