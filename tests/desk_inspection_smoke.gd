@@ -21,7 +21,8 @@ func _run() -> void:
     desk.activate(player)
     var panel: DeskInspection = game.desk_inspection
     await process_frame # Native HBox sorting is deferred until after instantiation.
-    check(panel != null and panel == desk.ui_menu, "Legacy desk must open shared modular inspection.")
+    check(panel != null and panel == desk.ui_menu and panel == game.desk_inspection_cache,
+        "Desk should open one shared, already-created inspection pane without inventory rebuild.")
     check(panel.is_inside_tree() and panel.get_parent() == game.get_node("HUD"),
         "Desk inspection must be a viewport HUD Control, not a world-space popup.")
     check(panel.get_global_rect().position.x >= 0 and panel.get_global_rect().end.x <= 1280,
@@ -32,6 +33,10 @@ func _run() -> void:
         "Desk and backpack must show two actual physical inventory models at the same time.")
     check(panel.bag_view.visible and panel.desk_view.visible, "Contents page must show desk and player pack.")
     print("DESK COLUMNS: bag=", panel.bag_view.get_global_rect(), " desk=", panel.desk_view.get_global_rect())
+    var left_window: Control = panel.get_node("Columns/BackpackPanel")
+    var right_window: Control = panel.get_node("Columns/DeskPanel")
+    check(left_window.get_global_rect().end.x + 10.0 <= right_window.get_global_rect().position.x,
+        "Backpack and desk should be TWO clearly separated background windows.")
     check(panel.bag_view.get_global_rect().end.x <= panel.desk_view.get_global_rect().position.x + 5.0,
         "Desk screen must have original backpack on LEFT and pageable desk contents on RIGHT.")
     check(panel.get_node("Columns/DeskPanel/Layout/Navigation/Page").get_theme_font_size("font_size") >= 28
@@ -49,6 +54,12 @@ func _run() -> void:
     check(panel.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel/Description").text.contains("dosimeter"),
         "Desk notes should be authored evidence from this actual desk, not generic UI help.")
     panel._select_page(2)
+    var crt: RichTextLabel = panel.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel/Description")
+    check(crt.get_theme_color("default_color").g > crt.get_theme_color("default_color").r,
+        "Powered workstation should use phosphor GREEN text instead of white instructions.")
+    var power_button: Button = panel.get_node("Columns/DeskPanel/Layout/Bottom/Power")
+    check(power_button.visible and power_button.has_theme_stylebox_override("normal"),
+        "POWER must be a visible rounded red button, not bare text.")
     check(panel.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel/Description").text.contains("RAD-MON"),
         "Desk computer should show its own signal/text log while powered on.")
     panel.toggle_power()
@@ -78,6 +89,14 @@ func _run() -> void:
         check(revisited.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel/Description").text == "Black display.",
             "Unpowered desk terminal must not reveal computer data.")
         revisited.close()
+    var other_desk: Node = game.get_node("World/Desk2")
+    other_desk.activate(player)
+    check(game.desk_inspection == panel and other_desk.ui_menu == panel
+        and panel.authored_notes.contains("STAFF SHIFT CARD"),
+        "Switching desks should REUSE the cached page while rebinding to that desk's authored evidence.")
+    check(panel.bag_view.inv == player.inventory and panel.desk_view.inv == other_desk.loot,
+        "Reused desk pane must point to the second desk's own physical loot and original backpack.")
+    panel.close()
     var old_count: int = player.inventory.count(cutters)
     game.get_node("HUD/FullInventory").show()
     game._select_drawer_page(0)
