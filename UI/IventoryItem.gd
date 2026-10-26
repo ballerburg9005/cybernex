@@ -31,17 +31,21 @@ func refresh() -> void:
         tooltip_text = "Empty slot"
         return
     image.texture = cell.item.texture
-    number.text = str(amount) if amount > 1 else ""
+    number.text = "%dx" % amount if amount > 1 else ""
     var lines := PackedStringArray()
-    lines.append("%s   ×%d" % [cell.item.name, amount])
-    if not cell.item.description.is_empty():
+    lines.append("%s  %dx" % [cell.item.name, amount])
+    # Tooltips identify items; recipe and use instructions belong nowhere in
+    # the HUD. Only short physical descriptions are appropriate.
+    if not cell.item.description.is_empty() and not _is_instructions(cell.item.description):
         lines.append(cell.item.description)
-    for recipe in cell.item.combos:
-        if recipe != null and recipe.with != null and recipe.yields != null:
-            var tool_note: String = " [reusable]" if not recipe.eats_source else ""
-            lines.append("COMBINE WITH %s → %s ×%d%s" % [
-                recipe.with.name, recipe.yields.name, recipe.amount, tool_note])
     tooltip_text = "\n".join(lines)
+
+func _is_instructions(value: String) -> bool:
+    var lower: String = value.to_lower()
+    for phrase in [" to ", "requires ", "use ", "combine ", "drag ", "install ", "craft ", "reusable", "equip ", "solder is"]:
+        if lower.contains(phrase):
+            return true
+    return false
 
 func _gui_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and event.double_click:
@@ -131,6 +135,6 @@ func _notification(what: int) -> void:
         return
     var released: InvItem = _pending_world_item
     _pending_world_item = null
-    if not get_viewport().gui_is_drag_successful():
+    if not get_viewport().gui_is_drag_successful() and (get_viewport().gui_get_drag_data() == null or true):
         if parent_view != null and parent_view.has_method("request_world_drop"):
             parent_view.request_world_drop(inventory, index, released, get_viewport().get_mouse_position())
