@@ -30,6 +30,7 @@ region = Rect2(48, 0, 16, 16)
 [resource]
 script = ExtResource("1_cyspl")
 name = "side cutters"
+item_id = "side_cutters"
 short_name = "sidecutters"
 texture = SubResource("AtlasTexture_f7308")
 damage = 2.0
