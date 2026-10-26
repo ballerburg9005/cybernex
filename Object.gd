@@ -70,10 +70,13 @@ func combine(itemslot):
 
 
 func spawn_item(itemslot):
-	myitem = preload("res://items/item_world.tscn").instantiate()
-	myitem.itemslot = itemslot
-	myitem.name = "spawned_"+itemslot.item.short_name
-	add_child(myitem)
+    # Salvage must be a real world pickup, not a child body inside the wall.
+    var world: Node2D = get_parent()
+    myitem = preload("res://items/item_world.tscn").instantiate()
+    myitem.itemslot = itemslot
+    myitem.name = "spawned_" + itemslot.item.short_name
+    world.add_child(myitem)
+    myitem.global_position = global_position + Vector2(0, 20)
 	#myitem[l].z_index = 3000
 	
 
