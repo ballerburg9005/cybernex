@@ -21,6 +21,7 @@ func _run() -> void:
     test_multistack_crafting_and_cross_swap()
     test_equipment_snapshot_atomicity()
     test_search_filter_count()
+    test_crafting_index()
     if failures != 0:
         push_error("INVENTORY TESTS FAILED: " + str(failures))
         quit(1)
@@ -249,3 +250,30 @@ func test_search_filter_count() -> void:
     index.refresh()
     check(index.visible_count.text == "2 entries / 6 units", "Clearing search must restore complete grouped counts.")
     index.queue_free()
+
+func test_crafting_index() -> void:
+    var bag := Inv.new(12)
+    var cutters: InvItem = item("side_cutters")
+    var heavy: InvItem = item("big_wire")
+    var wires: InvItem = item("wires")
+    bag.add_item(cutters, 1)
+    var discovered: Array[Dictionary] = InventoryRecipeIndex.list_for(bag)
+    check(discovered.size() >= 1, "Owning a tool should reveal Inspector-authored recovery recipes.")
+    check(not bool(discovered[0]["can_craft"]), "Recipe index must report missing copper stock before crafting.")
+    bag.add_item(heavy, 1)
+    var panel: InventoryView = load("res://UI/Inventory.tscn").instantiate()
+    root.add_child(panel)
+    panel.configure(bag)
+    var candidate: int = -1
+    for i in range(panel.offered_recipes.size()):
+        var entry: Dictionary = panel.offered_recipes[i]
+        if Inv.matches(entry["source"], cutters) and Inv.matches(entry["target"], heavy):
+            candidate = i
+            break
+    check(candidate >= 0, "Inventory crafting bar should list tool + cable.")
+    if candidate >= 0:
+        check(panel.offered_recipes[candidate]["can_craft"], "Recipe must be available once the material is present.")
+        panel.recipe_selector.select(candidate)
+        panel._assemble_selected()
+        check(bag.count(heavy) == 0 and bag.count(wires) == 3 and bag.count(cutters) == 1, "Assembly bar must use atomic crafting, consuming material but not tools.")
+    panel.queue_free()
