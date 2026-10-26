@@ -54,8 +54,10 @@ func _run() -> void:
     check(picker.viewport_to_world(viewport_point).distance_to(player.global_position) < 0.1, "World hover projection must invert Camera2D canvas transforms on original map.")
     var quantity: int = player.inventory.count(item)
     check(quantity >= 2, "Starter inventory should contain wires for world drops.")
-    check(absf(player.service_reach() - 49.0) < 0.1,
-        "Unaugmented world tool reach must be the original 49-unit PlayerReach circle.")
+    var reach_shape: CollisionShape2D = player.get_node("PlayerReach/CollisionShape2D")
+    var reach_world_radius: float = reach_shape.shape.radius * reach_shape.global_scale.x
+    check(absf(player.service_reach() - reach_world_radius) < 0.1,
+        "Unaugmented world tool reach must match the original PlayerReach circle at World x3 scale.")
     var trash: InvItem = load("res://items/junk.tres")
     var robot: Node = game.get_node("World/Enemy")
     check(robot.drops != null and robot.drops.occupied() and Inv.matches(robot.drops.item, trash),
