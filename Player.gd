@@ -20,9 +20,14 @@ var dragged_item_mutex = false
 
 @export var inventory : Inv
 @export var quickinventory : Inv
+@export var equipment: EquipmentLoadout
 
 func _ready():
 	last_health = health
+	if equipment == null:
+		equipment = EquipmentLoadout.new()
+	if inventory != null:
+		inventory.normalize()
 	
 	get_node("/root/main/HUD/FullInventory").visible = false
 	for e in [inventory, quickinventory]:
@@ -65,22 +70,11 @@ func arr_remove_dirty(arr):
 	return out
 
 
-func use_item_on_item(from_inv, to_inv, fidx, tidx):
-	for combo in from_inv.items[fidx].item.combos:
-		if to_inv.items[tidx].item == combo.with:
-				p("Used "+from_inv.items[fidx].item.name+" on "+to_inv.items[tidx].item.name+".")
-				if combo.yields and combo.yields != preload("res://items/blank.tres"):
-					p("Crafted new item: "+combo.yields.name+".")
-					add_inventory_item(InvSlot.new(combo.yields, combo.amount), -1, to_inv)
-				from_inv.items[fidx].count -= 1 if combo.eats_source else 0
-				to_inv.items[tidx].count -= 1 if combo.eats_target else 0
-				if from_inv.items[fidx].count <= 0:
-					from_inv.items[fidx] = InvSlot.new()
-				if to_inv.items[tidx].count <= 0:
-					to_inv.items[tidx] = InvSlot.new()
-				return true
-	p("Can't use "+from_inv.items[fidx].item.name+" on "+to_inv.items[tidx].item.name+".")
-	return false
+func use_item_on_item(from_inv: Inv, to_inv: Inv, fidx: int, tidx: int) -> bool:
+	var result: Dictionary = InventoryOperations.move_or_combine(from_inv, fidx, to_inv, tidx)
+	get_node("/root/main").p(str(result.get("message", "Nothing happened")))
+	return bool(result.get("ok", false))
+
 
 func inv_action(from_action, to_action, from_inv, to_inv, itemslot, idx):
 	print("Putting item into UI at idx "+str(idx))
@@ -269,21 +263,12 @@ func drag_apply_inventory_item():
 	dragged_item = null
 
 # this is for keyboard action currently
-func add_inventory_item(itemslot, start = 0, inv = inventory):
-	start = inv.find(itemslot.item) if start < 0 and inv.has(itemslot.item) else 0 if start < 0 else start
+func add_inventory_item(itemslot: InvSlot, start: int = -1, inv: Inv = null) -> bool:
+	var actual: Inv = inventory if inv == null else inv
+	if actual == null or itemslot == null:
+		return false
+	return actual.add_stack(itemslot, start)
 
-	if inv.has(itemslot.item): 
-		if itemslot != inv.items[inv.find(itemslot.item)]:
-			itemslot.count += inv.items[inv.find(itemslot.item)].count
-		inv.items[inv.find(itemslot.item)] = InvSlot.new()
-
-	for i in (range(min(start, inv.items.size()), inv.items.size()) + range(0, min(start, inv.items.size()))):
-		if inv.items[i].item == preload("res://items/blank.tres"):
-			print("Index:"+str(i))
-			inv.items[i] = itemslot.duplicate()
-			return true
-	
-	return false
 
 func _input(event):
 	if dragged_item and dragged_item_mutex:
