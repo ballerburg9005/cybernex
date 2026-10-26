@@ -8,6 +8,23 @@ var runtime: EquipmentRuntime
 var _reported_energy: float = -1.0
 var sockets: Array[EquipmentSlot] = []
 
+func _ready() -> void:
+    # The silhouette is authored at 450x430; shrink only its visual canvas
+    # inside compact side drawers instead of demanding >460px at 720p.
+    _fit_body_canvas()
+    resized.connect(_fit_body_canvas)
+
+func _fit_body_canvas() -> void:
+    if not is_node_ready():
+        return
+    var canvas: Control = $Frame/Layout/Canvas
+    var available: float = maxf(180.0, size.x - 14.0)
+    var factor: float = minf(1.0, available / 450.0)
+    canvas.scale = Vector2.ONE * factor
+    canvas.custom_minimum_size = Vector2(450.0 * factor, 430.0 * factor)
+    # Slots retain native Godot drag coordinates because they are children
+    # of the uniformly scaled Canvas, not manually reparented controls.
+
 func setup(inv: Inv, equipment: EquipmentLoadout) -> void:
     if backpack != null and backpack.changed.is_connected(_on_backpack_changed):
         backpack.changed.disconnect(_on_backpack_changed)
