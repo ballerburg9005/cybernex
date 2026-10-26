@@ -37,4 +37,4 @@ damage = 2.0
 combos = Array[ExtResource("1_yxx5w")]([SubResource("Resource_kx3bl"), SubResource("Resource_erepa")])
 type = 6
 
-description = "Reusable cutters: cut heavy cable into usable wires or thin wire into two copper contacts."
+description = "Hardened steel side cutters."
