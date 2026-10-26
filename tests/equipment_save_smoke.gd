@@ -76,6 +76,11 @@ func test_world_save() -> void:
     player.inventory.add_item(wires, 2)
     player.equipment.assign("weapon_secondary", pistol, player.inventory) # may fail when owning only one; not essential
     terminal.access_granted = true
+    var deliberate_slot: int = 41
+    var split: Dictionary = InventoryOperations.move_or_combine(
+        player.inventory, player.inventory.find(wires), player.inventory, deliberate_slot, 1)
+    check(bool(split.get("ok", false)) and player.inventory.slot_at(deliberate_slot) != null,
+        "Backpack must allow one wire to be positioned in an arbitrary distant slot.")
     var bag_count: int = player.inventory.count(wires)
     var cell_count: int = player.inventory.count(cell)
     var initial_items: int = 0
@@ -91,6 +96,10 @@ func test_world_save() -> void:
     terminal.access_granted = false
     check(game.load_game(), "Main game Load button handler must restore saved world.")
     check(player.inventory.count(wires) == bag_count and player.inventory.count(cell) == cell_count, "Save/load must exactly restore stacked physical stock.")
+    check(player.inventory.slot_at(deliberate_slot) != null
+        and Inv.matches(player.inventory.slot_at(deliberate_slot).item, wires)
+        and player.inventory.slot_at(0) != null,
+        "World save must restore the actual physical backpack position, not repack its contents.")
     check(player.position.distance_to(Vector2(223.0, 182.0)) < 0.01 and absf(player.health - 43.0) < 0.01, "Save/load must restore player pose and health.")
     check(absf(player.equipment_runtime.charge_wh - 9.25) < 0.001, "Save/load must restore suit energy.")
     check(terminal.access_granted, "Repair/access state must survive save/load.")
@@ -100,6 +109,8 @@ func test_world_save() -> void:
     check(mannequin.backpack == player.inventory and mannequin.loadout == player.equipment, "Mannequin must reference freshly restored player equipment.")
     var hotbar: InventoryView = game.get_node("HUD/QuickInventory/InventoryItems")
     check(hotbar.backpack == player.inventory and hotbar.inv == player.quickinventory, "Linked quickbar must rebind without duplicating items.")
+    check(game.companion_drawer.backpack_view.inv == player.inventory,
+        "Body Systems companion must relink to restored physical backpack without cloning items.")
     var restored_items: int = 0
     for node in game.world.get_children():
         if node is WorldItemPickup:
