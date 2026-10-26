@@ -10,6 +10,7 @@ region = Rect2(32, 0, 16, 16)
 [resource]
 script = ExtResource("item")
 name = "Arc maintenance pistol"
+item_id = "arc_pistol"
 short_name = "arc pistol"
 texture = SubResource("icon")
 damage = 0.0
