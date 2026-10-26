@@ -28,6 +28,22 @@ func _run() -> void:
     check(drawer.size.x >= 345.0 and drawer.size.x < 450.0,
         "Inventory must use a fixed compact width at default 720p and cannot push the grid off-screen.")
     check(drawer.position.x <= 12.0, "Exploration inventory drawer must stay left of centered player.")
+    var backpack_panel: InventoryView = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems")
+    check(backpack_panel.grid_container.columns == 10, "Player inventory must be ten cells wide.")
+    check(backpack_panel.grid_container.get_child_count() % 10 == 0, "Last inventory row must have visible empty cells.")
+    var nav: Control = game.get_node("HUD/FullInventory/VBoxContainer/DrawerNav")
+    check(nav is PanelContainer and nav.has_theme_stylebox_override("panel"), "All navigation labels must be backed as one panel.")
+    check(game.get_node("HUD/FullInventory/VBoxContainer/PdaPage").has_theme_stylebox_override("normal"), "PDA text must render against an opaque-enough UI panel.")
+    game._select_drawer_page(4)
+    game.toggle_inventory()
+    check(game.current_drawer_page == 0 and drawer.visible, "Tab from a later page must always return to backpack.")
+    var quick: Control = game.get_node("HUD/QuickInventory")
+    var log: Control = game.get_node("HUD/TextBox")
+    check(quick.visible and quick.get_global_rect().end.x + 2.0 <= log.get_global_rect().position.x,
+        "Normal quickbar must remain visible on left without overlapping the event journal.")
+    check(game.ui_captures_world_input(), "Open inventory must suppress world-action keys.")
+    game.toggle_inventory()
+    check(not game.ui_captures_world_input(), "Closing UI should restore world controls.")
     drawer.visible = false
     var item: InvItem = load("res://items/wires.tres")
     var player = game.get_node("World/Player")
@@ -38,6 +54,12 @@ func _run() -> void:
     check(picker.viewport_to_world(viewport_point).distance_to(player.global_position) < 0.1, "World hover projection must invert Camera2D canvas transforms on original map.")
     var quantity: int = player.inventory.count(item)
     check(quantity >= 2, "Starter inventory should contain wires for world drops.")
+    check(absf(player.service_reach() - 49.0) < 0.1,
+        "Unaugmented world tool reach must be the original 49-unit PlayerReach circle.")
+    var trash: InvItem = load("res://items/junk.tres")
+    var robot: Node = game.get_node("World/Enemy")
+    check(robot.drops != null and robot.drops.occupied() and Inv.matches(robot.drops.item, trash),
+        "Defeated robot must yield the original trash-can item, never a missing placeholder.")
     var screen_point: Vector2 = picker.world_to_viewport(player.global_position + Vector2(30, 0))
     var old_children: int = world.get_child_count()
     check(screen_point.distance_to(picker.world_to_viewport(player.global_position)) > 0.0, "Drop target is projected into viewport space, not transformed twice.")
@@ -64,12 +86,30 @@ func _run() -> void:
     terminal.activate(player)
     var bench: CircuitWorkbench = terminal.ui_menu
     check(bench != null and bench.field_inventory == player.inventory, "Terminal workbench should bind actual player backpack.")
+    var canvas: CircuitBoardView = bench.board_view
+    check(canvas._get_minimum_size() == Vector2.ZERO, "Infinite-looking circuit view must not shrink the board panel to authored cells.")
+    canvas.size = Vector2(800, 440)
+    canvas._center_on_authored_board()
+    var resistor_center: Vector2 = canvas.pan_offset + Vector2(2.5, 1.5) * canvas.cell_size
+    check(canvas._cell_from_position(resistor_center) == Vector2i(2, 1),
+        "Native board drag/drop must translate displayed panning back into authored cell coordinates.")
+    check(not canvas._inside(Vector2i(-1, 1)) and not canvas._inside(Vector2i(canvas.board.width, 1)),
+        "Fake infinite-grid cells must never become valid electronic placements.")
+    canvas.pan_by(Vector2(99999, -99999))
+    var centre: Vector2 = canvas.size * 0.5 - canvas.pan_offset
+    var extended: Vector2 = Vector2(canvas.board.width, canvas.board.height) * canvas.cell_size
+    var pad: float = canvas.pan_limit_cells * canvas.cell_size
+    check(centre.x >= -pad - 0.1 and centre.x <= extended.x + pad + 0.1
+        and centre.y >= -pad - 0.1 and centre.y <= extended.y + pad + 0.1,
+        "Middle-mouse board scrolling must stop no farther than twenty cells outside loaded data.")
+    canvas.pan_offset = Vector2.ZERO
+    canvas._center_on_authored_board()
     check(game.puzzle_active and drawer.visible, "Circuit opening should preserve the same physical inventory grid.")
     print("HUD PUZZLE: drawer=", drawer.get_global_rect(), " board=", bench.get_global_rect(),
         " quick_visible=", game.get_node("HUD/QuickInventory").visible)
     check(drawer.position.x > 500.0 and not game.get_node("HUD/QuickInventory").visible,
         "Puzzle mode moves the drawer right and hides quick access.")
-    check(not game.get_node("HUD/TextBox/HBoxContainer/S3").visible,
+    check(game.get_node("HUD/TextBox").get_global_rect().position.x <= 10.0,
         "Event log should span the entire bottom edge during circuit repair.")
     check(bench.get_global_rect().end.x <= drawer.get_global_rect().position.x,
         "Large puzzle board must not draw underneath the inventory drawer.")
