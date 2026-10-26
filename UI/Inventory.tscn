@@ -22,18 +22,22 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "INVENTORY INDEX"
 
-[node name="Filter" type="OptionButton" parent="Layout/Toolbar"]
+[node name="Actions" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Filter" type="OptionButton" parent="Layout/Actions"]
 layout_mode = 2
 
-[node name="Sort" type="Button" parent="Layout/Toolbar"]
+[node name="Sort" type="Button" parent="Layout/Actions"]
 layout_mode = 2
 text = "SORT / GROUP"
 
-[node name="Save" type="Button" parent="Layout/Toolbar"]
+[node name="Save" type="Button" parent="Layout/Actions"]
 layout_mode = 2
 text = "SAVE"
 
-[node name="Load" type="Button" parent="Layout/Toolbar"]
+[node name="Load" type="Button" parent="Layout/Actions"]
 layout_mode = 2
 text = "LOAD"
 
