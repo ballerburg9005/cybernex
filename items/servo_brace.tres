@@ -17,4 +17,7 @@ damage = 0.0
 combos = []
 type = 32
 equipment_slots = PackedStringArray("augment_left_arm", "augment_right_arm")
+locomotion_multiplier = 1.16
+powered_draw_watts = 4.5
+service_reach_bonus = 32.0
 description = "External powered support for heavy manual repair operations."
