@@ -43,6 +43,7 @@ func _ready() -> void:
     board_view.board_changed.connect(_topology_changed)
     board_view.rotation_requested.connect(_rotate_at_index)
     board_view.incoming_part.connect(_install_inventory_part)
+    board_view.tool_applied.connect(_apply_tool_to_board)
     timer.timeout.connect(_on_simulation_tick)
     %RotateButton.pressed.connect(_rotate_selected)
     %RemoveButton.pressed.connect(_remove_selected)
@@ -417,3 +418,16 @@ func _extraction_cost(index: int) -> bool:
         _announce("Fresh solder required to desolder an intact component.")
         return false
     return true
+
+func _apply_tool_to_board(item: InvItem, cell: Vector2i) -> void:
+    if board == null or field_inventory == null or not timer.is_stopped():
+        return
+    if not Inv.matches(item, preload("res://items/side_cutters.tres")):
+        return
+    var part_index: int = board.placement_at(cell)
+    if part_index < 0 or not board.placements[part_index].failed_open:
+        return
+    if not field_inventory.has(item):
+        return
+    if extract_to_backpack(part_index, field_inventory):
+        _announce("Burnt component leads snapped. The cutters remain usable.")
