@@ -26,6 +26,7 @@ func _ready():
     hud = $HUD
     player = $World/Player
     camera = $World/Player/Camera2D
+    $World/WorldHitTest.reference_physics_body = player
     hud_full_inventory = find_myname_recursively($HUD, "hud_full_inventory")
     hud_quick_inventory = find_myname_recursively($HUD, "hud_quick_inventory")
     hud_textbox = find_myname_recursively($HUD, "hud_textbox")
@@ -72,62 +73,56 @@ func p(s):
     textbox.text += "\n"+s
 
 
-func tooltip_timer_update():
-    var mouse_not_moved = (tooltip_last_mouse_position - get_global_mouse_position()).length() < 0.2 
-    tooltip_last_mouse_position = get_global_mouse_position()
-    if mouse_not_moved and tooltip_display < TOOLTIP_WAIT:
-        tooltip_display += 1
-        return true
-    elif not mouse_not_moved:
-        tooltip_display = 0
-        if hud_tooltip and hud_tooltip in hud.get_children():
-            hud.remove_child(hud_tooltip)
-            hud_tooltip.queue_free()
-            hud_tooltip = null
-        return true
-    
-    var direct_space = get_viewport().find_world_2d().direct_space_state
-    var intersections = {"World": [], "UI": []}
-    for l in ["World", "UI"]:
-        var query = PhysicsPointQueryParameters2D.new()
-        query.collide_with_areas = true
-        query.collide_with_bodies = true
-        if l == "UI":
-            query.canvas_instance_id = hud.get_instance_id()
-            query.position = hud.get_node("MousePosition").get_global_mouse_position()
-        else:
-            query.canvas_instance_id = PhysicsServer2D.body_get_canvas_instance_id(player.get_rid())
-            query.position = get_global_mouse_position()
-        
-        #if query.canvas_instance_id == 0:
-            #query.position += $Camera2D.get_target_position()-Vector2(get_viewport().size)/2
-        var inters = direct_space.intersect_point(query)
-        if inters:
-            inters.sort_custom(func(a, b): return a.collider.z_index > b.collider.z_index)
-            intersections[l] += inters.filter(func(e): return e.collider.is_visible_in_tree())
-    
-    if mouse_over_ui:
-        intersections["World"] = []
-    for i in intersections["UI"] + intersections["World"]:
-        var thename = "-1"
-        if "myname" in i.collider:
-            thename = i.collider.myname
-        elif "myname" in i.collider.get_parent() and i.collider.name in ["hitbox", "influence"]:
-            thename = i.collider.get_parent().myname
-#		elif "itemslot" in i.collider and i.collider.itemslot and i.collider.itemslot.item:
-#			thename = i.collider.itemslot.item.name
-#		elif "itemslot" in i.collider.get_parent() and i.collider.get_parent().itemslot and i.collider.get_parent().itemslot.item:
-#			thename = i.collider.get_parent().itemslot.item.name
-        if str(thename) != "-1" and not hud_tooltip:
-            if thename and thename.length() > 0:
-                hud_tooltip = preload("res://tooltip.tscn").instantiate()
-                hud_tooltip.name = "tooltip"
-                hud_tooltip.get_node("MarginContainer/Label").text = thename
-                hud_tooltip.global_position = hud.get_node("MousePosition").get_global_mouse_position()+Vector2(16,0)
-                hud.add_child(hud_tooltip)
-                hud_tooltip.z_index = 2000
-            return true
+func _clear_world_tooltip() -> void:
+    if is_instance_valid(hud_tooltip):
+        hud_tooltip.queue_free()
+    hud_tooltip = null
 
+func _hover_target_name(collider: CollisionObject2D) -> String:
+    var node: Node = collider
+    if node == null:
+        return ""
+    if not ("myname" in node) and node.get_parent() != null and "myname" in node.get_parent():
+        node = node.get_parent()
+    if not ("myname" in node):
+        return ""
+    var result: String = str(node.get("myname"))
+    if "itemslot" in node and node.itemslot != null and node.itemslot.occupied():
+        result += "  ×%d" % node.itemslot.count
+    if player.diagnostic_level() > 0:
+        if "access_granted" in node and "disabled" in node:
+            result += "\n[NEURAL SCAN]  PLC: %s  |  HW: %s" % [
+                "AUTHORIZED" if node.access_granted else "SEALED",
+                "FAULT" if node.disabled else "ACTIVE"
+            ]
+        elif "health" in node:
+            result += "\n[NEURAL SCAN]  chassis integrity: %.0f" % node.health
+    return result
+
+func tooltip_timer_update() -> void:
+    # HUD Controls own their native tooltips. The single world picker lives
+    # in the camera-driven World canvas. No CanvasLayer physics query or HUD
+    # Area2D is permitted here: that caused 4.3 pan/zoom hover offsets.
+    var mouse_viewport: Vector2 = get_viewport().get_mouse_position()
+    var moved: bool = mouse_viewport.distance_to(tooltip_last_mouse_position) >= 3.0
+    tooltip_last_mouse_position = mouse_viewport
+    if moved or mouse_over_ui or $HUD/FullInventory.visible:
+        tooltip_display = 0
+        _clear_world_tooltip()
+        return
+    tooltip_display += 1
+    if tooltip_display < TOOLTIP_WAIT or is_instance_valid(hud_tooltip):
+        return
+    var collider: CollisionObject2D = $World/WorldHitTest.pick_viewport_point(mouse_viewport)
+    var label: String = _hover_target_name(collider)
+    if label.is_empty():
+        return
+    hud_tooltip = preload("res://tooltip.tscn").instantiate()
+    hud_tooltip.name = "world_hover_tooltip"
+    hud_tooltip.get_node("MarginContainer/Label").text = label
+    hud.add_child(hud_tooltip)
+    hud_tooltip.global_position = $HUD.get_final_transform().affine_inverse() * mouse_viewport + Vector2(14, 10)
+    hud_tooltip.z_index = 2000
 
 func _on_ui_mouse_entered():
     #print("mouse_over_ui")
