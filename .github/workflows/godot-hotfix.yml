@@ -1,0 +1,32 @@
+name: Legacy Godot 4.7 parser and startup smoke
+on:
+  push:
+    branches: [fix/godot-void-physics-callback]
+  pull_request:
+
+jobs:
+  headless-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+      - name: Installed Godot version
+        run: godot --version
+      - name: Headless editor import
+        run: |
+          set -o pipefail
+          godot --headless --path . --editor --import --quit 2>&1 | tee /tmp/godot-editor.log
+          if grep -q 'SCRIPT ERROR' /tmp/godot-editor.log; then
+            exit 1
+          fi
+      - name: Headless startup of original game
+        run: |
+          set -o pipefail
+          godot --headless --path . --quit-after 10 res://main.tscn 2>&1 | tee /tmp/godot-main.log
+          if grep -q 'SCRIPT ERROR' /tmp/godot-main.log; then
+            exit 1
+          fi
