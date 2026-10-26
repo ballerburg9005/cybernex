@@ -72,7 +72,7 @@ func _backpack_updated() -> void:
                 inv.items[i] = InvSlot.new()
                 modified = true
         if modified:
-            inv.changed.emit()
+            inv.emit_changed()
     refresh()
 
 func _allowed(item: InvItem) -> bool:
