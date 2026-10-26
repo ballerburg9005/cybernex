@@ -22,6 +22,15 @@ var combinables = []
 
 func _ready():
     last_health = health
+    # The .tres entries are starter templates, not shared global runtime state.
+    # A second spawned player or reloaded level must not inherit first player's
+    # consumed supplies, quickbar bindings or installed gear.
+    if inventory != null:
+        inventory = inventory.duplicate(true)
+    if quickinventory != null:
+        quickinventory = quickinventory.duplicate(true)
+    if equipment != null:
+        equipment = equipment.duplicate(true)
     if equipment == null:
         equipment = EquipmentLoadout.new()
     if inventory != null:
