@@ -20,6 +20,9 @@ signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewp
 @onready var search_input: LineEdit = $Layout/SearchBar/Search
 @onready var visible_count: Label = $Layout/SearchBar/VisibleCount
 @onready var info: Label = $Layout/Feedback
+@onready var recipe_selector: OptionButton = $Layout/Crafting/Recipes
+@onready var assemble_button: Button = $Layout/Crafting/Craft
+var offered_recipes: Array[Dictionary] = []
 
 var backpack: Inv
 var cells_scene: PackedScene = preload("res://UI/InventoryItem.tscn")
@@ -43,6 +46,7 @@ func _ready() -> void:
         if inv != null and mode != "hotbar":
             inv.sort_by_category()
     )
+    assemble_button.pressed.connect(_assemble_selected)
     $Layout/Actions/Save.pressed.connect(func() -> void: save_requested.emit())
     $Layout/Actions/Load.pressed.connect(func() -> void: load_requested.emit())
     if inv == null:
@@ -142,6 +146,9 @@ func refresh() -> void:
     counter.text = ("%d/%d stacks  |  %d items" % [actual_stacks, inv.size(), item_count]) if mode != "hotbar" else "QUICK ACCESS"
     visible_count.text = "%d entries / %d units" % [occupied.size(), shown_quantity] if mode != "hotbar" else "Linked; physical stock in backpack"
     $Layout/SearchBar.visible = mode != "hotbar"
+    $Layout/Crafting.visible = mode != "hotbar"
+    if mode != "hotbar":
+        _refresh_recipe_index()
     sort_button.visible = mode != "hotbar"
     $Layout/Actions/Save.visible = mode != "hotbar"
     $Layout/Actions/Load.visible = mode != "hotbar"
@@ -158,3 +165,38 @@ func message(value: String) -> void:
 func request_world_drop(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2) -> void:
     if item != null:
         world_drop_requested.emit(origin, origin_index, item, viewport_position)
+
+func _refresh_recipe_index() -> void:
+    var retained_id: String = ""
+    var prior: int = recipe_selector.selected
+    if prior >= 0 and prior < offered_recipes.size():
+        retained_id = str(offered_recipes[prior]["id"])
+    offered_recipes = InventoryRecipeIndex.list_for(inv)
+    recipe_selector.clear()
+    if offered_recipes.is_empty():
+        recipe_selector.add_item("NO KNOWN COMBINATIONS")
+        recipe_selector.set_item_disabled(0, true)
+        assemble_button.disabled = true
+        return
+    var selected: int = 0
+    for i in range(offered_recipes.size()):
+        var entry: Dictionary = offered_recipes[i]
+        recipe_selector.add_item(entry["label"])
+        recipe_selector.set_item_disabled(i, not bool(entry["can_craft"]))
+        if str(entry["id"]) == retained_id:
+            selected = i
+    recipe_selector.select(selected)
+    assemble_button.disabled = not bool(offered_recipes[selected]["can_craft"])
+
+func _assemble_selected() -> void:
+    var index: int = recipe_selector.selected
+    if mode == "hotbar" or inv == null or index < 0 or index >= offered_recipes.size():
+        return
+    var entry: Dictionary = offered_recipes[index]
+    var from_index: int = inv.find(entry["source"])
+    var to_index: int = inv.find(entry["target"])
+    if from_index < 0 or to_index < 0 or from_index == to_index:
+        message("Required ingredients are not in distinct inventory stacks.")
+        return
+    var outcome: Dictionary = InventoryOperations.move_or_combine(inv, from_index, inv, to_index)
+    message(str(outcome.get("message", "No usable result.")))
