@@ -17,6 +17,10 @@ func _run() -> void:
     test_recipe_atomicity()
     test_loadout_counts()
     test_hud_and_mannequin()
+    test_auto_grouping_after_transactions()
+    test_multistack_crafting_and_cross_swap()
+    test_equipment_snapshot_atomicity()
+    test_search_filter_count()
     if failures != 0:
         push_error("INVENTORY TESTS FAILED: " + str(failures))
         quit(1)
@@ -152,3 +156,96 @@ func test_hud_and_mannequin() -> void:
     panel.queue_free()
     quickpanel.queue_free()
     mannequin.queue_free()
+
+func test_auto_grouping_after_transactions() -> void:
+    var wires: InvItem = item("wires")
+    var other := InvItem.new()
+    other.name = "Equivalent copper wire"
+    other.item_id = wires.item_id
+    var bag := Inv.new(7)
+    bag.items[0] = InvSlot.new(wires, 2)
+    bag.items[3] = InvSlot.new(other, 3)
+    check(bag.add_item(wires, 1), "Adding stock should re-group duplicate stacks.")
+    check(bag.count(wires) == 6 and bag.count(other) == 6, "Matching item IDs must conserve combined quantities.")
+    check(bag.slot_at(0).count == 6 and bag.slot_at(1) == null, "Ungrouped saved stacks should compact automatically after any inventory write.")
+    var other_cable: InvItem = item("big_wire")
+    check(bag.add_item(other_cable, 2), "Different item should occupy a second stack.")
+    var moving: Dictionary = InventoryOperations.move_or_combine(bag, bag.find(other_cable), bag, 6)
+    check(bool(moving["ok"]), "Dragging item into an empty slot must succeed even with auto-grouping.")
+    check(bag.count(other_cable) == 2, "Auto-grouping after drag must conserve moved quantities.")
+    check(bag.find(other_cable) >= 0, "Moved item must remain indexed.")
+
+func test_multistack_crafting_and_cross_swap() -> void:
+    var raw: InvItem = item("wires")
+    var jumper: InvItem = item("wire_bridge")
+    var tool := InvItem.new()
+    tool.name = "Binding jig"
+    tool.item_id = "binding_jig"
+    var combination := InvCombo.new()
+    combination.with = raw
+    combination.yields = jumper
+    combination.amount = 2
+    combination.eats_source = false
+    combination.eats_target = true
+    combination.target_amount = 3
+    tool.combos.append(combination)
+    var bag := Inv.new(8)
+    bag.max_stack = 2
+    check(bag.add_item(raw, 4), "Two stacks of wire should fit.")
+    check(bag.add_item(tool, 1), "Reusable jig must fit.")
+    var result: Dictionary = InventoryOperations.move_or_combine(bag, bag.find(tool), bag, bag.find(raw))
+    check(bool(result["ok"]), "Quantity-three recipe must consume wires from multiple two-item piles.")
+    check(bag.count(raw) == 1 and bag.count(jumper) == 2 and bag.count(tool) == 1, "Pooled multi-stack recipe must conserve and yield correct quantities.")
+    var first := Inv.new(3)
+    var second := Inv.new(3)
+    var pistol: InvItem = item("arc_pistol")
+    var regulator: InvItem = item("neural_regulator")
+    first.add_item(pistol, 1)
+    second.add_item(regulator, 1)
+    result = InventoryOperations.move_or_combine(first, first.find(pistol), second, second.find(regulator))
+    check(bool(result["ok"]) and first.count(regulator) == 1 and second.count(pistol) == 1, "Occupied cross-inventory drag should swap whole stacks safely.")
+    var previous: int = second.count(pistol)
+    first.max_stack = 1
+    second.add_item(pistol, 2)
+    result = InventoryOperations.move_or_combine(second, second.find(pistol), first, first.find(regulator))
+    check(not result["ok"], "Incompatible cross-container stack size must reject a swap.")
+    check(second.count(pistol) == previous + 2 and first.count(regulator) == 1, "Rejected cross-inventory swap must conserve both original piles.")
+
+func test_equipment_snapshot_atomicity() -> void:
+    var pistol: InvItem = item("arc_pistol")
+    var arm: InvItem = item("servo_brace")
+    var backpack := Inv.new(8)
+    backpack.add_item(pistol, 1)
+    backpack.add_item(arm, 1)
+    var body := EquipmentLoadout.new()
+    check(body.assign("weapon_primary", pistol, backpack), "Equip pistol before snapshot.")
+    check(body.assign("augment_left_arm", arm, backpack), "Equip servo before snapshot.")
+    var snap: Dictionary = body.snapshot()
+    var restored := EquipmentLoadout.new()
+    check(restored.restore(snap, backpack), "Valid loadout save must roundtrip.")
+    check(restored.item_at("weapon_primary") == pistol and restored.item_at("augment_left_arm") == arm, "Roundtrip loadout preserves both socket references.")
+    snap["weapon_secondary"] = Inv.item_key(pistol)
+    check(not restored.restore(snap, backpack), "A single pistol cannot be restored into two weapon sockets.")
+    check(restored.item_at("weapon_secondary") == null and restored.item_at("weapon_primary") == pistol, "Invalid restore must leave previous valid loadout intact.")
+    snap["weapon_secondary"] = ""
+    snap["augment_head"] = Inv.item_key(pistol)
+    check(not restored.restore(snap, backpack), "Weapon cannot restore into augmentation socket.")
+
+func test_search_filter_count() -> void:
+    var bag := Inv.new(6)
+    var wire: InvItem = item("wires")
+    var pistol: InvItem = item("arc_pistol")
+    bag.add_item(wire, 4)
+    bag.add_item(pistol, 2)
+    var index: InventoryView = load("res://UI/Inventory.tscn").instantiate()
+    root.add_child(index)
+    index.configure(bag)
+    check(index.counter.text.contains("6 items"), "Inventory total must count units, not occupied slots.")
+    index.search_input.text = "arc"
+    index.refresh()
+    check(index.visible_count.text == "1 entries / 2 units", "Search should filter the index without changing physical stock.")
+    check(bag.count(wire) == 4 and bag.count(pistol) == 2, "Filtering must not mutate the underlying inventory.")
+    index.search_input.text = ""
+    index.refresh()
+    check(index.visible_count.text == "2 entries / 6 units", "Clearing search must restore complete grouped counts.")
+    index.queue_free()
