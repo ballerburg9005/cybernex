@@ -22,6 +22,7 @@ theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="Frame/Layout"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "BODY SYSTEMS"
 horizontal_alignment = 1
 
@@ -39,7 +40,7 @@ offset_bottom = 344.0
 mouse_filter = 0
 text = "WEAPON / A"
 clip_text = true
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 9
 script = ExtResource("socket")
 slot_id = "weapon_primary"
 
@@ -129,6 +130,7 @@ slot_id = "augment_neural"
 
 [node name="LoadoutStatus" type="Label" parent="Frame/Layout"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "0 / 8 sockets active"
 horizontal_alignment = 1
 
