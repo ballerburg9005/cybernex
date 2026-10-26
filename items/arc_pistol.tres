@@ -17,4 +17,6 @@ damage = 0.0
 combos = []
 type = 4
 equipment_slots = PackedStringArray("weapon_primary", "weapon_secondary")
+discharge_wh = 0.45
+discharge_range = 150.0
 description = "Low-powered electric discharge tool; consumes rare charge cells."
