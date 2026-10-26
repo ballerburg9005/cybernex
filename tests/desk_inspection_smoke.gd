@@ -20,6 +20,7 @@ func _run() -> void:
     check(initial_count > 0, "Desk on original map must contain actual salvage.")
     desk.activate(player)
     var panel: DeskInspection = game.desk_inspection
+    await process_frame # Native HBox sorting is deferred until after instantiation.
     check(panel != null and panel == desk.ui_menu, "Legacy desk must open shared modular inspection.")
     check(panel.is_inside_tree() and panel.get_parent() == game.get_node("HUD"),
         "Desk inspection must be a viewport HUD Control, not a world-space popup.")
@@ -30,6 +31,7 @@ func _run() -> void:
     check(panel.bag_view.inv == player.inventory and panel.desk_view.inv == desk.loot,
         "Desk and backpack must show two actual physical inventory models at the same time.")
     check(panel.bag_view.visible and panel.desk_view.visible, "Contents page must show desk and player pack.")
+    print("DESK COLUMNS: bag=", panel.bag_view.get_global_rect(), " desk=", panel.desk_view.get_global_rect())
     check(panel.bag_view.get_global_rect().end.x <= panel.desk_view.get_global_rect().position.x + 5.0,
         "Desk screen must have original backpack on LEFT and pageable desk contents on RIGHT.")
     check(panel.get_node("Columns/DeskPanel/Layout/Navigation/Page").get_theme_font_size("font_size") >= 28
