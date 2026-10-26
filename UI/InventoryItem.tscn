@@ -34,10 +34,10 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [node name="InventoryItem" type="Button"]
-custom_minimum_size = Vector2(48, 48)
+custom_minimum_size = Vector2(33, 33)
 mouse_filter = 0
 focus_mode = 0
-theme_override_constants/icon_max_width = 42
+theme_override_constants/icon_max_width = 30
 theme_override_styles/normal = SubResource("slot_normal")
 theme_override_styles/hover = SubResource("slot_hover")
 theme_override_styles/pressed = SubResource("slot_pressed")
