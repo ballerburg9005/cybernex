@@ -4,7 +4,6 @@ class_name EquipmentLoadout
 
 ## Equipment references owned backpack items; it does NOT create another stack.
 ## Multiple sockets using identical stock require at least that many copies.
-signal changed
 
 @export var weapon_primary: InvItem
 @export var weapon_secondary: InvItem
@@ -42,7 +41,7 @@ func assign(slot_id: String, item: InvItem, backpack: Inv) -> bool:
     if not can_assign(slot_id, item, backpack):
         return false
     set(slot_id, item)
-    changed.emit()
+    emit_changed()
     return true
 
 func reconcile(backpack: Inv) -> void:
@@ -61,7 +60,7 @@ func reconcile(backpack: Inv) -> void:
         else:
             usage[item] = assigned + 1
     if modified:
-        changed.emit()
+        emit_changed()
 
 func snapshot() -> Dictionary:
     var state: Dictionary = {}
