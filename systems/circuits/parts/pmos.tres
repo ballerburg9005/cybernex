@@ -1,35 +1,41 @@
-[gd_resource type="Resource" script_class="CircuitPart" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="CircuitPart" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://systems/circuits/CircuitPart.gd" id="part"]
 [ext_resource type="Script" path="res://systems/circuits/CircuitPin.gd" id="pin"]
+[ext_resource type="Texture2D" path="res://assets/tileset_electronics.png" id="original_atlas"]
+
+[sub_resource type="AtlasTexture" id="original_atlas_sprite"]
+atlas = ExtResource("original_atlas")
+region = Rect2(32, 48, 32, 32)
 
 [sub_resource type="Resource" id="Pin0"]
 script = ExtResource("pin")
 side = 0
-offset = 0
+offset = 1
 name = "G"
 wire_group = 0
 
 [sub_resource type="Resource" id="Pin1"]
 script = ExtResource("pin")
-side = 1
-offset = 0
+side = 2
+offset = 1
 name = "D"
 wire_group = 0
 
 [sub_resource type="Resource" id="Pin2"]
 script = ExtResource("pin")
 side = 3
-offset = 0
+offset = 1
 name = "S"
 wire_group = 0
 
 [resource]
 script = ExtResource("part")
 part_id = "pmos"
-label = "P-channel MOSFET"
+label = "PMOS"
+sprite = SubResource("original_atlas_sprite")
 model = "pmos"
-footprint = Vector2i(1, 1)
+footprint = Vector2i(2, 2)
 pins = Array[ExtResource("pin")]([SubResource("Pin0"), SubResource("Pin1"), SubResource("Pin2")])
 value = 0.12
 secondary_value = 2.4
