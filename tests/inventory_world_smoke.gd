@@ -19,6 +19,7 @@ func _run() -> void:
     var game: Control = main_scene.instantiate()
     root.add_child(game)
     var drawer: Control = game.get_node("HUD/FullInventory")
+    print("HUD 720: viewport=", game.get_viewport_rect().size, " drawer=", drawer.get_global_rect())
     check(drawer.size.x >= 345.0 and drawer.size.x < 450.0,
         "Inventory must use a fixed compact width at default 720p and cannot push the grid off-screen.")
     check(drawer.position.x <= 12.0, "Exploration inventory drawer must stay left of centered player.")
@@ -58,6 +59,8 @@ func _run() -> void:
     var bench: CircuitWorkbench = terminal.ui_menu
     check(bench != null and bench.field_inventory == player.inventory, "Terminal workbench should bind actual player backpack.")
     check(game.puzzle_active and drawer.visible, "Circuit opening should preserve the same physical inventory grid.")
+    print("HUD PUZZLE: drawer=", drawer.get_global_rect(), " board=", bench.get_global_rect(),
+        " quick_visible=", game.get_node("HUD/QuickInventory").visible)
     check(drawer.position.x > 500.0 and not game.get_node("HUD/QuickInventory").visible,
         "Puzzle mode moves the drawer right and hides quick access.")
     check(not game.get_node("HUD/TextBox/HBoxContainer/S3").visible,
