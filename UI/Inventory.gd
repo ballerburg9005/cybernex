@@ -68,7 +68,7 @@ func configure(model: Inv, owner_inventory: Inv = null, display_mode: String = "
         return
     inv.ensure_slots()
     if mode != "hotbar":
-        inv.normalize()
+        inv.ensure_slots() # Do not compact the player’s carefully positioned stacks.
     else:
         # Quickbar entries are references to backpack items, never duplicated stock.
         for i in range(inv.size()):
@@ -128,11 +128,16 @@ func refresh() -> void:
         for i in range(inv.size()):
             indices.append(i)
     else:
-        indices.append_array(occupied)
         if filtering == 0:
-            # Show the full authored backpack grid, including empty slots.
-            indices.append_array(available)
+            for i in range(inv.size()):
+                indices.append(i) # Preserve physical slot indexes and gaps.
+        else:
+            indices.append_array(occupied)
     grid_container.columns = 10
+    var visible_rows: int = maxi(1, floori(maxf(48.0, $Layout/Scroll.size.y - 12.0) / 50.0))
+    if mode != "hotbar":
+        while indices.size() < maxi(50, visible_rows * 10):
+            indices.append(-1)
     if mode != "hotbar":
         while indices.size() % 10 != 0:
             indices.append(-1)
