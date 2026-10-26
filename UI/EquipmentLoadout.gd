@@ -34,7 +34,7 @@ func can_assign(slot_id: String, item: InvItem, backpack: Inv) -> bool:
         return false
     var occupied: int = 0
     for key in SOCKETS:
-        if key != slot_id and item_at(key) == item:
+        if key != slot_id and Inv.matches(item_at(key), item):
             occupied += 1
     return backpack.count(item) >= occupied + 1
 
@@ -55,12 +55,12 @@ func can_relocate(from_id: String, to_id: String, backpack: Inv) -> bool:
     if not allowed or not current.equipment_slots.has(to_id):
         return false
     var destination: InvItem = item_at(to_id)
-    if destination == current:
+    if Inv.matches(destination, current):
         return true
     # Swapping gear retains any displaced item in the backpack.
     var elsewhere: int = 0
     for socket in SOCKETS:
-        if socket != from_id and socket != to_id and item_at(socket) == current:
+        if socket != from_id and socket != to_id and Inv.matches(item_at(socket), current):
             elsewhere += 1
     return backpack.count(current) > elsewhere
 
@@ -84,13 +84,14 @@ func reconcile(backpack: Inv) -> void:
         var item: InvItem = item_at(key)
         if item == null:
             continue
-        var assigned: int = int(usage.get(item, 0))
+        var item_identity: String = Inv.item_key(item)
+        var assigned: int = int(usage.get(item_identity, 0))
         var valid_type: bool = bool(item.type & InvItem.IS_WEAPON) if key.begins_with("weapon_") else bool(item.type & InvItem.IS_AUGMENTATION)
         if not valid_type or not item.equipment_slots.has(key) or backpack.count(item) <= assigned:
             set(key, null)
             modified = true
         else:
-            usage[item] = assigned + 1
+            usage[item_identity] = assigned + 1
     if modified:
         emit_changed()
 
