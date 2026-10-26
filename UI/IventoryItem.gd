@@ -31,7 +31,7 @@ func refresh() -> void:
         tooltip_text = "Empty slot"
         return
     image.texture = cell.item.texture
-    number.text = "×%d" % amount
+    number.text = str(amount) if amount > 1 else ""
     var lines := PackedStringArray()
     lines.append("%s   ×%d" % [cell.item.name, amount])
     if not cell.item.description.is_empty():
