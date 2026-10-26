@@ -84,6 +84,11 @@ func _input(event: InputEvent) -> void:
                 obj.activate(self)
     if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_X:
         fire_arc_tool()
+    elif event is InputEventMouseButton and event.pressed \
+        and event.button_index == MOUSE_BUTTON_RIGHT:
+        # Right-click fires ONLY over actual World2D. Right-button drag from a
+        # backed inventory still carries the complete physical item stack.
+        fire_arc_tool()
 
 func _physics_process(delta):
     equipment_runtime.tick(delta, equipment, inventory)
