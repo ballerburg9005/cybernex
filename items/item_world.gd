@@ -12,6 +12,12 @@ var mytype: String = "item"
 var myname: String = "Item"
 
 func _ready() -> void:
+    # @tool executes this callback during editor/import scene previews too.
+    # A non-@tool InvSlot is only a placeholder in the editor, so calling
+    # occupied() there causes "Invalid call function on a placeholder instance".
+    # Runtime art, name and inventory behavior initialize in the game instead.
+    if Engine.is_editor_hint():
+        return
     if itemslot == null or not itemslot.occupied():
         itemslot = InvSlot.new(preload("res://items/missing.tres"), 1)
     $Sprite2D.texture = itemslot.item.texture
