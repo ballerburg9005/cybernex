@@ -84,7 +84,7 @@ func _setup_compact_hud() -> void:
     $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/S2.visible = false
     $HUD/FullInventory/VBoxContainer/HBoxContainer/S3.visible = false
     $HUD/FullInventory/VBoxContainer/S.visible = false
-    $HUD/QuickInventory/S.visible = false
+    $HUD/QuickInventory.visible = true
     $HUD/FullInventory/VBoxContainer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     $HUD/FullInventory/VBoxContainer/HBoxContainer.size_flags_vertical = Control.SIZE_EXPAND_FILL
     var backpack: InventoryView = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems
@@ -96,13 +96,20 @@ func _setup_compact_hud() -> void:
     dark.bg_color = Color(0.05, 0.075, 0.09, 0.95)
     dark.border_color = Color(0.31, 0.39, 0.4)
     dark.set_border_width_all(1)
-    dark.set_corner_radius_all(7)
+    dark.set_corner_radius_all(0)
     # Journal sides are twice as spacious as top/bottom.
-    dark.content_margin_left = 18.0
+    dark.content_margin_left = 6.0
     dark.content_margin_right = 18.0
     dark.content_margin_top = 9.0
     dark.content_margin_bottom = 9.0
     paper.add_theme_stylebox_override("panel", dark)
+    var hotbar_back: StyleBoxFlat = dark.duplicate()
+    hotbar_back.bg_color = Color("#34383d")
+    hotbar_back.content_margin_left = 4
+    hotbar_back.content_margin_right = 4
+    hotbar_back.content_margin_top = 3
+    hotbar_back.content_margin_bottom = 3
+    $HUD/QuickInventory.add_theme_stylebox_override("panel", hotbar_back)
     var enclosing: StyleBoxFlat = dark.duplicate()
     enclosing.content_margin_left = 5.0
     enclosing.content_margin_right = 5.0
@@ -118,7 +125,7 @@ func _setup_compact_hud() -> void:
     page_back.content_margin_top = 9.0
     page_back.content_margin_bottom = 9.0
     $HUD/FullInventory/VBoxContainer/PdaPage.add_theme_stylebox_override("normal", page_back)
-    $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Section.add_theme_font_size_override("font_size", 14)
+    $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Section.add_theme_font_size_override("font_size", 28)
     $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Section.add_theme_color_override("font_color", Color("#e7ece7"))
     $HUD/TextBox/S2.visible = false
     $HUD/TextBox/HBoxContainer/S3.visible = false
@@ -127,7 +134,9 @@ func _setup_compact_hud() -> void:
     feed.add_theme_font_size_override("bold_font_size", 17)
     feed.add_theme_color_override("default_color", Color("#e7ece7"))
     $HUD/TextBox/HBoxContainer/MarginContainer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    $HUD/TextBox/HBoxContainer.custom_minimum_size.y = 122.0
+    $HUD/TextBox/HBoxContainer.custom_minimum_size.y = 0.0
+    $HUD/TextBox/HBoxContainer/MarginContainer.add_theme_constant_override("margin_right", 8)
+    $HUD/TextBox/HBoxContainer/MarginContainer.add_theme_constant_override("margin_bottom", 6)
     $HUD/TextBox/HBoxContainer.size_flags_vertical = Control.SIZE_SHRINK_END
     feed.scroll_following = true
     feed.scroll_active = true
@@ -155,15 +164,15 @@ func _layout_hud() -> void:
     quick.set_anchors_preset(Control.PRESET_TOP_LEFT)
     quick.offset_left = (viewport.x - QUICKBAR_WIDTH) * 0.5
     quick.offset_right = quick.offset_left + QUICKBAR_WIDTH
-    quick.offset_top = viewport.y - 65.0
-    quick.offset_bottom = viewport.y - 6.0
+    quick.offset_top = viewport.y - 73.0
+    quick.offset_bottom = viewport.y - 4.0
 
     var journal: Control = $HUD/TextBox
     journal.set_anchors_preset(Control.PRESET_TOP_LEFT)
     journal.offset_left = 6.0 if puzzle_active else quick.offset_right + 8.0
     journal.offset_right = viewport.x - 6.0
-    journal.offset_top = viewport.y - 65.0
-    journal.offset_bottom = viewport.y - 6.0
+    journal.offset_top = viewport.y - 70.0
+    journal.offset_bottom = viewport.y - 2.0
 
     if active_circuit != null and is_instance_valid(active_circuit):
         active_circuit.set_anchors_preset(Control.PRESET_TOP_LEFT)
