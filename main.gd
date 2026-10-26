@@ -379,7 +379,7 @@ func _safe_drop_position(target: Vector2) -> Dictionary:
 ## A GUI drag is only an item Resource payload. If released over valid world
 ## ground, create exactly one proper world body at the camera-converted point.
 ## No UI collision shapes or world-side drag clones are ever involved.
-func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_position: Vector2) -> void:
+func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_position: Vector2, amount: int = 1) -> void:
     if item == null or player == null or world == null:
         return
     if source != player.inventory and source != player.quickinventory:
@@ -387,7 +387,9 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
     var drag_cell: InvSlot = source.slot_at(source_index)
     # Never look up an arbitrary item by type if a queued GUI refresh changed
     # the source slot during drag: that made pliers turn into other gear.
-    if drag_cell == null or not Inv.matches(drag_cell.item, item) or not player.inventory.has(item):
+    if drag_cell == null or not Inv.matches(drag_cell.item, item) or amount < 1 \
+        or not player.inventory.has(item, amount) \
+        or (source == player.inventory and drag_cell.count < amount):
         return
     if puzzle_active or is_hud_drop_region(viewport_position):
         return
@@ -433,10 +435,10 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
     if not bool(safe.get("ok", false)):
         p("There is nowhere for %s to land." % item.name)
         return
-    if not player.inventory.remove_item(item, 1):
+    if not player.inventory.remove_item(item, amount):
         return
     var dropped: Node2D = preload("res://items/item_world.tscn").instantiate()
-    dropped.set("itemslot", InvSlot.new(item, 1))
+    dropped.set("itemslot", InvSlot.new(item, amount))
     world.add_child(dropped)
     dropped.global_position = safe["point"]
     p("%s dropped. Remaining: %d." % [item.name, player.inventory.count(item)])
