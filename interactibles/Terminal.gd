@@ -32,11 +32,12 @@ func _ready():
     # Scene-owned loot: never mutate a globally cached .tres in another
     # terminal, second level or loaded save.
     loot = loot.duplicate(true) if loot != null else Inv.new(9)
-    if loot.count() > 0:
-        has_loot = true
-        for i in range(0,max(9, loot.items.size())):
-            if i >= loot.items.size():
-                loot.items += [InvSlot.new()]
+    # Empty editor-authored Array([]) overrides Inv._init(), so all
+    # terminals must grow their own nine real slots before saving/loading.
+    while loot.items.size() < 9:
+        loot.items.append(InvSlot.new())
+    loot.ensure_slots()
+    has_loot = loot.count() > 0
     
     for signal_description in get_signal_list():
         var signal_name = str(signal_description["name"])
