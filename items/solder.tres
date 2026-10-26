@@ -17,4 +17,4 @@ damage = 0.0
 combos = []
 type = 0
 equipment_slots = PackedStringArray()
-description = "Soft solder used for improvised jumpers and contact repairs."
+description = "Soft solder, 95% lead, rosin core."
