@@ -17,9 +17,9 @@ func setup(equipment: EquipmentLoadout, inventory: Inv, panel: Control) -> void:
 func update_display() -> void:
     var item: InvItem = loadout.item_at(slot_id) if loadout != null else null
     var name_tag: String = slot_id.replace("augment_", "").replace("weapon_", "").replace("_", " ").to_upper()
-    text = (name_tag + "  /  " + (item.short_name if not item.short_name.is_empty() else item.name)) if item != null else name_tag + "  /  EMPTY"
+    text = name_tag + ("\n" + (item.short_name if not item.short_name.is_empty() else item.name).left(9) if item != null else "")
     icon = item.texture if item != null else null
-    expand_icon = true
+    expand_icon = false
     icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
     var owned: int = backpack.count(item) if item != null and backpack != null else 0
     tooltip_text = ("%s    owned ×%d\n%s" % [item.name, owned, item.description]) if item != null else ("EQUIP: " + slot_id.replace("_", " "))
