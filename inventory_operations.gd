@@ -3,7 +3,7 @@ class_name InventoryOperations
 
 ## Slot-targeted Godot drag transactions. Source and destination state are
 ## staged separately; successful recipes emit changes only AFTER both commit.
-static func move_or_combine(source: Inv, from_index: int, destination: Inv, to_index: int) -> Dictionary:
+static func move_or_combine(source: Inv, from_index: int, destination: Inv, to_index: int, amount: int = -1) -> Dictionary:
     if source == null or destination == null:
         return _fail("Invalid inventory")
     var origin: InvSlot = source.slot_at(from_index)
@@ -11,6 +11,9 @@ static func move_or_combine(source: Inv, from_index: int, destination: Inv, to_i
         return _fail("Invalid source or target slot")
     if source == destination and from_index == to_index:
         return _fail("Same slot")
+    var original_quantity: int = origin.count
+    if amount == 0:
+        return _fail("Empty movement")
     var target: InvSlot = destination.slot_at(to_index)
     if target != null:
         var recipe: InvCombo = _recipe(origin.item, target.item)
@@ -22,7 +25,7 @@ static func move_or_combine(source: Inv, from_index: int, destination: Inv, to_i
     var a: Array[Dictionary] = source._state()
     var b: Array[Dictionary] = a if source == destination else destination._state()
     var item: InvItem = a[from_index]["item"]
-    var quantity: int = int(a[from_index]["count"])
+    var quantity: int = mini(original_quantity, amount) if amount > 0 else original_quantity
     if Inv.matches(b[to_index]["item"], item):
         var transfer: int = mini(quantity, maxi(0, destination.max_stack - int(b[to_index]["count"])))
         if transfer <= 0:
@@ -38,10 +41,14 @@ static func move_or_combine(source: Inv, from_index: int, destination: Inv, to_i
         if a[from_index]["count"] <= 0:
             a[from_index] = _empty()
     elif source == destination:
+        if quantity < original_quantity:
+            return _fail("An occupied slot can only exchange a whole stack")
         var previous: Dictionary = b[to_index]
         b[to_index] = a[from_index]
         a[from_index] = previous
     else:
+        if quantity < original_quantity:
+            return _fail("An occupied slot can only exchange a whole stack")
         # Moving between containers may exchange whole piles if each fits.
         if int(b[to_index]["count"]) > source.max_stack or int(a[from_index]["count"]) > destination.max_stack:
             return _fail("Swapped stack exceeds container capacity")
@@ -50,7 +57,7 @@ static func move_or_combine(source: Inv, from_index: int, destination: Inv, to_i
         a[from_index] = previous
     if not _commit_both(source, a, destination, b):
         return _fail("Inventory full; movement cancelled")
-    return {"ok": true, "message": "Moved"}
+    return {"ok": true, "message": "Moved %dx" % quantity}
 
 static func _recipe(from: InvItem, to: InvItem) -> InvCombo:
     if from == null or to == null:
