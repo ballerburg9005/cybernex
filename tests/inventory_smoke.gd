@@ -339,7 +339,9 @@ func test_physical_slot_positions_and_gesture_amounts() -> void:
     check(filler.index == -1 and filler.disabled and filler.number.text == "×",
         "Grid extends below storage capacity with dark disabled X-marked cells.")
     var preview: Control = occupied_slot._make_preview(copper, 6)
-    check(preview.z_index >= 2000 and preview.get_child(0).get_child(0).texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,
-        "Mouse-held pixel art must render visibly above HUD at original crisp integer scale.")
+    check(preview is TextureRect and preview.z_index >= 2000
+        and preview.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
+        and preview.get_child_count() == 0,
+        "Mouse-held inventory icon must be a bare native-scaled sprite without a background card.")
     preview.free()
     inventory_ui.queue_free()
