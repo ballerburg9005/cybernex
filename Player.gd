@@ -73,8 +73,12 @@ func _input(event: InputEvent) -> void:
         if interface != null and not interface.mouse_over_ui and not interface.get_node("HUD/FullInventory").visible:
             fire_arc_tool()
     if event.is_action_pressed("action_inventory"):
-        var panel: Control = get_node("/root/main/HUD/FullInventory")
-        panel.visible = not panel.visible
+        var host: Node = get_node("/root/main")
+        var panel: Control = host.get_node("HUD/FullInventory")
+        if host.puzzle_active:
+            host.cycle_drawer(1)
+        else:
+            panel.visible = not panel.visible
 
 
 func _physics_process(delta):
