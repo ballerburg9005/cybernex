@@ -16,18 +16,27 @@ var authored_notes: String = ""
 var authored_computer_readout: String = ""
 const PAGES := ["CONTENTS", "NOTES", "COMPUTER"]
 
-@onready var desk_view: InventoryView = $Layout/Contents/DeskItems
-@onready var bag_view: InventoryView = $Layout/Contents/Backpack
+@onready var desk_view: InventoryView = $Columns/DeskPanel/Layout/Contents/DeskItems
+@onready var bag_view: InventoryView = $Columns/BackpackPanel/BackpackLayout/Backpack
 
 func _ready() -> void:
-    $Layout/Navigation/Previous.pressed.connect(func() -> void: _select_page(page_index - 1))
-    $Layout/Navigation/Next.pressed.connect(func() -> void: _select_page(page_index + 1))
-    $Layout/Navigation/Close.pressed.connect(close)
-    $Layout/Bottom/TakeAll.pressed.connect(take_all)
-    $Layout/Bottom/Power.pressed.connect(toggle_power)
+    $Columns/DeskPanel/Layout/Navigation/Previous.pressed.connect(func() -> void: _select_page(page_index - 1))
+    $Columns/DeskPanel/Layout/Navigation/Next.pressed.connect(func() -> void: _select_page(page_index + 1))
+    $Columns/DeskPanel/Layout/Navigation/Close.pressed.connect(close)
+    $Columns/DeskPanel/Layout/Bottom/TakeAll.pressed.connect(take_all)
+    $Columns/DeskPanel/Layout/Bottom/Power.pressed.connect(toggle_power)
     desk_view.feedback.connect(_log)
     bag_view.feedback.connect(_log)
     get_viewport().size_changed.connect(reflow)
+    var panel_style := StyleBoxFlat.new()
+    panel_style.bg_color = Color("#161e23")
+    panel_style.border_color = Color("#4d6369")
+    panel_style.set_border_width_all(1)
+    panel_style.content_margin_left = 5
+    panel_style.content_margin_right = 5
+    panel_style.content_margin_top = 5
+    panel_style.content_margin_bottom = 5
+    add_theme_stylebox_override("panel", panel_style)
     reflow()
 
 func configure_contents(incoming: Inv, bag: Inv, on_event: Callable,
@@ -55,15 +64,15 @@ func reflow() -> void:
 
 func _select_page(next: int) -> void:
     page_index = posmod(next, PAGES.size())
-    $Layout/Navigation/Page.text = "DESK / %s                        BACKPACK" % PAGES[page_index]
+    $Columns/DeskPanel/Layout/Navigation/Page.text = "DESK / %s" % PAGES[page_index]
     desk_view.visible = page_index == 0
-    $Layout/Contents/DetailPanel.visible = page_index != 0
-    $Layout/Bottom/TakeAll.visible = page_index == 0
-    $Layout/Bottom/Power.visible = page_index == 2
+    $Columns/DeskPanel/Layout/Contents/DetailPanel.visible = page_index != 0
+    $Columns/DeskPanel/Layout/Bottom/TakeAll.visible = page_index == 0
+    $Columns/DeskPanel/Layout/Bottom/Power.visible = page_index == 2
     if page_index == 1:
-        $Layout/Contents/DetailPanel/Description.text = authored_notes if not authored_notes.is_empty() else "Papers and loose sheets."
+        $Columns/DeskPanel/Layout/Contents/DetailPanel/Description.text = authored_notes if not authored_notes.is_empty() else "Papers and loose sheets."
     elif page_index == 2:
-        $Layout/Contents/DetailPanel/Description.text = (authored_computer_readout if not authored_computer_readout.is_empty() else "Workstation PC.") if computer_powered else "Black display."
+        $Columns/DeskPanel/Layout/Contents/DetailPanel/Description.text = (authored_computer_readout if not authored_computer_readout.is_empty() else "Workstation PC.") if computer_powered else "Black display."
 
 func toggle_power() -> void:
     computer_powered = not computer_powered
