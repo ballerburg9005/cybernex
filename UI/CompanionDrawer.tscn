@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://UI/CompanionDrawer.gd" id="script"]
+[ext_resource type="PackedScene" path="res://UI/Inventory.tscn" id="stock"]
+
+[node name="CompanionDrawer" type="PanelContainer"]
+visible = false
+mouse_filter = 0
+script = ExtResource("script")
+
+[node name="Layout" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Nav" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Previous" type="Button" parent="Layout/Nav"]
+custom_minimum_size = Vector2(38, 36)
+layout_mode = 2
+focus_mode = 0
+text = "◀"
+
+[node name="Section" type="Label" parent="Layout/Nav"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 28
+text = "BACKPACK"
+
+[node name="Next" type="Button" parent="Layout/Nav"]
+custom_minimum_size = Vector2(38, 36)
+layout_mode = 2
+focus_mode = 0
+text = "▶"
+
+[node name="InventoryItems" parent="Layout" instance=ExtResource("stock")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Info" type="RichTextLabel" parent="Layout"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 0
+theme_override_font_sizes/normal_font_size = 22
+bbcode_enabled = true
+scroll_active = true
+text = ""
