@@ -39,10 +39,13 @@ func _run() -> void:
     created.activate(player)
     check(player.inventory.count(item) == quantity, "Picking up the dropped object must restore its original count.")
     game.mouse_over_ui = true
-    game._handle_world_drop(player.inventory, player.inventory.find(item), item, screen_point)
+    game.get_node("HUD/FullInventory").visible = true
+    var ui_point: Vector2 = game.get_node("HUD/FullInventory").get_global_rect().get_center()
+    game._handle_world_drop(player.inventory, player.inventory.find(item), item, ui_point)
+    game.get_node("HUD/FullInventory").visible = false
     check(player.inventory.count(item) == quantity, "Item released over UI should never be dropped on the floor.")
     game.mouse_over_ui = false
-    game._handle_world_drop(player.inventory, player.inventory.find(item), item, screen_point + Vector2(900, 0))
+    game._handle_world_drop(player.inventory, player.inventory.find(item), item, screen_point + Vector2(9000, 0))
     check(player.inventory.count(item) == quantity, "Out-of-reach world drop must preserve stock.")
     # World terminal must use the SAME physical backpack as the grid/mannequin.
     var terminal = game.get_node("World/Terminal")
