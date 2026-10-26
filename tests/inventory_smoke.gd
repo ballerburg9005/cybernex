@@ -117,8 +117,8 @@ func test_loadout_counts() -> void:
     check(bag.count(pistol) == 1, "Equipment references backpack stock rather than duplicating it.")
     bag.add_item(pistol)
     check(body.assign("weapon_secondary", pistol, bag), "Two identical pistols can occupy two hands.")
-    check(not body.assign("augment_legs", regulator, bag), "Incompatible augmentation sockets should reject item.")
-    check(body.assign("augment_neural", regulator, bag), "Neural regulator should equip to neural slot.")
+    check(body.assign("augment_legs", regulator, bag), "Even nonsensical body placements are physically allowed.")
+    check(body.relocate("augment_legs", "augment_neural", bag), "Player must manually move regulator to neural socket.")
     bag.remove_item(pistol, 1)
     body.reconcile(bag)
     check(body.item_at("weapon_primary") != null and body.item_at("weapon_secondary") == null, "Equipment should unequip unsupported duplicate after item loss.")
@@ -271,12 +271,10 @@ func test_crafting_index() -> void:
         if Inv.matches(entry["source"], cutters) and Inv.matches(entry["target"], heavy):
             candidate = i
             break
-    check(candidate >= 0, "Inventory crafting bar should list tool + cable.")
-    if candidate >= 0:
-        check(panel.offered_recipes[candidate]["can_craft"], "Recipe must be available once the material is present.")
-        panel.recipe_selector.select(candidate)
-        panel._assemble_selected()
-        check(bag.count(heavy) == 0 and bag.count(wires) == 3 and bag.count(cutters) == 1, "Assembly bar must use atomic crafting, consuming material but not tools.")
+    check(candidate == -1 and not panel.get_node("Layout/Crafting").visible, "Explicit recipe UI must stay hidden; combinations are discovered by dragging.")
+    var cut: Dictionary = InventoryOperations.move_or_combine(bag, bag.find(cutters), bag, bag.find(heavy))
+    check(bool(cut["ok"]) and bag.count(heavy) == 0 and bag.count(wires) == 3 and bag.count(cutters) == 1,
+        "Dragging ingredients must craft real material with reusable cutters.")
     panel.queue_free()
 
 func test_equipment_identity_and_manual_grouping() -> void:
