@@ -4,6 +4,7 @@ class_name CircuitWorkbench
 ## Standalone vertical slice. Godot Inspector edits the .tres templates and
 ## board placements; runtime uses the same resources without modifying originals.
 signal puzzle_solved
+signal journal_event(message: String)
 @export var authored_board: CircuitBoard
 @export var catalog: Array[CircuitPart] = []
 @export var item_catalog: Array[InvItem] = []
@@ -24,6 +25,7 @@ var simulation := CircuitSimulation.new()
 var selected_index: int = -1
 var already_solved: bool = false
 var last_measurement: Dictionary = {}
+var meter_unlocked: bool = false
 
 func _ready() -> void:
     if authored_board == null:
@@ -31,17 +33,20 @@ func _ready() -> void:
         return
     board = authored_board.duplicate(true)
     board_view.board = board
+    board_view.workbench = self
     for part in catalog:
         if part != null:
             palette.add_item(part.label)
     _refresh_palette_labels()
     board_view.cell_clicked.connect(_on_board_click)
     board_view.board_changed.connect(_topology_changed)
+    board_view.rotation_requested.connect(_rotate_at_index)
+    board_view.incoming_part.connect(_install_inventory_part)
     timer.timeout.connect(_on_simulation_tick)
     %RotateButton.pressed.connect(_rotate_selected)
     %RemoveButton.pressed.connect(_remove_selected)
     run_button.pressed.connect(_toggle_running)
-    status.text = "Repair the circuit, then RUN. Click a part to select it."
+    status.text = ""
     board_view.queue_redraw()
 
 func _on_board_click(cell: Vector2i) -> void:
@@ -51,12 +56,12 @@ func _on_board_click(cell: Vector2i) -> void:
     if index >= 0:
         selected_index = index
         _refresh_probe()
-        status.text = "Selected: %s. Drag to reposition, or rotate." % board.placements[index].part.label
+        status.text = ""
         return
     if not timer.is_stopped():
         return
-    if catalog.is_empty() or palette.selected < 0:
-        return
+    if field_inventory != null:
+        return # Player must drag a physical spare from the inventory.
     var new_part := CircuitPlacement.new()
     new_part.part = catalog[palette.selected]
     new_part.cell = cell
@@ -67,22 +72,28 @@ func _on_board_click(cell: Vector2i) -> void:
         selected_index = board.placements.size() - 1
         _topology_changed()
     else:
-        status.text = "No room: footprint overlaps an occupied cell."
+        _announce("The component does not fit the available footprint.")
 
 func _rotate_selected() -> void:
+    _rotate_at_index(selected_index)
+
+func _rotate_at_index(index: int) -> void:
     if not timer.is_stopped():
         return
-    if selected_index < 0 or selected_index >= board.placements.size():
+    if index < 0 or index >= board.placements.size():
         return
-    var old: CircuitPlacement = board.placements[selected_index]
+    selected_index = index
+    var old: CircuitPlacement = board.placements[index]
     if old.fixed_to_board or not old.part.can_rotate:
-        status.text = "This board component is fixed."
+        _announce("The component is riveted to the chassis.")
         return
     var rotated: CircuitPlacement = old.duplicate(true)
     rotated.rotation = (rotated.rotation + 1) % 4
-    if board.can_place(rotated, selected_index):
-        board.placements[selected_index] = rotated
+    if board.can_place(rotated, index):
+        board.placements[index] = rotated
         _topology_changed()
+    else:
+        _announce("No clearance to rotate this footprint.")
 
 func _remove_selected() -> void:
     if not timer.is_stopped():
@@ -90,7 +101,9 @@ func _remove_selected() -> void:
     if selected_index < 0 or selected_index >= board.placements.size():
         return
     if board.placements[selected_index].fixed_to_board or not board.placements[selected_index].part.can_remove:
-        status.text = "This board component cannot be removed."
+        _announce("The component cannot be extracted.")
+        return
+    if not _extraction_cost(selected_index):
         return
     var removed: CircuitPlacement = board.placements[selected_index]
     if field_inventory != null:
@@ -113,13 +126,13 @@ func _remove_selected() -> void:
 func _topology_changed() -> void:
     # Editing while energized is prohibited: realistic live-circuit edits come later.
     timer.stop()
-    run_button.text = "RUN"
+    run_button.text = "POWER"
     simulation = CircuitSimulation.new()
     last_measurement = {}
     if is_node_ready():
-        probe_report.text = "No measurement: board changed."
+        probe_report.text = ""
     already_solved = false
-    status.text = "Layout changed. RUN to measure voltage and temperature."
+    status.text = ""
     board_view.queue_redraw()
     board_view.allow_dragging = true
     _refresh_palette_labels()
@@ -140,7 +153,7 @@ func _on_simulation_tick() -> void:
     var state: Dictionary = simulation.step(board, timer.wait_time)
     last_measurement = state
     if not state["errors"].is_empty():
-        status.text = "Solver: " + "; ".join(state["errors"])
+        _announce("Electrical fault: " + "; ".join(state["errors"]))
         timer.stop()
         run_button.text = "RUN"
         board_view.allow_dragging = true
@@ -157,12 +170,13 @@ func _on_simulation_tick() -> void:
     board_view.queue_redraw()
     _refresh_probe()
     if state.has("newly_failed") and not state["newly_failed"].is_empty():
-        status.text = "Overcurrent/thermal failure destroyed part(s): %s" % str(state["newly_failed"])
+        _announce("Overcurrent destroyed an exposed component.")
         return
-    status.text = "Load: %.3f V | hottest: %.1f C | stable: %.2fs" % [voltage, highest, state["hold_seconds"]]
+    if meter_unlocked:
+        status.text = "%.3f V  /  %.1f °C" % [voltage, highest]
     if state["solved"] and not already_solved:
         already_solved = true
-        status.text += " | ACCESS ACTUATOR READY"
+        _announce("Actuator relay accepted the restored circuit.")
         puzzle_solved.emit()
 
 func set_field_inventory(stock: Inv) -> void:
@@ -283,6 +297,9 @@ func _refresh_probe() -> void:
         return
     var placement: CircuitPlacement = board.placements[selected_index]
     var part: CircuitPart = placement.part
+    if not meter_unlocked:
+        probe_report.text = ""
+        return
     var lines := PackedStringArray()
     lines.append("DMM // %s" % part.label)
     lines.append("ID %s | %s" % [part.part_id, "FAILED OPEN" if placement.failed_open else "present"])
@@ -307,3 +324,66 @@ func _refresh_probe() -> void:
         var temperature: float = float(last_measurement.get("temperatures_c", {}).get(selected_index, 23.0))
         lines.append("P = %.4f W  |  T = %.1f C" % [watts, temperature])
     probe_report.text = "\n".join(lines)
+
+func _announce(message: String) -> void:
+    if is_node_ready():
+        status.text = message
+    journal_event.emit(message)
+
+func set_meter_unlocked(value: bool) -> void:
+    meter_unlocked = value
+    _refresh_probe()
+
+func _install_inventory_part(item: InvItem, cell: Vector2i) -> void:
+    if timer == null or not timer.is_stopped() or board == null:
+        return
+    if item == null or item.circuit_part == null or field_inventory == null:
+        return
+    var placement := CircuitPlacement.new()
+    placement.part = item.circuit_part
+    placement.cell = cell
+    if not board.can_place(placement):
+        _announce("The part cannot fit the empty pad.")
+        return
+    if not _spend_component(placement.part):
+        _announce("Missing spare part or fresh solder for the joint.")
+        return
+    board.placements.append(placement)
+    selected_index = board.placements.size() - 1
+    _topology_changed()
+
+func can_extract_to(index: int, pack: Inv) -> bool:
+    if board == null or pack == null or not timer.is_stopped():
+        return false
+    if index < 0 or index >= board.placements.size():
+        return false
+    var placement: CircuitPlacement = board.placements[index]
+    if placement.fixed_to_board or not placement.part.can_remove:
+        return false
+    if placement.failed_open:
+        return pack.has(preload("res://items/side_cutters.tres"))
+    return pack.has(preload("res://items/solder.tres"))
+
+func extract_to_backpack(index: int, pack: Inv) -> bool:
+    if pack != field_inventory or not can_extract_to(index, pack):
+        _announce("Removing a soldered part requires solder; a burnt part must be cut with pliers.")
+        return false
+    selected_index = index
+    var previous: int = board.placements.size()
+    _remove_selected()
+    return board.placements.size() < previous
+
+func _extraction_cost(index: int) -> bool:
+    if field_inventory == null:
+        return true # Standalone circuit test bench does not carry real stock.
+    var placement: CircuitPlacement = board.placements[index]
+    if placement.failed_open:
+        if not field_inventory.has(preload("res://items/side_cutters.tres")):
+            _announce("Side cutters required to snap out the burnt lead.")
+            return false
+        return true
+    var solder: InvItem = preload("res://items/solder.tres")
+    if not field_inventory.remove_item(solder, 1):
+        _announce("Fresh solder required to desolder an intact component.")
+        return false
+    return true
