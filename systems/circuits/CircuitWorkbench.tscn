@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://systems/circuits/CircuitWorkbench.gd" id="workbench"]
 [ext_resource type="Script" path="res://systems/circuits/CircuitBoardView.gd" id="view"]
@@ -21,6 +21,7 @@
 [ext_resource type="Script" path="res://items/inventory_items.gd" id="item_script"]
 [ext_resource type="Resource" path="res://items/wire_bridge.tres" id="jumper_item"]
 [ext_resource type="Resource" path="res://items/resistor10.tres" id="resistor_item"]
+[ext_resource type="Resource" path="res://items/side_cutters.tres" id="cutters_item"]
 
 [sub_resource type="StyleBoxFlat" id="power_idle"]
 bg_color = Color(0.44, 0.075, 0.07, 0.98)
@@ -57,7 +58,7 @@ mouse_filter = 2
 script = ExtResource("workbench")
 authored_board = ExtResource("board")
 catalog = Array[ExtResource("part_script")]([ExtResource("r"), ExtResource("wire"), ExtResource("corner"), ExtResource("junction"), ExtResource("crossover"), ExtResource("diode"), ExtResource("npn"), ExtResource("pnp"), ExtResource("nmos"), ExtResource("pmos"), ExtResource("capacitor"), ExtResource("inductor")])
-item_catalog = Array[ExtResource("item_script")]([ExtResource("resistor_item"), ExtResource("jumper_item")])
+item_catalog = Array[ExtResource("item_script")]([ExtResource("resistor_item"), ExtResource("jumper_item"), ExtResource("cutters_item")])
 
 [node name="Panel" type="PanelContainer" parent="."]
 layout_mode = 1
