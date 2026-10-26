@@ -116,7 +116,7 @@ func _remove_selected() -> void:
         if removed.failed_open:
             field_inventory.add_item(preload("res://items/junk.tres"), 1)
         else:
-            var reclaimed: InvItem = _part_item(removed.part)
+            var reclaimed: InvItem = _tool_item(removed.held_item_id) if not removed.held_item_id.is_empty() else _part_item(removed.part)
             if reclaimed != null and not field_inventory.add_item(reclaimed, 1):
                 status.text = "Pack full. Cannot recover intact component."
                 return
@@ -265,7 +265,8 @@ func snapshot() -> Dictionary:
                 "rotation": placement.rotation,
                 "fixed": placement.fixed_to_board,
                 "failed": placement.failed_open,
-                "joint": placement.joint_resistance_ohms
+                "joint": placement.joint_resistance_ohms,
+                "held_item": placement.held_item_id
             })
     return {"placements": parts}
 
@@ -285,6 +286,12 @@ func restore(data: Dictionary) -> bool:
         if typeof(saved) != TYPE_DICTIONARY:
             return false
         var part_id: String = str(saved.get("part_id", ""))
+        var held_id: String = str(saved.get("held_item", ""))
+        if not held_id.is_empty():
+            var tool: InvItem = _tool_item(held_id)
+            if tool == null or part_id != "contact_" + held_id:
+                return false
+            catalog_by_id[part_id] = _contact_part(tool)
         if not catalog_by_id.has(part_id):
             return false
         var placement := CircuitPlacement.new()
@@ -292,6 +299,7 @@ func restore(data: Dictionary) -> bool:
         placement.cell = Vector2i(int(saved.get("x", -1)), int(saved.get("y", -1)))
         placement.rotation = posmod(int(saved.get("rotation", 0)), 4)
         placement.fixed_to_board = bool(saved.get("fixed", false))
+        placement.held_item_id = held_id
         placement.failed_open = bool(saved.get("failed", false))
         placement.joint_resistance_ohms = float(saved.get("joint", 0.0))
         if not is_finite(placement.joint_resistance_ohms) or placement.joint_resistance_ohms < 0.0 or placement.joint_resistance_ohms > 10.0:
@@ -377,6 +385,8 @@ func can_extract_to(index: int, pack: Inv) -> bool:
     var placement: CircuitPlacement = board.placements[index]
     if placement.fixed_to_board or not placement.part.can_remove:
         return false
+    if not placement.held_item_id.is_empty() and not placement.failed_open:
+        return _can_store_extracted(index, pack)
     if placement.failed_open:
         return pack.has(preload("res://items/side_cutters.tres")) and _can_store_extracted(index, pack)
     if placement.joint_resistance_ohms > 0.0:
@@ -394,11 +404,12 @@ func extract_to_backpack(index: int, pack: Inv) -> bool:
 
 func _can_store_extracted(index: int, stock: Inv) -> bool:
     var placement: CircuitPlacement = board.placements[index]
-    var recovered: InvItem = preload("res://items/junk.tres") if placement.failed_open else _part_item(placement.part)
+    var recovered: InvItem = preload("res://items/junk.tres") if placement.failed_open else (
+        _tool_item(placement.held_item_id) if not placement.held_item_id.is_empty() else _part_item(placement.part))
     if recovered == null:
         return true
     var preview: Inv = stock.duplicate(true)
-    if not placement.failed_open and placement.joint_resistance_ohms <= 0.0:
+    if not placement.failed_open and placement.held_item_id.is_empty() and placement.joint_resistance_ohms <= 0.0:
         preview.remove_item(preload("res://items/solder.tres"), 1)
     return preview.can_add(recovered, 1)
 
@@ -406,6 +417,8 @@ func _extraction_cost(index: int) -> bool:
     if field_inventory == null:
         return true # Standalone circuit test bench does not carry real stock.
     var placement: CircuitPlacement = board.placements[index]
+    if not placement.held_item_id.is_empty() and not placement.failed_open:
+        return true # Simply pick up the loose conducting tool, without solder.
     if placement.failed_open:
         if not field_inventory.has(preload("res://items/side_cutters.tres")):
             _announce("Side cutters required to snap out the burnt lead.")
@@ -419,15 +432,96 @@ func _extraction_cost(index: int) -> bool:
         return false
     return true
 
+## The tool itself is the low-ohm element: it stays on the board, is removed
+## from the backpack, heats under load and can be recovered without solder.
+## Tools with no authored contact resistance (including guns) are incompatible.
+func _tool_item(item_id: String) -> InvItem:
+    for candidate in item_catalog:
+        if candidate != null and candidate.item_id == item_id and candidate.contact_resistance_ohms > 0.0:
+            return candidate
+    return null
+
+func _contact_part(item: InvItem) -> CircuitPart:
+    var part := CircuitPart.new()
+    part.part_id = "contact_" + item.item_id
+    part.label = item.short_name if not item.short_name.is_empty() else item.name
+    part.model = "wire"
+    part.footprint = Vector2i.ONE
+    part.sprite = item.texture
+    part.value = item.contact_resistance_ohms
+    part.rated_watts = item.contact_rated_watts
+    part.thermal_capacity = 0.5
+    part.cooling_watts_per_kelvin = 0.04
+    part.failure_temperature_c = 120.0
+    var left := CircuitPin.new()
+    left.name = "L"
+    left.side = 0
+    var right := CircuitPin.new()
+    right.name = "R"
+    right.side = 2
+    part.pins = [left, right]
+    return part
+
+func _has_facing_terminal(cell: Vector2i, face: int) -> bool:
+    if board == null:
+        return false
+    var index: int = board.placement_at(cell)
+    if index < 0:
+        return false
+    var placement: CircuitPlacement = board.placements[index]
+    if placement.failed_open:
+        return false
+    for pin in placement.part.pins:
+        if pin == null:
+            continue
+        var exposed: Dictionary = placement.rotated_pin(pin)
+        if exposed["cell"] == cell and int(exposed["side"]) == face:
+            return true
+    return false
+
+func _contact_orientation(cell: Vector2i) -> int:
+    if board == null or not board.can_place(_candidate_contact(cell)):
+        return -1
+    if _has_facing_terminal(cell + Vector2i.LEFT, 2) and _has_facing_terminal(cell + Vector2i.RIGHT, 0):
+        return 0
+    if _has_facing_terminal(cell + Vector2i.UP, 3) and _has_facing_terminal(cell + Vector2i.DOWN, 1):
+        return 1
+    return -1
+
+func _candidate_contact(cell: Vector2i) -> CircuitPlacement:
+    var candidate := CircuitPlacement.new()
+    candidate.cell = cell
+    candidate.part = preload("res://systems/circuits/parts/wire_straight.tres")
+    return candidate
+
+func can_bridge_with_tool(item: InvItem, cell: Vector2i) -> bool:
+    return item != null and not item.item_id.is_empty() and item.contact_resistance_ohms > 0.0 \
+        and item.contact_rated_watts > 0.0 and field_inventory != null and field_inventory.has(item) \
+        and timer != null and timer.is_stopped() and _contact_orientation(cell) >= 0
+
 func _apply_tool_to_board(item: InvItem, cell: Vector2i) -> void:
-    if board == null or field_inventory == null or not timer.is_stopped():
-        return
-    if not Inv.matches(item, preload("res://items/side_cutters.tres")):
+    if board == null or field_inventory == null or not timer.is_stopped() or item == null:
         return
     var part_index: int = board.placement_at(cell)
-    if part_index < 0 or not board.placements[part_index].failed_open:
+    if part_index >= 0:
+        if not Inv.matches(item, preload("res://items/side_cutters.tres")):
+            return
+        if not board.placements[part_index].failed_open or not field_inventory.has(item):
+            return
+        if extract_to_backpack(part_index, field_inventory):
+            _announce("Burnt leads snapped. The cutters remain usable.")
         return
-    if not field_inventory.has(item):
+    if not can_bridge_with_tool(item, cell):
         return
-    if extract_to_backpack(part_index, field_inventory):
-        _announce("Burnt component leads snapped. The cutters remain usable.")
+    var rotation: int = _contact_orientation(cell)
+    var placement := CircuitPlacement.new()
+    placement.part = _contact_part(item)
+    placement.cell = cell
+    placement.rotation = rotation
+    placement.held_item_id = item.item_id
+    if not board.can_place(placement) or not field_inventory.remove_item(item, 1):
+        return
+    board.placements.append(placement)
+    selected_index = board.placements.size() - 1
+    _topology_changed()
+    _announce("%s rests across the contacts." % item.name)
