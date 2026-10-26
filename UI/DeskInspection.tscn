@@ -7,73 +7,104 @@
 mouse_filter = 0
 script = ExtResource("screen")
 
-[node name="Layout" type="VBoxContainer" parent="."]
+[node name="Columns" type="HBoxContainer" parent="."]
 layout_mode = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 0
 
-[node name="Navigation" type="HBoxContainer" parent="Layout"]
+[node name="BackpackPanel" type="PanelContainer" parent="Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BackpackLayout" type="VBoxContainer" parent="Columns/BackpackPanel"]
 layout_mode = 2
 
-[node name="Previous" type="Button" parent="Layout/Navigation"]
+[node name="Title" type="Label" parent="Columns/BackpackPanel/BackpackLayout"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+text = "BACKPACK"
+
+[node name="Backpack" parent="Columns/BackpackPanel/BackpackLayout" instance=ExtResource("inventory")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DeskPanel" type="PanelContainer" parent="Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Layout" type="VBoxContainer" parent="Columns/DeskPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+
+[node name="Navigation" type="HBoxContainer" parent="Columns/DeskPanel/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Previous" type="Button" parent="Columns/DeskPanel/Layout/Navigation"]
 layout_mode = 2
 focus_mode = 0
+custom_minimum_size = Vector2(38, 36)
 text = "◀"
 
-[node name="Page" type="Label" parent="Layout/Navigation"]
+[node name="Page" type="Label" parent="Columns/DeskPanel/Layout/Navigation"]
 layout_mode = 2
 size_flags_horizontal = 3
 horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 28
 text = "DESK / CONTENTS"
 
-[node name="Next" type="Button" parent="Layout/Navigation"]
+[node name="Next" type="Button" parent="Columns/DeskPanel/Layout/Navigation"]
 layout_mode = 2
 focus_mode = 0
+custom_minimum_size = Vector2(38, 36)
 text = "▶"
 
-[node name="Close" type="Button" parent="Layout/Navigation"]
+[node name="Close" type="Button" parent="Columns/DeskPanel/Layout/Navigation"]
 layout_mode = 2
 focus_mode = 0
-text = "CLOSE"
+custom_minimum_size = Vector2(38, 36)
+text = "×"
 
-[node name="Contents" type="HBoxContainer" parent="Layout"]
+[node name="Contents" type="VBoxContainer" parent="Columns/DeskPanel/Layout"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 9
 
-[node name="DeskItems" parent="Layout/Contents" instance=ExtResource("inventory")]
+[node name="DeskItems" parent="Columns/DeskPanel/Layout/Contents" instance=ExtResource("inventory")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="DetailPanel" type="PanelContainer" parent="Layout/Contents"]
+[node name="DetailPanel" type="PanelContainer" parent="Columns/DeskPanel/Layout/Contents"]
 visible = false
-custom_minimum_size = Vector2(505, 200)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Description" type="RichTextLabel" parent="Layout/Contents/DetailPanel"]
+[node name="Description" type="RichTextLabel" parent="Columns/DeskPanel/Layout/Contents/DetailPanel"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_font_sizes/normal_font_size = 16
+mouse_filter = 0
+theme_override_font_sizes/normal_font_size = 36
+theme_override_font_sizes/bold_font_size = 36
 bbcode_enabled = true
 scroll_active = true
-mouse_filter = 0
+text = ""
 
-[node name="Backpack" parent="Layout/Contents" instance=ExtResource("inventory")]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Bottom" type="HBoxContainer" parent="Layout"]
+[node name="Bottom" type="HBoxContainer" parent="Columns/DeskPanel/Layout"]
 layout_mode = 2
 
-[node name="TakeAll" type="Button" parent="Layout/Bottom"]
+[node name="TakeAll" type="Button" parent="Columns/DeskPanel/Layout/Bottom"]
 layout_mode = 2
 focus_mode = 0
 text = "TAKE ALL"
 
-[node name="Power" type="Button" parent="Layout/Bottom"]
+[node name="Power" type="Button" parent="Columns/DeskPanel/Layout/Bottom"]
 visible = false
 layout_mode = 2
 focus_mode = 0
