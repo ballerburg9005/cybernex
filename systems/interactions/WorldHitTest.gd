@@ -3,7 +3,7 @@ class_name WorldHitTest
 
 ## Place as a child of World, never of a HUD CanvasLayer.
 ## UI and world must never share physics Areas merely to drag inventory.
-@export_flags_2d_physics var interactable_layers: int = 49264
+@export_flags_2d_physics var interactable_layers: int = 49776
 @export var reference_physics_body: PhysicsBody2D
 
 func viewport_to_world(viewport_position: Vector2) -> Vector2:
