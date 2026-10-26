@@ -4,6 +4,7 @@ class_name InventoryView
 ## One inventory is the source of truth. Change signals rebuild only visible
 ## controls, replacing 200ms polling and per-cell physics collisions.
 signal feedback(message: String)
+signal use_requested(item: InvItem)
 signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2)
 @export var inv: Inv
 @export_enum("backpack", "hotbar") var mode: String = "backpack"
@@ -139,6 +140,10 @@ func refresh() -> void:
     $Layout/SearchBar.visible = mode != "hotbar"
     sort_button.visible = mode != "hotbar"
     filter_button.visible = mode != "hotbar"
+
+func request_use(item: InvItem) -> void:
+    if item != null and backpack != null and backpack.has(item):
+        use_requested.emit(item)
 
 func message(value: String) -> void:
     info.text = value
