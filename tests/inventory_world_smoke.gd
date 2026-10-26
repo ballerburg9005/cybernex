@@ -114,6 +114,13 @@ func _run() -> void:
     var world: Node2D = game.get_node("World")
     var picker: WorldHitTest = world.get_node("WorldHitTest")
     check(picker.reference_physics_body == player, "World hover picker must reference actual player physics canvas.")
+    var bot_scene: CharacterBody2D = game.get_node("World/Enemy")
+    var door_scene: Node2D = game.get_node("World/Door-0-0")
+    check(bot_scene.z_index == player.z_index and bot_scene.get_node("Sprite").z_index == 0
+        and bot_scene.get_node("CPUParticles2D").show_behind_parent,
+        "Robot sprite must join player Y-sort layer, with its dust/shadow behind actors.")
+    check(door_scene.z_index == player.z_index and door_scene.y_sort_enabled,
+        "Open bulkhead must join character Y-sort layer to cover players walking behind it.")
     check(game._hover_target_name(player) == "player" and picker.interactable_layers & (1 << 9) != 0,
         "Player must remain identifiable by world hover like other interactive objects.")
     var viewport_point: Vector2 = picker.world_to_viewport(player.global_position)
