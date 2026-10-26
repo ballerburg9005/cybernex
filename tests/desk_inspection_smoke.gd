@@ -39,10 +39,15 @@ func _run() -> void:
     panel._select_page(1)
     check(panel.bag_view.visible and panel.get_node("Layout/Contents/DetailPanel").visible,
         "Notes page must keep actual backpack visible alongside inspection pane.")
+    check(panel.get_node("Layout/Contents/DetailPanel/Description").text.contains("dosimeter"),
+        "Desk notes should be authored evidence from this actual desk, not generic UI help.")
     panel._select_page(2)
+    check(panel.get_node("Layout/Contents/DetailPanel/Description").text.contains("RAD-MON"),
+        "Desk computer should show its own signal/text log while powered on.")
     panel.toggle_power()
-    check(not panel.computer_powered and game.hud_textbox.text.contains("PC shuts off."),
-        "Computer page must route machine action to lower accessible event journal.")
+    check(not panel.computer_powered and not desk.computer_powered
+        and game.hud_textbox.text.contains("PC shuts off."),
+        "Computer page must persist power to desk and narrate change in accessible event journal.")
     panel._select_page(0)
     var player_before: int = player.inventory.count()
     check(panel.take_all(), "TAKE ALL should transfer compatible real desk contents.")
@@ -51,6 +56,21 @@ func _run() -> void:
     panel.close()
     check(game.desk_inspection == null, "Closing a desk frees its modal capture.")
     check(not game.ui_captures_world_input(), "Closing desk restores normal world action keys.")
+    var saved_desk: Dictionary = WorldSave.capture(game)
+    check(saved_desk["terminals"]["Desk"]["computer_powered"] == false,
+        "Versioned world save must capture each desk computer's actual power state.")
+    desk.computer_powered = true
+    check(WorldSave.restore(game, saved_desk) and not desk.computer_powered,
+        "Loading the saved station must restore computer power before next inspection.")
+    desk.activate(player)
+    var revisited: DeskInspection = game.desk_inspection
+    check(revisited != null and revisited.computer_powered == false,
+        "Revisiting desk after save/load must show the real OFF condition.")
+    if revisited != null:
+        revisited._select_page(2)
+        check(revisited.get_node("Layout/Contents/DetailPanel/Description").text == "Black display.",
+            "Unpowered desk terminal must not reveal computer data.")
+        revisited.close()
     var old_count: int = player.inventory.count(cutters)
     game.get_node("HUD/FullInventory").show()
     game._select_drawer_page(0)
