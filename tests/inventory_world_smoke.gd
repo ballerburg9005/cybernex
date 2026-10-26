@@ -61,6 +61,19 @@ func _run() -> void:
     check(quick.visible and absf(quick.get_global_rect().get_center().x - 640.0) < 5.0
         and quick.get_global_rect().end.x + 2.0 <= log.get_global_rect().position.x,
         "Ten physical quickbar shortcuts must be centered at the bottom and not overlap the journal.")
+    var quick_grid: Control = game.get_node("HUD/QuickInventory/InventoryItems/Layout/Scroll/GridContainer")
+    var quick_bounds: Rect2 = quick_grid.get_global_rect()
+    print("QUICKBAR 720: root=", quick.get_global_rect(), " cells=", quick_bounds, " journal=", log.get_global_rect())
+    check(quick_bounds.size.x > 460.0 and quick_bounds.position.y >= 0.0
+        and quick_bounds.end.y <= 720.0 and quick.get_global_rect().end.y <= 720.0,
+        "All ten quickbar item shortcuts must be physically visible in bottom-center HUD.")
+    var journal_scroll: VScrollBar = journal.get_v_scroll_bar()
+    check(journal_scroll != null and journal_scroll.get_global_rect().end.y <= 720.0,
+        "Event journal vertical scrollbar must stay above the window bottom edge.")
+    check(game.get_node("HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Section").get_theme_font_size("font_size") >= 28,
+        "Backpack and Body headings must have legible doubled font size.")
+    check(game.get_node("HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Close") is Button,
+        "Backpack navigation CLOSE button must sit next to the right arrow.")
     check(not game.ui_captures_world_input(), "Normal inventory must allow walking and Space interactions.")
     Input.action_press("move_right")
     var actor: CharacterBody2D = game.get_node("World/Player")
