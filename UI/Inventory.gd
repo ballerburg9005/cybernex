@@ -132,7 +132,7 @@ func refresh() -> void:
         if filtering == 0:
             # Show the full authored backpack grid, including empty slots.
             indices.append_array(available)
-    grid_container.columns = 9 if mode == "hotbar" else 10
+    grid_container.columns = 10
     if mode != "hotbar":
         while indices.size() % 10 != 0:
             indices.append(-1)
