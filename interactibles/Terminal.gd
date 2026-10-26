@@ -109,13 +109,19 @@ func _open_circuit_puzzle(caller) -> void:
     get_node("/root/main").p("Relay housing opened.")
 
 func _on_circuit_solved() -> void:
+    # The relay latches after a valid electrical pulse. Any loose pliers or
+    # other contact probes have to come back before the circuit pane closes.
+    if is_instance_valid(ui_menu) and not ui_menu.reclaim_loose_tools(loot):
+        get_node("/root/main").p("No room to recover tools from the relay.")
+        return
     access_granted = true
+    has_loot = loot.count() > 0
     if is_instance_valid(ui_menu):
         ui_menu.queue_free()
     ui_menu = null
     get_node("/root/main").exit_circuit_mode()
     play_activate()
-    get_node("/root/main").p("Service relay accepted. Terminal interface unlocked.")
+    get_node("/root/main").p("Relay latched. Terminal unlocked.")
 
 func spawn_lootbox() -> void:
     var game: Node = get_node("/root/main")
