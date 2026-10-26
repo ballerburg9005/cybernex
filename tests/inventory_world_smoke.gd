@@ -70,6 +70,12 @@ func _run() -> void:
     var journal_scroll: VScrollBar = journal.get_v_scroll_bar()
     check(journal_scroll != null and journal_scroll.get_global_rect().end.y <= 720.0,
         "Event journal vertical scrollbar must stay above the window bottom edge.")
+    for i in range(30):
+        game.p("Equipment and station event %d" % i)
+    await process_frame
+    check(journal_scroll.visible and journal_scroll.get_global_rect().end.y <= 720.0
+        and journal_scroll.get_global_rect().end.x <= 1280.0,
+        "A populated accessible event log must show its wheel-scrolling bar FULLY on screen.")
     check(game.get_node("HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Section").get_theme_font_size("font_size") >= 28,
         "Backpack and Body headings must have legible doubled font size.")
     check(game.get_node("HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Close") is Button,
