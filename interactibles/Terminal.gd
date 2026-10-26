@@ -67,7 +67,6 @@ func activate(caller, action = "default"):
     if ui_menu:
         if not (caller == ui_menu and action in ["loot", "activate"]):
             toggled = true
-        ui_menu.get_parent().remove_child(ui_menu)
         ui_menu.queue_free()
         ui_menu = null
 
@@ -189,7 +188,6 @@ func _on_influence_body_shape_entered(body_rid, body, body_shape_index, local_sh
 
 func _on_influence_body_shape_exited(body_rid, body, body_shape_index, local_shape_index):
     if ui_menu:
-        get_node("/root/main").remove_child(ui_menu)
         ui_menu.queue_free()
         ui_menu = null
     if "activatables" in body and body.activatables.has(self):
