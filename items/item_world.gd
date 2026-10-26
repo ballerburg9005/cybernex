@@ -8,6 +8,8 @@ class_name WorldItemPickup
 @export var disabled: bool = false
 @export var only_players: bool = true
 
+static var shared_outline: ShaderMaterial
+
 var mytype: String = "item"
 var myname: String = "Item"
 
@@ -42,9 +44,11 @@ func _on_influence_body_shape_entered(_rid: RID, body: Node2D, _body_shape_index
         return
     if "activatables" in body and not body.activatables.has(self):
         body.activatables.append(self)
-        $Sprite2D.material = ShaderMaterial.new()
-        $Sprite2D.material.shader = preload("res://assets/shaders/outline.gdshader")
-        $Sprite2D.material.set_shader_parameter("add_margins", false)
+        if shared_outline == null:
+            shared_outline = ShaderMaterial.new()
+            shared_outline.shader = preload("res://assets/shaders/outline.gdshader")
+            shared_outline.set_shader_parameter("add_margins", false)
+        $Sprite2D.material = shared_outline
 
 func _on_influence_body_shape_exited(_rid: RID, body: Node2D, _body_shape_index: int, _local_shape_index: int) -> void:
     if body != null and "activatables" in body:
