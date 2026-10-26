@@ -299,6 +299,7 @@ size_flags_stretch_ratio = 0.2
 mouse_filter = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 6
 size_flags_vertical = 4
