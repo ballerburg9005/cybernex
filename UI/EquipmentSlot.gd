@@ -22,7 +22,7 @@ func update_display() -> void:
     expand_icon = false
     icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
     var owned: int = backpack.count(item) if item != null and backpack != null else 0
-    tooltip_text = ("%s    owned ×%d\n%s" % [item.name, owned, item.description]) if item != null else ("EQUIP: " + slot_id.replace("_", " "))
+    tooltip_text = ("%s  %dx" % [item.name, owned]) if item != null else name_tag
     modulate = Color("#d4eee9") if item != null else Color("#92a7bd")
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
