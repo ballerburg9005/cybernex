@@ -134,9 +134,9 @@ func refresh() -> void:
         else:
             indices.append_array(occupied)
     grid_container.columns = 10
-    var visible_rows: int = maxi(1, floori(maxf(48.0, $Layout/Scroll.size.y - 12.0) / 50.0))
+    var visible_rows: int = maxi(12, ceili(float(get_viewport_rect().size.y) / 50.0))
     if mode != "hotbar":
-        while indices.size() < maxi(50, visible_rows * 10):
+        while indices.size() < maxi(inv.size(), visible_rows * 10):
             indices.append(-1)
     if mode != "hotbar":
         while indices.size() % 10 != 0:
