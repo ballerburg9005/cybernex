@@ -5,6 +5,8 @@ class_name InventoryView
 ## controls, replacing 200ms polling and per-cell physics collisions.
 signal feedback(message: String)
 signal use_requested(item: InvItem)
+signal save_requested
+signal load_requested
 signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2)
 @export var inv: Inv
 @export_enum("backpack", "hotbar") var mode: String = "backpack"
@@ -41,6 +43,8 @@ func _ready() -> void:
         if inv != null and mode != "hotbar":
             inv.sort_by_category()
     )
+    $Layout/Toolbar/Save.pressed.connect(func() -> void: save_requested.emit())
+    $Layout/Toolbar/Load.pressed.connect(func() -> void: load_requested.emit())
     if inv == null:
         inv = Inv.new()
     configure(inv, null, mode)
@@ -139,6 +143,8 @@ func refresh() -> void:
     visible_count.text = "%d entries / %d units" % [occupied.size(), shown_quantity] if mode != "hotbar" else "Linked; physical stock in backpack"
     $Layout/SearchBar.visible = mode != "hotbar"
     sort_button.visible = mode != "hotbar"
+    $Layout/Toolbar/Save.visible = mode != "hotbar"
+    $Layout/Toolbar/Load.visible = mode != "hotbar"
     filter_button.visible = mode != "hotbar"
 
 func request_use(item: InvItem) -> void:
