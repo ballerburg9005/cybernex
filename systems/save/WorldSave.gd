@@ -13,7 +13,7 @@ static func _reject(message: String) -> bool:
     return false
 const ITEM_NAMES := [
     "arc_pistol", "big_wire", "copper_contacts", "junk", "neural_regulator",
-    "power_cell", "resistor10", "servo_brace", "side_cutters", "solder",
+    "power_cell", "insulation_tape", "resistor10", "servo_brace", "side_cutters", "solder",
     "wire_bridge", "wires"
 ]
 
