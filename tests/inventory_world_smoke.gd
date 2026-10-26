@@ -30,6 +30,12 @@ func _run() -> void:
     check(drawer.position.x <= 12.0, "Exploration inventory drawer must stay left of centered player.")
     var backpack_panel: InventoryView = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems")
     check(backpack_panel.grid_container.columns == 10, "Player inventory must be ten cells wide.")
+    var first_cell: InventoryCell = backpack_panel.grid_container.get_child(0)
+    check(first_cell.custom_minimum_size == Vector2(48, 48)
+        and first_cell.number.get_theme_font_size("font_size") <= 10,
+        "Every authored 16px inventory glyph must use the original integer 3x / 48px size and tiny count.")
+    check(first_cell.number.text == "1x" and not first_cell.tooltip_text.contains("COMBINE WITH"),
+        "Physical stacks need small 1x notation and item-identifying, not instructional, tooltips.")
     check(backpack_panel.grid_container.get_child_count() % 10 == 0, "Last inventory row must have visible empty cells.")
     var nav: Control = game.get_node("HUD/FullInventory/VBoxContainer/DrawerNav")
     check(nav is PanelContainer and nav.has_theme_stylebox_override("panel"), "All navigation labels must be backed as one panel.")
@@ -42,10 +48,21 @@ func _run() -> void:
         "Reopening inventory must start on backpack after Tab closed any page.")
     var quick: Control = game.get_node("HUD/QuickInventory")
     var log: Control = game.get_node("HUD/TextBox")
+    var journal: RichTextLabel = game.hud_textbox
+    check(journal.scroll_active and journal.mouse_filter == Control.MOUSE_FILTER_STOP,
+        "Mouse wheel must scroll the event journal without triggering world interactions.")
+    check(game.get_node("World/Player").quickinventory.size() == 10
+        and game.get_node("HUD/QuickInventory/InventoryItems").grid_container.get_child_count() == 10,
+        "Centered quickbar must have exactly ten reference-only shortcuts.")
     check(quick.visible and absf(quick.get_global_rect().get_center().x - 640.0) < 5.0
         and quick.get_global_rect().end.x + 2.0 <= log.get_global_rect().position.x,
         "Ten physical quickbar shortcuts must be centered at the bottom and not overlap the journal.")
     check(not game.ui_captures_world_input(), "Normal inventory must allow walking and Space interactions.")
+    Input.action_press("move_right")
+    var actor: CharacterBody2D = game.get_node("World/Player")
+    actor._physics_process(0.016)
+    check(actor.velocity.x > 0, "Holding move-right must still move player with backpack open.")
+    Input.action_release("move_right")
     game.toggle_inventory()
     check(not game.ui_captures_world_input(), "Closing UI should retain world controls.")
     root.size = Vector2i(1920, 1080)
@@ -54,7 +71,11 @@ func _run() -> void:
     check(drawer.get_global_rect().end.x < 1920.0 and drawer.get_global_rect().position.x <= 12.0,
         "1080p exploration drawer must stay fully onscreen at fixed left margin.")
     game._select_drawer_page(1)
+    var visible_backpack: Control = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems")
+    check(visible_backpack.visible, "Body systems MUST include the same draggable backpack, simultaneously.")
     var mannequin: Control = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer/Equipment")
+    check(mannequin.get_global_rect().end.x <= visible_backpack.get_global_rect().position.x + 3.0,
+        "Mannequin slots must be LEFT of the backpack, not offscreen or replacing it.")
     check(mannequin.get_global_rect().end.x <= drawer.get_global_rect().end.x + 3.0,
         "The mannequin and its physical sockets must fit within the drawer at 1080p.")
     game._select_drawer_page(0)
@@ -67,6 +88,8 @@ func _run() -> void:
     var world: Node2D = game.get_node("World")
     var picker: WorldHitTest = world.get_node("WorldHitTest")
     check(picker.reference_physics_body == player, "World hover picker must reference actual player physics canvas.")
+    check(game._hover_target_name(player) == "player" and picker.interactable_layers & (1 << 9) != 0,
+        "Player must remain identifiable by world hover like other interactive objects.")
     var viewport_point: Vector2 = picker.world_to_viewport(player.global_position)
     check(picker.viewport_to_world(viewport_point).distance_to(player.global_position) < 0.1, "World hover projection must invert Camera2D canvas transforms on original map.")
     var quantity: int = player.inventory.count(item)
@@ -154,6 +177,19 @@ func _run() -> void:
     check(bench.get_global_rect().end.x <= drawer.get_global_rect().position.x,
         "Large puzzle board must not draw underneath the inventory drawer.")
     var resistor: InvItem = load("res://items/resistor10.tres")
+    check(resistor.texture is AtlasTexture and resistor.texture.get_size() == Vector2(16, 16)
+        and resistor.texture.atlas.resource_path.ends_with("tileset_electronics.png"),
+        "Inventory resistor icon must come from original hand-drawn resistor atlas at integer 3x size.")
+    var pistol: InvItem = load("res://items/arc_pistol.tres")
+    var pistol_before: int = player.inventory.count(pistol)
+    var invalid_tool_drop: Dictionary = {"kind": "inventory_item", "item": pistol,
+        "inventory": player.inventory, "index": player.inventory.find(pistol)}
+    check(not canvas._can_drop_data(canvas.pan_offset + Vector2(4.5, 0.5) * canvas.cell_size, invalid_tool_drop),
+        "A gun must never be accepted as a generic circuit replacement.")
+    game._handle_world_drop(player.inventory, player.inventory.find(pistol), pistol,
+        canvas.get_global_rect().get_center())
+    check(player.inventory.count(pistol) == pistol_before,
+        "A rejected circuit drop must never leak through the overlay or consume the gun.")
     var solder: InvItem = load("res://items/solder.tres")
     var resistor_before: int = player.inventory.count(resistor)
     var solder_before: int = player.inventory.count(solder)
