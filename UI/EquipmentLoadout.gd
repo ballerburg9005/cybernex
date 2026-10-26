@@ -44,6 +44,35 @@ func assign(slot_id: String, item: InvItem, backpack: Inv) -> bool:
     emit_changed()
     return true
 
+func can_relocate(from_id: String, to_id: String, backpack: Inv) -> bool:
+    if from_id == to_id:
+        return true
+    var current: InvItem = item_at(from_id)
+    if current == null or backpack == null or not SOCKETS.has(to_id):
+        return false
+    if not current.equipment_slots.has(to_id):
+        return false
+    var destination: InvItem = item_at(to_id)
+    if destination == current:
+        return true
+    # Swapping gear retains any displaced item in the backpack.
+    var elsewhere: int = 0
+    for socket in SOCKETS:
+        if socket != from_id and socket != to_id and item_at(socket) == current:
+            elsewhere += 1
+    return backpack.count(current) > elsewhere
+
+func relocate(from_id: String, to_id: String, backpack: Inv) -> bool:
+    if not can_relocate(from_id, to_id, backpack):
+        return false
+    if from_id == to_id:
+        return true
+    var current: InvItem = item_at(from_id)
+    set(from_id, null)
+    set(to_id, current)
+    emit_changed()
+    return true
+
 func reconcile(backpack: Inv) -> void:
     if backpack == null:
         return
