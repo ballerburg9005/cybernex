@@ -47,6 +47,9 @@ func _ready() -> void:
             inv.sort_by_category()
     )
     assemble_button.pressed.connect(_assemble_selected)
+    recipe_selector.item_selected.connect(func(index: int) -> void:
+        assemble_button.disabled = index < 0 or index >= offered_recipes.size() or not bool(offered_recipes[index]["can_craft"])
+    )
     $Layout/Actions/Save.pressed.connect(func() -> void: save_requested.emit())
     $Layout/Actions/Load.pressed.connect(func() -> void: load_requested.emit())
     if inv == null:
