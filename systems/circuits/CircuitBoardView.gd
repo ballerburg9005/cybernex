@@ -137,7 +137,7 @@ func _draw() -> void:
                 rect.position + Vector2(18, 1), rect.position + Vector2(1, 18)])
             draw_colored_polygon(pts, Color.BLACK)
         else:
-            # Static desaturated green is preferred to distracting flashing.
+            # Static blue-gray denotes removable parts. No distracting flashing.
             draw_rect(rect.grow(-3.0), SAFE_EDGE, false, 2.0)
         if i == hottest_part:
             draw_rect(rect.grow(-2.0), Color("#aa6840"), false, 2.0)
@@ -241,9 +241,13 @@ func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
         var item: InvItem = data.get("item")
         if item == null or not _inside(cell):
             return false
-        if Inv.matches(item, preload("res://items/side_cutters.tres")):
+        if item.contact_resistance_ohms > 0.0 and workbench != null:
             var target_index: int = board.placement_at(cell)
-            return target_index >= 0 and board.placements[target_index].failed_open and workbench != null and workbench.can_extract_to(target_index, workbench.field_inventory)
+            if target_index >= 0:
+                return Inv.matches(item, preload("res://items/side_cutters.tres")) \
+                    and board.placements[target_index].failed_open \
+                    and workbench.can_extract_to(target_index, workbench.field_inventory)
+            return workbench.can_bridge_with_tool(item, cell)
         if item.circuit_part == null:
             return false
         var incoming := CircuitPlacement.new()
@@ -264,10 +268,11 @@ func _drop_data(at_position: Vector2, data: Variant) -> void:
         return
     var cell: Vector2i = _cell_from_position(at_position)
     if data.get("kind") == "inventory_item":
-        if Inv.matches(data["item"], preload("res://items/side_cutters.tres")):
-            tool_applied.emit(data["item"], cell)
+        var item: InvItem = data["item"]
+        if item.contact_resistance_ohms > 0.0:
+            tool_applied.emit(item, cell)
         else:
-            incoming_part.emit(data["item"], cell)
+            incoming_part.emit(item, cell)
         return
     var index: int = int(data["index"])
     board.placements[index].cell = cell
