@@ -11,6 +11,10 @@ var mytype = "terminal"
 @export_range(0, 20) var puzzle_difficulty = 0
 @export var loot : Inv = Inv.new(9)
 @export var loot_after_solved = true
+## Inspected text belongs to a particular authored desk, never a generic HUD hint.
+@export_multiline var desk_note: String = ""
+@export_multiline var computer_readout: String = ""
+@export var computer_powered: bool = true
 
 var SCALE = 3
 
@@ -131,7 +135,11 @@ func spawn_lootbox() -> void:
     game.get_node("HUD").add_child(ui_menu)
     ui_menu.z_index = 3000
     game.desk_inspection = ui_menu
-    ui_menu.configure_contents(loot, game.player.inventory, Callable(game, "p"))
+    ui_menu.configure_contents(loot, game.player.inventory, Callable(game, "p"),
+        desk_note, computer_readout, computer_powered)
+    ui_menu.power_changed.connect(func(value: bool) -> void:
+        computer_powered = value
+    )
     ui_menu.closed.connect(func() -> void:
         ui_menu = null
         game.desk_inspection = null
