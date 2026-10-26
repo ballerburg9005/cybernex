@@ -1,4 +1,4 @@
-extends PanelContainer
+extends Control
 class_name DeskInspection
 
 ## One reusable full-size panel for desk contents, notes and computer controls.
@@ -36,7 +36,24 @@ func _ready() -> void:
     panel_style.content_margin_right = 5
     panel_style.content_margin_top = 5
     panel_style.content_margin_bottom = 5
-    add_theme_stylebox_override("panel", panel_style)
+    $Columns/BackpackPanel.add_theme_stylebox_override("panel", panel_style)
+    $Columns/DeskPanel.add_theme_stylebox_override("panel", panel_style.duplicate())
+    var power_box := StyleBoxFlat.new()
+    power_box.bg_color = Color("#701f20")
+    power_box.border_color = Color("#e15855")
+    power_box.set_border_width_all(2)
+    power_box.set_corner_radius_all(12)
+    power_box.content_margin_left = 19
+    power_box.content_margin_right = 19
+    power_box.content_margin_top = 9
+    power_box.content_margin_bottom = 9
+    var power_button: Button = $Columns/DeskPanel/Layout/Bottom/Power
+    power_button.add_theme_stylebox_override("normal", power_box)
+    var power_hover: StyleBoxFlat = power_box.duplicate()
+    power_hover.bg_color = Color("#b12e2b")
+    power_button.add_theme_stylebox_override("hover", power_hover)
+    power_button.add_theme_stylebox_override("pressed", power_box)
+    power_button.add_theme_color_override("font_color", Color.WHITE)
     reflow()
 
 func configure_contents(incoming: Inv, bag: Inv, on_event: Callable,
@@ -69,6 +86,21 @@ func _select_page(next: int) -> void:
     $Columns/DeskPanel/Layout/Contents/DetailPanel.visible = page_index != 0
     $Columns/DeskPanel/Layout/Bottom/TakeAll.visible = page_index == 0
     $Columns/DeskPanel/Layout/Bottom/Power.visible = page_index == 2
+    var screen: PanelContainer = $Columns/DeskPanel/Layout/Contents/DetailPanel
+    var monitor_style := StyleBoxFlat.new()
+    monitor_style.bg_color = Color("#07160c") if page_index == 2 else Color("#1b2329")
+    monitor_style.border_color = Color("#3f905a") if page_index == 2 else Color("#57636c")
+    monitor_style.set_border_width_all(2)
+    monitor_style.set_corner_radius_all(13)
+    monitor_style.content_margin_left = 15
+    monitor_style.content_margin_right = 15
+    monitor_style.content_margin_top = 15
+    monitor_style.content_margin_bottom = 15
+    screen.add_theme_stylebox_override("panel", monitor_style)
+    var phosphor: RichTextLabel = $Columns/DeskPanel/Layout/Contents/DetailPanel/Description
+    phosphor.add_theme_color_override("default_color", Color("#65ec83") if page_index == 2 else Color("#e6e9e7"))
+    var power_button: Button = $Columns/DeskPanel/Layout/Bottom/Power
+    power_button.text = "POWER  ON" if computer_powered else "POWER  OFF"
     if page_index == 1:
         $Columns/DeskPanel/Layout/Contents/DetailPanel/Description.text = authored_notes if not authored_notes.is_empty() else "Papers and loose sheets."
     elif page_index == 2:
