@@ -17,4 +17,6 @@ damage = 0.0
 combos = []
 type = 32
 equipment_slots = PackedStringArray("augment_neural", "augment_head")
+diagnostic_level = 2
+powered_draw_watts = 1.25
 description = "Interface diagnostic augmentation for station telemetry."
