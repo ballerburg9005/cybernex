@@ -104,8 +104,29 @@ func _run() -> void:
     check(centre.x >= -pad - 0.1 and centre.x <= extended.x + pad + 0.1
         and centre.y >= -pad - 0.1 and centre.y <= extended.y + pad + 0.1,
         "Middle-mouse board scrolling must stop no farther than twenty cells outside loaded data.")
-    canvas.pan_offset = Vector2.ZERO
+    canvas.pan_needs_center = true
     canvas._center_on_authored_board()
+    var prior_pan: Vector2 = canvas.pan_offset
+    var middle_down := InputEventMouseButton.new()
+    middle_down.button_index = MOUSE_BUTTON_MIDDLE
+    middle_down.pressed = true
+    canvas._gui_input(middle_down)
+    var middle_motion := InputEventMouseMotion.new()
+    middle_motion.relative = Vector2(19, -11)
+    canvas._gui_input(middle_motion)
+    check(canvas.middle_panning and canvas.pan_offset.distance_to(prior_pan + Vector2(19, -11)) < 0.5,
+        "Middle-mouse motion must pan virtual grid, not operate or rotate components.")
+    var middle_up := InputEventMouseButton.new()
+    middle_up.button_index = MOUSE_BUTTON_MIDDLE
+    middle_up.pressed = false
+    canvas._gui_input(middle_up)
+    check(not canvas.middle_panning, "Releasing middle mouse must stop panning.")
+    canvas.pan_needs_center = true
+    canvas._center_on_authored_board()
+    var power: Button = bench.get_node("Panel/Padding/Layout/Bottom/RunButton")
+    var power_style: StyleBoxFlat = power.get_theme_stylebox("normal")
+    check(power_style.bg_color.r > power_style.bg_color.g * 2.0,
+        "Circuit power switch must be visibly distinct with a red backed button.")
     check(game.puzzle_active and drawer.visible, "Circuit opening should preserve the same physical inventory grid.")
     print("HUD PUZZLE: drawer=", drawer.get_global_rect(), " board=", bench.get_global_rect(),
         " quick_visible=", game.get_node("HUD/QuickInventory").visible)
