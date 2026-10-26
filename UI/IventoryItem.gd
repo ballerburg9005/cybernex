@@ -6,6 +6,7 @@ var backpack: Inv
 var index: int = -1
 var is_hotbar: bool = false
 var parent_view: Control
+var _pending_world_item: InvItem
 
 @onready var image: TextureRect = $Icon
 @onready var number: Label = $Count
@@ -50,6 +51,7 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
     label.text = stack.item.name
     preview.add_child(label)
     set_drag_preview(preview)
+    _pending_world_item = stack.item
     return {
         "kind": "inventory_item", "item": stack.item,
         "inventory": inventory, "index": index, "hotbar": is_hotbar
@@ -97,3 +99,12 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 func _feedback(message: String) -> void:
     if parent_view != null and parent_view.has_method("message"):
         parent_view.message(message)
+
+func _notification(what: int) -> void:
+    if what != NOTIFICATION_DRAG_END or _pending_world_item == null:
+        return
+    var released: InvItem = _pending_world_item
+    _pending_world_item = null
+    if not get_viewport().gui_is_drag_successful():
+        if parent_view != null and parent_view.has_method("request_world_drop"):
+            parent_view.request_world_drop(inventory, index, released, get_viewport().get_mouse_position())
