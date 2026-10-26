@@ -1,12 +1,46 @@
-[gd_scene load_steps=2 format=3 uid="uid://cbujhi3tvu5ra"]
+[gd_scene load_steps=5 format=3 uid="uid://cbujhi3tvu5ra"]
 
 [ext_resource type="Script" path="res://UI/IventoryItem.gd" id="slot_script"]
+
+[sub_resource type="StyleBoxFlat" id="slot_normal"]
+bg_color = Color(0.20, 0.22, 0.24, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.34, 0.36, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="slot_hover"]
+bg_color = Color(0.27, 0.29, 0.30, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.48, 0.61, 0.54, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="slot_pressed"]
+bg_color = Color(0.29, 0.36, 0.33, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="InventoryItem" type="Button"]
 custom_minimum_size = Vector2(48, 48)
 mouse_filter = 0
 focus_mode = 0
 theme_override_constants/icon_max_width = 42
+theme_override_styles/normal = SubResource("slot_normal")
+theme_override_styles/hover = SubResource("slot_hover")
+theme_override_styles/pressed = SubResource("slot_pressed")
 script = ExtResource("slot_script")
 
 [node name="Icon" type="TextureRect" parent="."]
