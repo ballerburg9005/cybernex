@@ -48,6 +48,10 @@ func _run() -> void:
         "Reopening inventory must start on backpack after Tab closed any page.")
     var quick: Control = game.get_node("HUD/QuickInventory")
     var log: Control = game.get_node("HUD/TextBox")
+    check(drawer.mouse_filter == Control.MOUSE_FILTER_STOP
+        and quick.mouse_filter == Control.MOUSE_FILTER_STOP
+        and log.mouse_filter == Control.MOUSE_FILTER_STOP,
+        "Opaque HUD background, navigation, shortcut bar and journal must consume GUI mouse events.")
     var journal: RichTextLabel = game.hud_textbox
     check(journal.scroll_active and journal.mouse_filter == Control.MOUSE_FILTER_STOP,
         "Mouse wheel must scroll the event journal without triggering world interactions.")
