@@ -29,8 +29,16 @@ func pick_world_point(point: Vector2) -> CollisionObject2D:
     if reference_physics_body != null:
         query.canvas_instance_id = PhysicsServer2D.body_get_canvas_instance_id(reference_physics_body.get_rid())
     var results: Array[Dictionary] = get_world_2d().direct_space_state.intersect_point(query, 32)
+    var self_hit: CollisionObject2D = null
     for result in results:
         var collider: CollisionObject2D = result["collider"]
-        if collider != null and collider.is_visible_in_tree():
+        if collider == null or not collider.is_visible_in_tree():
+            continue
+        # Near a terminal, wall or robot the player's hitbox can overlap the
+        # same pixel. Prefer an actual target while retaining player tooltip
+        # lookup when the player is the only interactive physics body.
+        if collider == reference_physics_body or collider.get_parent() == reference_physics_body:
+            self_hit = collider
+        else:
             return collider
-    return null
+    return self_hit
