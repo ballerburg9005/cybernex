@@ -20,13 +20,13 @@ jobs:
         run: |
           set -o pipefail
           godot --headless --path . --editor --import --quit 2>&1 | tee /tmp/godot-editor.log
-          if grep -q 'SCRIPT ERROR: Parse Error:' /tmp/godot-editor.log; then
+          if grep -q 'SCRIPT ERROR' /tmp/godot-editor.log; then
             exit 1
           fi
       - name: Headless startup of original game
         run: |
           set -o pipefail
           godot --headless --path . --quit-after 10 res://main.tscn 2>&1 | tee /tmp/godot-main.log
-          if grep -q 'SCRIPT ERROR: Parse Error:' /tmp/godot-main.log; then
+          if grep -q 'SCRIPT ERROR' /tmp/godot-main.log; then
             exit 1
           fi
