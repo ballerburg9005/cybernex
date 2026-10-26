@@ -43,8 +43,8 @@ fixed_to_board = true
 
 [resource]
 script = ExtResource("b")
-width = 6
-height = 4
+width = 9
+height = 7
 placements = Array[ExtResource("p")]([SubResource("source"), SubResource("burned_resistor"), SubResource("motor"), SubResource("ground_source"), SubResource("ground_load")])
 required_load_part_id = "door_motor"
 min_load_volts = 4.0
