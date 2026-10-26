@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Inv" load_steps=19 format=3 uid="uid://belbro1hfjjh3"]
+[gd_resource type="Resource" script_class="Inv" load_steps=21 format=3 uid="uid://belbro1hfjjh3"]
 
 [ext_resource type="Script" path="res://inventory.gd" id="inventory"]
 [ext_resource type="Script" path="res://inventory_slot.gd" id="slot"]
@@ -11,6 +11,7 @@
 [ext_resource type="Resource" path="res://items/servo_brace.tres" id="item6"]
 
 [ext_resource type="Resource" path="res://items/resistor10.tres" id="item7"]
+[ext_resource type="Resource" path="res://items/power_cell.tres" id="item8"]
 
 [sub_resource type="Resource" id="stack0"]
 script = ExtResource("slot")
@@ -52,7 +53,12 @@ script = ExtResource("slot")
 item = ExtResource("item7")
 count = 1
 
+[sub_resource type="Resource" id="stack8"]
+script = ExtResource("slot")
+item = ExtResource("item8")
+count = 2
+
 [resource]
 script = ExtResource("inventory")
 max_stack = 999
-items = Array[ExtResource("slot")]([SubResource("stack0"), SubResource("stack1"), SubResource("stack2"), SubResource("stack3"), SubResource("stack4"), SubResource("stack5"), SubResource("stack6"), SubResource("stack7"), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null])
+items = Array[ExtResource("slot")]([SubResource("stack0"), SubResource("stack1"), SubResource("stack2"), SubResource("stack3"), SubResource("stack4"), SubResource("stack5"), SubResource("stack6"), SubResource("stack7"), SubResource("stack8"), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null])
