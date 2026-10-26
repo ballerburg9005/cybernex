@@ -306,10 +306,10 @@ size_flags_vertical = 4
 
 [node name="MarginContainer" type="MarginContainer" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="Equipment" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer" instance=ExtResource("30_eqp")]
 layout_mode = 2
@@ -319,16 +319,21 @@ layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="DrawerNav" type="HBoxContainer" parent="HUD/FullInventory/VBoxContainer"]
+[node name="DrawerNav" type="PanelContainer" parent="HUD/FullInventory/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 2
+size_flags_horizontal = 3
 
-[node name="Previous" type="Button" parent="HUD/FullInventory/VBoxContainer/DrawerNav"]
+[node name="NavRow" type="HBoxContainer" parent="HUD/FullInventory/VBoxContainer/DrawerNav/NavRow"]
 layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Previous" type="Button" parent="HUD/FullInventory/VBoxContainer/DrawerNav/NavRow"]
+layout_mode = 2
+focus_mode = 0
 custom_minimum_size = Vector2(38, 36)
-text = "▲"
+text = "◀"
 
-[node name="Section" type="Label" parent="HUD/FullInventory/VBoxContainer/DrawerNav"]
+[node name="Section" type="Label" parent="HUD/FullInventory/VBoxContainer/DrawerNav/NavRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 horizontal_alignment = 1
@@ -338,7 +343,7 @@ text = "INVENTORY"
 [node name="Next" type="Button" parent="HUD/FullInventory/VBoxContainer/DrawerNav"]
 layout_mode = 2
 custom_minimum_size = Vector2(38, 36)
-text = "▼"
+text = "▶"
 
 [node name="PdaPage" type="RichTextLabel" parent="HUD/FullInventory/VBoxContainer"]
 visible = false
