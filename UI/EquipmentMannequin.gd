@@ -66,8 +66,8 @@ func _update_sockets() -> void:
         var reading: String = ""
         if runtime != null:
             _reported_energy = runtime.charge_wh
-            reading = "  |  SUIT %.2f/%.0f Wh" % [runtime.charge_wh, runtime.capacity_wh]
-        $Frame/Layout/LoadoutStatus.text = ("%d / 8 SOCKETS    |    %d WEAPONS    |    %d AUGMENTATIONS" % [loadout.occupied_sockets(), guns, augmentations]) + reading
+            reading = "  •  %.1f Wh" % runtime.charge_wh
+        $Frame/Layout/LoadoutStatus.text = ("%d/8 MOUNTS  •  %d WEAPONS  •  %d AUG" % [loadout.occupied_sockets(), guns, augmentations]) + reading
 
 func message(value: String) -> void:
     $Frame/Layout/Hint.text = value
