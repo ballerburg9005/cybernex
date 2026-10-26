@@ -1,5 +1,6 @@
 @tool
 extends StaticBody2D
+class_name WorldItemPickup
 
 ## Only genuine world-space pickups belong in the physics simulation.
 ## Inventory previews are Controls; never duplicate this body into a CanvasLayer.
