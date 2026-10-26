@@ -14,10 +14,18 @@ jobs:
         with:
           version: 4.7.2
           use-dotnet: false
-      - name: Import Godot project
-        run: godot --headless --path . --editor --import --quit
+      - name: Report downloaded Godot version
+        run: godot --version
+      - name: Check all GDScript void callbacks
+        run: python3 tests/lint_void_callbacks.py .
+      - name: Import Godot project in headless editor
+        run: |
+          set -o pipefail
+          godot --headless --path . --editor --import --quit 2>&1 | tee /tmp/godot-import.log
+          ! grep -q 'SCRIPT ERROR\|Parse Error: A void' /tmp/godot-import.log
       - name: Run headless electrical tests
         run: |
+          set -o pipefail
           godot --headless --path . --script res://tests/circuit_smoke.gd 2>&1 | tee /tmp/circuits.log
           ! grep -q "SCRIPT ERROR\|Parse Error: A void" /tmp/circuits.log
       - name: Verify inventory, craft recipes, groups and mannequin
