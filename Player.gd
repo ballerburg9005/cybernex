@@ -68,7 +68,9 @@ func _input(event: InputEvent) -> void:
             if is_instance_valid(obj):
                 obj.activate(self)
     if event.is_action_pressed("action_2") and not event.is_echo():
-        fire_arc_tool()
+        var interface: Node = get_node_or_null("/root/main")
+        if interface != null and not interface.mouse_over_ui and not interface.get_node("HUD/FullInventory").visible:
+            fire_arc_tool()
     if event.is_action_pressed("action_inventory"):
         var panel: Control = get_node("/root/main/HUD/FullInventory")
         panel.visible = not panel.visible
@@ -157,3 +159,35 @@ func fire_arc_tool() -> bool:
         target.stun_for(1.6)
     weapon_fired.emit(target, float(shot["energy_spent_wh"]))
     return true
+
+func _unhandled_key_input(event: InputEvent) -> void:
+    if not (event is InputEventKey) or not event.pressed or event.echo:
+        return
+    if event.keycode >= KEY_1 and event.keycode <= KEY_9:
+        use_quickslot(event.keycode - KEY_1)
+
+func use_quickslot(index: int) -> bool:
+    if quickinventory == null or inventory == null or equipment == null:
+        return false
+    var linked: InvSlot = quickinventory.slot_at(index)
+    if linked == null or not inventory.has(linked.item):
+        return false
+    var item: InvItem = linked.item
+    if item.energy_wh > 0.0:
+        if recharge_from(item):
+            p("Installed %s. Suit charge: %.1f Wh." % [item.name, equipment_runtime.charge_wh])
+            return true
+        return false
+    if item.type & InvItem.IS_WEAPON:
+        if equipment.assign("weapon_primary", item, inventory):
+            p("%s connected to primary weapon socket." % item.name)
+            return true
+        return false
+    if item.type & InvItem.IS_AUGMENTATION:
+        for socket in item.equipment_slots:
+            if equipment.item_at(socket) != null and Inv.matches(equipment.item_at(socket), item):
+                return true
+            if equipment.assign(socket, item, inventory):
+                p("%s fitted to %s." % [item.name, socket.replace("_", " ")])
+                return true
+    return false
