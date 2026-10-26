@@ -5,7 +5,7 @@ class_name MannequinCanvas
 ## Drawn with CanvasItem (not a noise placeholder or a physics body).
 ## Every socket is still an individually editable Button in the Godot scene.
 func _draw() -> void:
-    var mid: float = size.x * 0.5
+    var mid: float = 225.0
     var dark: Color = Color("#111b28")
     var grid_color: Color = Color("#213748")
     var chassis: Color = Color("#334653")
@@ -16,6 +16,12 @@ func _draw() -> void:
         draw_line(Vector2(x, 0), Vector2(x, size.y), grid_color, 1.0)
     for y in range(0, int(size.y), 24):
         draw_line(Vector2(0, y), Vector2(size.x, y), grid_color, 1.0)
+    # The original suit art is scaled into the 330-pixel sidebar; sockets
+    # remain independent Godot controls over the illustration.
+    var scale_factor: float = minf(size.x / 450.0, size.y / 430.0)
+    draw_set_transform(Vector2((size.x - 450.0 * scale_factor) * 0.5,
+        (size.y - 430.0 * scale_factor) * 0.5), 0.0,
+        Vector2.ONE * scale_factor)
     # Eight slot leads converge on matching anatomical/system mounts.
     var left: float = 126.0
     var right: float = size.x - 126.0
@@ -62,3 +68,5 @@ func _draw() -> void:
         draw_line(Vector2(mid - 7, y), Vector2(mid + 7, y), bright.darkened(0.4), 2.0)
     draw_string(get_theme_default_font(), Vector2(mid - 62, size.y - 12),
         "SUIT PLATFORM MK-I", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, bright)
+
+    draw_set_transform(Vector2.ZERO)
