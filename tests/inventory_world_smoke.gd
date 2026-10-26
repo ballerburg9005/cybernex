@@ -18,6 +18,10 @@ func _run() -> void:
         return
     var game: Control = main_scene.instantiate()
     root.add_child(game)
+    var drawer: Control = game.get_node("HUD/FullInventory")
+    check(drawer.size.x >= 345.0 and drawer.size.x < 450.0,
+        "Inventory must use a fixed compact width at default 720p and cannot push the grid off-screen.")
+    check(drawer.position.x <= 12.0, "Exploration inventory drawer must stay left of centered player.")
     var item: InvItem = load("res://items/wires.tres")
     var player = game.get_node("World/Player")
     var world: Node2D = game.get_node("World")
@@ -53,6 +57,13 @@ func _run() -> void:
     terminal.activate(player)
     var bench: CircuitWorkbench = terminal.ui_menu
     check(bench != null and bench.field_inventory == player.inventory, "Terminal workbench should bind actual player backpack.")
+    check(game.puzzle_active and drawer.visible, "Circuit opening should preserve the same physical inventory grid.")
+    check(drawer.position.x > 500.0 and not game.get_node("HUD/QuickInventory").visible,
+        "Puzzle mode moves the drawer right and hides quick access.")
+    check(not game.get_node("HUD/TextBox/HBoxContainer/S3").visible,
+        "Event log should span the entire bottom edge during circuit repair.")
+    check(bench.get_global_rect().end.x <= drawer.get_global_rect().position.x,
+        "Large puzzle board must not draw underneath the inventory drawer.")
     var resistor: InvItem = load("res://items/resistor10.tres")
     var solder: InvItem = load("res://items/solder.tres")
     var resistor_before: int = player.inventory.count(resistor)
@@ -66,6 +77,8 @@ func _run() -> void:
         bench._on_simulation_tick()
     check(terminal.access_granted, "Electrically valid repair should grant legacy map terminal access.")
     check(terminal.ui_menu == null, "Solved repair should dismiss the workbench overlay.")
+    check(not game.puzzle_active and game.get_node("HUD/QuickInventory").visible,
+        "Closing the terminal should restore exploration quickbar and HUD.")
     var jumper: InvItem = load("res://items/wire_bridge.tres")
     var wire_model: CircuitPart = load("res://systems/circuits/parts/wire_straight.tres")
     check(jumper.circuit_part == wire_model, "Crafted jumper is mapped to a usable real circuit part.")
