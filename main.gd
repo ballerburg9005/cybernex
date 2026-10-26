@@ -21,6 +21,8 @@ var puzzle_active: bool = false
 var active_circuit: CircuitWorkbench
 var current_drawer_page: int = 0
 var desk_inspection: Control
+var desk_inspection_cache: DeskInspection
+var desk_inspection_terminal: Node
 const BACKPACK_DRAWER_WIDTH := 522.0
 const BODY_DRAWER_WIDTH := 522.0
 var companion_drawer: CompanionDrawer
@@ -77,6 +79,17 @@ func _ready():
     companion_drawer.z_index = 1000
     companion_drawer.bind_inventory(player.inventory)
     companion_drawer.backpack_view.feedback.connect(p)
+    # Build a single dual-inventory scene up front; triggering loot later is
+    # O(1), not repeated instantiation of hundreds of buttons and scroll UI.
+    desk_inspection_cache = preload("res://UI/DeskInspection.tscn").instantiate()
+    hud.add_child(desk_inspection_cache)
+    desk_inspection_cache.z_index = 3000
+    desk_inspection_cache.hide()
+    desk_inspection_cache.closed.connect(_on_desk_inspection_closed)
+    desk_inspection_cache.power_changed.connect(func(powered: bool) -> void:
+        if desk_inspection_terminal != null and is_instance_valid(desk_inspection_terminal):
+            desk_inspection_terminal.computer_powered = powered
+    )
     $HUD/FullInventory/VBoxContainer.move_child($HUD/FullInventory/VBoxContainer/DrawerNav, 0)
     get_viewport().size_changed.connect(_layout_hud)
     $HUD/FullInventory.visibility_changed.connect(_layout_hud)
@@ -85,6 +98,13 @@ func _ready():
     _select_drawer_page(0)
     hud_textbox.text = "System initialized."
 
+
+func _on_desk_inspection_closed() -> void:
+    if desk_inspection_terminal != null and is_instance_valid(desk_inspection_terminal):
+        if desk_inspection_terminal.ui_menu == desk_inspection_cache:
+            desk_inspection_terminal.ui_menu = null
+    desk_inspection_terminal = null
+    desk_inspection = null
 
 func _setup_compact_hud() -> void:
     # Strip the old fullscreen/spacer layout, not its authored scene nodes.
