@@ -16,6 +16,10 @@ var tooltip_display = 0
 var hud_tooltip
 
 var mouse_over_ui = false
+var puzzle_active: bool = false
+var active_circuit: CircuitWorkbench
+var current_drawer_page: int = 0
+const DRAWER_PAGES := ["BACKPACK", "BODY SYSTEMS", "NOTES", "MAP", "MULTIMETER", "OSCILLOSCOPE"]
 
 var start_music_volume_temp = 0.0
 var background_music_volume_temp = 0.0
@@ -55,8 +59,118 @@ func _ready():
     tooltip_timer.start(0.2)
     
     $HUD.visible = true
+    $HUD/FullInventory/VBoxContainer/DrawerNav/Previous.pressed.connect(func() -> void:
+        cycle_drawer(-1)
+    )
+    $HUD/FullInventory/VBoxContainer/DrawerNav/Next.pressed.connect(func() -> void:
+        cycle_drawer(1)
+    )
+    $HUD/FullInventory/VBoxContainer.move_child($HUD/FullInventory/VBoxContainer/DrawerNav, 0)
+    get_viewport().size_changed.connect(_layout_hud)
+    _setup_compact_hud()
+    _layout_hud()
+    _select_drawer_page(0)
+    hud_textbox.text = "System initialized."
 
-    hud_textbox.text = "Game started."
+
+func _setup_compact_hud() -> void:
+    # Strip the old fullscreen/spacer layout, not its authored scene nodes.
+    $HUD/FullInventory/VBoxContainer/HBoxContainer/S.visible = false
+    $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/S2.visible = false
+    $HUD/FullInventory/VBoxContainer/HBoxContainer/S3.visible = false
+    $HUD/FullInventory/VBoxContainer/S.visible = false
+    $HUD/QuickInventory/S.visible = false
+    $HUD/FullInventory/VBoxContainer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    $HUD/FullInventory/VBoxContainer/HBoxContainer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    var backpack: InventoryView = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems
+    backpack.custom_minimum_size = Vector2(0, 0)
+    backpack.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    $HUD/QuickInventory/InventoryItems.custom_minimum_size = Vector2(0, 0)
+    var paper: PanelContainer = $HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer
+    var dark := StyleBoxFlat.new()
+    dark.bg_color = Color(0.05, 0.075, 0.09, 0.95)
+    dark.border_color = Color(0.31, 0.39, 0.4)
+    dark.set_border_width_all(1)
+    dark.set_corner_radius_all(7)
+    paper.add_theme_stylebox_override("panel", dark)
+    var feed: RichTextLabel = hud_textbox
+    feed.add_theme_font_size_override("normal_font_size", 17)
+    feed.add_theme_font_size_override("bold_font_size", 17)
+    feed.add_theme_color_override("default_color", Color("#e7ece7"))
+    $HUD/TextBox/HBoxContainer/MarginContainer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    $HUD/TextBox/HBoxContainer.custom_minimum_size.y = 122.0
+    $HUD/TextBox/HBoxContainer.size_flags_vertical = Control.SIZE_SHRINK_END
+    $HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer/RichTextLabel.scroll_following = true
+
+func _layout_hud() -> void:
+    if not is_node_ready():
+        return
+    var viewport: Vector2 = get_viewport_rect().size
+    var drawer_width: float = clampf(viewport.x * 0.29, 350.0, 520.0)
+    var drawer: Control = $HUD/FullInventory
+    drawer.anchor_left = 0.0
+    drawer.anchor_right = 0.0
+    drawer.anchor_top = 0.0
+    drawer.anchor_bottom = 0.0
+    drawer.offset_left = viewport.x - drawer_width - 8.0 if puzzle_active else 8.0
+    drawer.offset_right = viewport.x - 8.0 if puzzle_active else drawer_width + 8.0
+    drawer.offset_top = 6.0
+    drawer.offset_bottom = maxf(360.0, viewport.y - 140.0)
+    var quick: Control = $HUD/QuickInventory
+    quick.anchor_left = 0.0
+    quick.anchor_right = 0.0
+    quick.anchor_top = 0.0
+    quick.anchor_bottom = 0.0
+    quick.offset_left = 8.0
+    quick.offset_right = 464.0
+    quick.offset_top = viewport.y - 65.0
+    quick.offset_bottom = viewport.y - 8.0
+    if active_circuit != null and is_instance_valid(active_circuit):
+        active_circuit.set_anchors_preset(Control.PRESET_TOP_LEFT)
+        active_circuit.position = Vector2(6, 6)
+        active_circuit.size = Vector2(maxf(390.0, viewport.x - drawer_width - 24.0),
+            maxf(350.0, viewport.y - 148.0))
+
+func _select_drawer_page(index: int) -> void:
+    current_drawer_page = posmod(index, DRAWER_PAGES.size())
+    var page: String = DRAWER_PAGES[current_drawer_page]
+    $HUD/FullInventory/VBoxContainer/DrawerNav/Section.text = page
+    var row: Control = $HUD/FullInventory/VBoxContainer/HBoxContainer
+    var backpack: Control = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems
+    var body: Control = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer
+    var pda: RichTextLabel = $HUD/FullInventory/VBoxContainer/PdaPage
+    row.visible = current_drawer_page < 2
+    backpack.visible = current_drawer_page == 0
+    body.visible = current_drawer_page == 1
+    pda.visible = current_drawer_page >= 2
+    if current_drawer_page == 2:
+        pda.text = "[b]STATION NOTES[/b]\n\nNo recovered entries."
+    elif current_drawer_page == 3:
+        pda.text = "[b]MAP[/b]\n\nMapping module has no cartographic data."
+    elif current_drawer_page >= 4:
+        pda.text = "[b]%s[/b]\n\nInstrument not installed." % page
+
+func cycle_drawer(step: int) -> void:
+    _select_drawer_page(current_drawer_page + step)
+
+func enter_circuit_mode(workbench: CircuitWorkbench) -> void:
+    puzzle_active = true
+    active_circuit = workbench
+    $HUD/QuickInventory.visible = false
+    $HUD/FullInventory.visible = true
+    $HUD/TextBox/HBoxContainer/S3.visible = false
+    _select_drawer_page(0)
+    _layout_hud()
+    workbench.journal_event.connect(p)
+    workbench.set_meter_unlocked(false)
+
+func exit_circuit_mode() -> void:
+    puzzle_active = false
+    active_circuit = null
+    $HUD/FullInventory.visible = false
+    $HUD/QuickInventory.visible = true
+    $HUD/TextBox/HBoxContainer/S3.visible = true
+    _layout_hud()
 
 func find_myname_recursively(node, name):
     if node.has_meta("myname") and node.get_meta("myname") == name:
@@ -68,7 +182,9 @@ func find_myname_recursively(node, name):
     return null
 
 func p(s):
-    s = s[0].to_upper() + s.substr(1,-1)
+    if str(s).is_empty():
+        return
+    s = str(s)[0].to_upper() + str(s).substr(1)
     var textbox = get_node("/root/main").hud_textbox
     textbox.text += "\n"+s
 
