@@ -7,6 +7,9 @@ var index: int = -1
 var is_hotbar: bool = false
 var parent_view: Control
 var _pending_world_item: InvItem
+var _pending_world_amount: int = 0
+var _right_drag_origin: Vector2 = Vector2.ZERO
+var _right_drag_armed: bool = false
 
 @onready var image: TextureRect = $Icon
 @onready var number: Label = $Count
@@ -27,9 +30,11 @@ func refresh() -> void:
     var amount: int = backpack.count(cell.item) if is_hotbar and cell != null else cell.count if cell != null else 0
     if cell == null or amount <= 0:
         image.texture = null
-        number.text = ""
-        tooltip_text = "Empty slot"
+        number.text = "×" if index == -1 else ""
+        number.add_theme_color_override("font_color", Color("#a8afb5") if index == -1 else Color.WHITE)
+        tooltip_text = ""
         return
+    number.remove_theme_color_override("font_color")
     image.texture = cell.item.texture
     number.text = "%dx" % amount
     var lines := PackedStringArray()
@@ -48,34 +53,76 @@ func _is_instructions(value: String) -> bool:
     return false
 
 func _gui_input(event: InputEvent) -> void:
-    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and event.double_click:
-        var slot: InvSlot = inventory.slot_at(index) if inventory != null else null
-        if slot != null and parent_view != null and parent_view.has_method("request_use"):
-            parent_view.request_use(slot.item)
+    if event is InputEventMouseButton:
+        if event.button_index == MOUSE_BUTTON_RIGHT:
+            if event.pressed:
+                _right_drag_origin = event.position
+                _right_drag_armed = true
+            else:
+                _right_drag_armed = false
             accept_event()
+            return
+        if event.button_index == MOUSE_BUTTON_LEFT and event.pressed and event.double_click:
+            var slot: InvSlot = inventory.slot_at(index) if inventory != null else null
+            if slot != null and parent_view != null and parent_view.has_method("request_use"):
+                parent_view.request_use(slot.item)
+                accept_event()
+    if event is InputEventMouseMotion and _right_drag_armed:
+        if not (event.button_mask & MOUSE_BUTTON_MASK_RIGHT):
+            _right_drag_armed = false
+            return
+        if event.position.distance_to(_right_drag_origin) >= 6.0:
+            _right_drag_armed = false
+            var data: Variant = _make_drag_payload(true)
+            if data != null:
+                force_drag(data, _make_preview(data["item"], data["amount"]))
+                accept_event()
 
-func _get_drag_data(_at_position: Vector2) -> Variant:
+func _make_preview(item: InvItem, amount: int) -> Control:
+    var preview := PanelContainer.new()
+    preview.z_index = 4096
+    preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color(0.07, 0.09, 0.11, 0.94)
+    style.set_corner_radius_all(4)
+    preview.add_theme_stylebox_override("panel", style)
+    var row := HBoxContainer.new()
+    preview.add_child(row)
+    var sprite := TextureRect.new()
+    sprite.texture = item.texture
+    sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+    sprite.custom_minimum_size = Vector2(48, 48)
+    sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    row.add_child(sprite)
+    var label := Label.new()
+    label.text = "%dx" % amount
+    label.add_theme_font_size_override("font_size", 14)
+    row.add_child(label)
+    return preview
+
+func _make_drag_payload(whole_stack: bool) -> Variant:
     if inventory == null:
         return null
     var stack: InvSlot = inventory.slot_at(index)
     if stack == null or (is_hotbar and backpack.count(stack.item) <= 0):
         return null
-    var preview := HBoxContainer.new()
-    var icon_preview := TextureRect.new()
-    icon_preview.texture = stack.item.texture
-    icon_preview.custom_minimum_size = Vector2(36, 36)
-    icon_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-    icon_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-    preview.add_child(icon_preview)
-    var label := Label.new()
-    label.text = stack.item.name
-    preview.add_child(label)
-    set_drag_preview(preview)
+    var amount: int = stack.count if whole_stack else 1
+    if is_hotbar:
+        amount = backpack.count(stack.item) if whole_stack else 1
     _pending_world_item = stack.item
-    return {
-        "kind": "inventory_item", "item": stack.item,
-        "inventory": inventory, "index": index, "hotbar": is_hotbar
-    }
+    _pending_world_amount = amount
+    return {"kind": "inventory_item", "item": stack.item,
+        "inventory": inventory, "index": index, "hotbar": is_hotbar,
+        "amount": amount}
+
+func _get_drag_data(_at_position: Vector2) -> Variant:
+    # Godot's standard left-button drag carries one item; the explicit
+    # right-button gesture below calls force_drag for the entire pile.
+    var data: Variant = _make_drag_payload(false)
+    if data != null:
+        set_drag_preview(_make_preview(data["item"], data["amount"]))
+    return data
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
     if not (data is Dictionary) or inventory == null:
@@ -123,7 +170,8 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
             origin.emit_changed()
         _feedback("Quickslot cleared. Items remain in backpack.")
         return
-    var outcome: Dictionary = InventoryOperations.move_or_combine(origin, int(data.get("index", -1)), inventory, index)
+    var outcome: Dictionary = InventoryOperations.move_or_combine(origin, int(data.get("index", -1)), inventory, index,
+        int(data.get("amount", 1)))
     _feedback(str(outcome.get("message", "")))
 
 func _feedback(message: String) -> void:
@@ -135,6 +183,8 @@ func _notification(what: int) -> void:
         return
     var released: InvItem = _pending_world_item
     _pending_world_item = null
+    var released_amount: int = _pending_world_amount
+    _pending_world_amount = 0
     if not get_viewport().gui_is_drag_successful():
         if parent_view != null and parent_view.has_method("request_world_drop"):
-            parent_view.request_world_drop(inventory, index, released, get_viewport().get_mouse_position())
+            parent_view.request_world_drop(inventory, index, released, get_viewport().get_mouse_position(), released_amount)
