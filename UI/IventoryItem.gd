@@ -77,7 +77,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
     if is_hotbar:
         # A hotbar is a reference, not a duplicated stack.
         inventory.items[index] = InvSlot.new(item, 1)
-        inventory.changed.emit()
+        inventory.emit_changed()
         _feedback("Assigned %s to quick slot %d." % [item.name, index + 1])
         return
     if bool(data.get("hotbar", false)):
@@ -85,7 +85,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
         var origin_idx: int = int(data.get("index", -1))
         if origin_idx >= 0 and origin_idx < origin.size():
             origin.items[origin_idx] = InvSlot.new()
-            origin.changed.emit()
+            origin.emit_changed()
         _feedback("Quickslot cleared. Items remain in backpack.")
         return
     var outcome: Dictionary = InventoryOperations.move_or_combine(origin, int(data.get("index", -1)), inventory, index)
