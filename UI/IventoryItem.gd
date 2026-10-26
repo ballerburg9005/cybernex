@@ -75,6 +75,9 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
     if item == null or origin == null:
         return
     if is_hotbar:
+        if backpack == null or not backpack.has(item):
+            _feedback("Not in backpack: retrieve the item before assigning quick access.")
+            return
         # A hotbar is a reference, not a duplicated stack.
         inventory.items[index] = InvSlot.new(item, 1)
         inventory.emit_changed()
