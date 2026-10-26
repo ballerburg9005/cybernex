@@ -7,7 +7,7 @@ signal feedback(message: String)
 signal use_requested(item: InvItem)
 signal save_requested
 signal load_requested
-signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2)
+signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2, amount: int)
 @export var inv: Inv
 @export_enum("backpack", "hotbar") var mode: String = "backpack"
 @export_range(1, 12, 1) var preferred_columns: int = 10
@@ -151,6 +151,7 @@ func refresh() -> void:
         cell.refresh()
         if i == -1:
             cell.disabled = true
+            cell.modulate = Color("#858b91")
     var actual_stacks: int = inv.size() - available.size()
     var item_count: int = 0
     for i in range(inv.size()):
@@ -174,9 +175,9 @@ func message(value: String) -> void:
     # Only the original lower-right event feed narrates gameplay.
     feedback.emit(value)
 
-func request_world_drop(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2) -> void:
+func request_world_drop(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2, amount: int = 1) -> void:
     if item != null:
-        world_drop_requested.emit(origin, origin_index, item, viewport_position)
+        world_drop_requested.emit(origin, origin_index, item, viewport_position, amount)
 
 func _refresh_recipe_index() -> void:
     var retained_id: String = ""
