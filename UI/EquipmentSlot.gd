@@ -52,7 +52,12 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
     var item: InvItem = loadout.item_at(slot_id)
     if item == null:
         return null
-    var label := Label.new()
-    label.text = "EQUIPPED: " + item.name
-    set_drag_preview(label)
+    var sprite := TextureRect.new()
+    sprite.texture = item.texture
+    sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+    sprite.custom_minimum_size = Vector2(48, 48)
+    sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    set_drag_preview(sprite)
     return {"kind": "equipped_item", "item": item, "slot": slot_id, "loadout": loadout}
