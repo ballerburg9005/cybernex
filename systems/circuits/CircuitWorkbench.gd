@@ -6,6 +6,7 @@ class_name CircuitWorkbench
 signal puzzle_solved
 @export var authored_board: CircuitBoard
 @export var catalog: Array[CircuitPart] = []
+@export var item_catalog: Array[InvItem] = []
 
 @onready var board_view: CircuitBoardView = %BoardView
 @onready var palette: OptionButton = %Palette
@@ -17,6 +18,7 @@ signal puzzle_solved
 var board: CircuitBoard
 ## Optional shared resource from the station bay. Standalone mode remains unlimited.
 var supplied_inventory: SalvageInventory
+var field_inventory: Inv
 var require_salvage: bool = false
 var simulation := CircuitSimulation.new()
 var selected_index: int = -1
@@ -91,6 +93,14 @@ func _remove_selected() -> void:
         status.text = "This board component cannot be removed."
         return
     var removed: CircuitPlacement = board.placements[selected_index]
+    if field_inventory != null:
+        if removed.failed_open:
+            field_inventory.add_item(preload("res://items/junk.tres"), 1)
+        else:
+            var reclaimed: InvItem = _part_item(removed.part)
+            if reclaimed != null and not field_inventory.add_item(reclaimed, 1):
+                status.text = "Pack full. Cannot recover intact component."
+                return
     if require_salvage and supplied_inventory != null:
         if removed.failed_open:
             supplied_inventory.add("electronic_scrap", 1, "Burnt electronic scrap")
@@ -155,10 +165,21 @@ func _on_simulation_tick() -> void:
         status.text += " | ACCESS ACTUATOR READY"
         puzzle_solved.emit()
 
+func set_field_inventory(stock: Inv) -> void:
+    field_inventory = stock
+    require_salvage = stock != null or supplied_inventory != null
+    _refresh_palette_labels()
+
+func _part_item(part: CircuitPart) -> InvItem:
+    for stock in item_catalog:
+        if stock != null and stock.circuit_part != null and stock.circuit_part.part_id == part.part_id:
+            return stock
+    return null
+
 func set_inventory(stock: SalvageInventory) -> void:
     # Called by the owning gameplay scene after this Control enters the tree.
     supplied_inventory = stock
-    require_salvage = stock != null
+    require_salvage = stock != null or field_inventory != null
     _refresh_palette_labels()
 
 func _refresh_palette_labels() -> void:
@@ -169,13 +190,29 @@ func _refresh_palette_labels() -> void:
         if part == null:
             continue
         var text: String = part.label
-        if require_salvage and supplied_inventory != null:
+        if field_inventory != null:
+            var inventory_item: InvItem = _part_item(part)
+            text += "  [×%d]" % (field_inventory.count(inventory_item) if inventory_item != null else 0)
+        elif require_salvage and supplied_inventory != null:
             text += "  [×%d]" % supplied_inventory.amount(part.part_id)
         if i < palette.item_count:
             palette.set_item_text(i, text)
         i += 1
 
 func _spend_component(part: CircuitPart) -> bool:
+    if field_inventory != null:
+        var item: InvItem = _part_item(part)
+        var solder: InvItem = preload("res://items/solder.tres")
+        if item == null or not field_inventory.has(item) or not field_inventory.has(solder):
+            status.text = "Need a compatible spare component and a solder segment."
+            return false
+        if not field_inventory.remove_item(item, 1):
+            return false
+        if not field_inventory.remove_item(solder, 1):
+            field_inventory.add_item(item, 1)
+            return false
+        _refresh_palette_labels()
+        return true
     if not require_salvage or supplied_inventory == null:
         return true
     var requirement := MaterialRequirement.new()
