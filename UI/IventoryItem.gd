@@ -28,6 +28,7 @@ func refresh() -> void:
         return
     var cell: InvSlot = inventory.slot_at(index) if inventory != null else null
     var amount: int = backpack.count(cell.item) if is_hotbar and cell != null else cell.count if cell != null else 0
+    $ResistorBands.visible = cell != null and cell.item.item_id == "resistor_10ohm"
     if cell == null or amount <= 0:
         image.texture = null
         number.text = "×" if index == -1 else ""
@@ -78,28 +79,18 @@ func _gui_input(event: InputEvent) -> void:
                 force_drag(data, _make_preview(data["item"], data["amount"]))
                 accept_event()
 
-func _make_preview(item: InvItem, amount: int) -> Control:
-    var preview := PanelContainer.new()
-    preview.z_index = 4096
-    preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    var style := StyleBoxFlat.new()
-    style.bg_color = Color(0.07, 0.09, 0.11, 0.94)
-    style.set_corner_radius_all(4)
-    preview.add_theme_stylebox_override("panel", style)
-    var row := HBoxContainer.new()
-    preview.add_child(row)
+func _make_preview(item: InvItem, _amount: int) -> Control:
+    # The native icon alone follows the cursor; no second background panel,
+    # name text, spacer or padding is allowed in the drag ghost.
     var sprite := TextureRect.new()
     sprite.texture = item.texture
     sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
     sprite.custom_minimum_size = Vector2(48, 48)
     sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-    row.add_child(sprite)
-    var label := Label.new()
-    label.text = "%dx" % amount
-    label.add_theme_font_size_override("font_size", 14)
-    row.add_child(label)
-    return preview
+    sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    sprite.z_index = 4096
+    return sprite
 
 func _make_drag_payload(whole_stack: bool) -> Variant:
     if inventory == null:
