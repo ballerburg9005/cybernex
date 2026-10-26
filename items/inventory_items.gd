@@ -3,6 +3,9 @@ extends Resource
 class_name InvItem
 
 @export var name: String = ""
+## Optional stable identity; otherwise the resource_path defines the stack type.
+## Unnamed runtime-only Resources stack only with the same instance.
+@export var item_id: String = ""
 @export var short_name: String = ""
 @export var texture: Texture2D
 @export var damage: float = 0.0
