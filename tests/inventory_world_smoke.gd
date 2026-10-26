@@ -147,7 +147,7 @@ func _run() -> void:
     var cutters_before: int = player.inventory.count(cutters)
     var tool_drop: Dictionary = {"kind": "inventory_item", "item": cutters,
         "inventory": player.inventory, "index": player.inventory.find(cutters)}
-    var burnt_cell_position: Vector2 = Vector2(2.5, 1.5) * bench.board_view.cell_size
+    var burnt_cell_position: Vector2 = bench.board_view.pan_offset + Vector2(2.5, 1.5) * bench.board_view.cell_size
     check(bench.board_view._can_drop_data(burnt_cell_position, tool_drop),
         "Burnt leads must accept cutters dragged directly from the backpack.")
     bench.board_view._drop_data(burnt_cell_position, tool_drop)
