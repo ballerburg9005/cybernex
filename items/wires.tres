@@ -29,4 +29,4 @@ damage = 0.0
 combos = Array[ExtResource("recipe")]([SubResource("solder_join")])
 type = 0
 
-description = "Salvaged copper wiring. Join with solder to make an insulated jumper."
+description = "Salvaged copper wiring."
