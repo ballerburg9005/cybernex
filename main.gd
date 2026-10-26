@@ -311,6 +311,19 @@ func tooltip_timer_update() -> void:
         _clear_world_tooltip()
         return
     var collider: CollisionObject2D = $World/WorldHitTest.pick_viewport_point(mouse_viewport)
+    # The character's animated 32px sprite extends ABOVE his slim feet
+    # collision capsule. A pointer over the visible head must say "player",
+    # without expanding the physical hitbox or tool-interaction reach.
+    if collider == null and player != null and is_instance_valid(player):
+        var sprite: AnimatedSprite2D = player.get_node("Sprite")
+        var frames: SpriteFrames = sprite.sprite_frames
+        if frames != null:
+            var graphic: Texture2D = frames.get_frame_texture(sprite.animation, sprite.frame)
+            if graphic != null:
+                var local: Vector2 = sprite.to_local(
+                    $World/WorldHitTest.viewport_to_world(mouse_viewport))
+                if Rect2(-graphic.get_size() * 0.5, graphic.get_size()).has_point(local):
+                    collider = player
     var changed: bool = collider != last_hovered_world
     if changed or moved:
         last_hovered_world = collider
