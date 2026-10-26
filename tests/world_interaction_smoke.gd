@@ -37,6 +37,22 @@ func _run() -> void:
     check(player.inventory.count(cutters) == previous_cutters, "Reusable pliers must never be consumed on the wall.")
     check(player.inventory.count(wires) == previous_wires, "Salvage must appear in world before actual pickup, not as free inventory.")
     check(_pickup_count(world) == original_pickups + 1, "Exposed wall must release exactly one genuine world pickup.")
+    var cut_pickup: WorldItemPickup = null
+    for child in world.get_children():
+        if child is WorldItemPickup and child.name.begins_with("spawned_"):
+            cut_pickup = child
+            break
+    check(cut_pickup != null, "Exposed wall must produce an identifiable physical pickup.")
+    if cut_pickup != null:
+        var space := PhysicsShapeQueryParameters2D.new()
+        var clearance := CircleShape2D.new()
+        clearance.radius = 9.0
+        space.shape = clearance
+        space.transform = Transform2D(0.0, cut_pickup.global_position)
+        space.collision_mask = (1 << 19) | (1 << 21) | (1 << 22) | (1 << 23) | (1 << 6)
+        space.exclude = [cut_pickup.get_rid()]
+        check(world.get_world_2d().direct_space_state.intersect_shape(space, 1).is_empty(),
+            "Freshly cut wires must settle in empty ground, not inside a wall collider.")
     var saved: Dictionary = WorldSave.capture(game)
     wall.howoften = previous_remaining
     check(WorldSave.restore(game, saved), "Physical salvage state must roundtrip through world save.")
