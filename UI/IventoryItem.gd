@@ -31,7 +31,7 @@ func refresh() -> void:
         tooltip_text = "Empty slot"
         return
     image.texture = cell.item.texture
-    number.text = "%dx" % amount if amount > 1 else ""
+    number.text = "%dx" % amount
     var lines := PackedStringArray()
     lines.append("%s  %dx" % [cell.item.name, amount])
     # Tooltips identify items; recipe and use instructions belong nowhere in
