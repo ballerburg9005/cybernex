@@ -29,6 +29,20 @@ layout_mode = 2
 layout_mode = 2
 text = "SORT / GROUP"
 
+[node name="SearchBar" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Search" type="LineEdit" parent="Layout/SearchBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "SEARCH SALVAGE / GEAR"
+clear_button_enabled = true
+
+[node name="VisibleCount" type="Label" parent="Layout/SearchBar"]
+layout_mode = 2
+text = "0 entries / 0 units"
+
 [node name="Scroll" type="ScrollContainer" parent="Layout"]
 layout_mode = 2
 size_flags_vertical = 3
