@@ -53,6 +53,7 @@ func _run() -> void:
         and log.mouse_filter == Control.MOUSE_FILTER_STOP,
         "Opaque HUD background, navigation, shortcut bar and journal must consume GUI mouse events.")
     var journal: RichTextLabel = game.hud_textbox
+    print("JOURNAL 720: label=", journal.get_global_rect(), " text=", journal.text, " richbox=", journal.get_parent().get_global_rect())
     check(journal.get_global_rect().position.y >= 0.0
         and journal.get_global_rect().size.y >= 65.0
         and journal.get_global_rect().end.y <= 720.0
