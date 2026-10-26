@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://ctfh5rdwvcfap"]
+[gd_scene load_steps=37 format=3 uid="uid://ctfh5rdwvcfap"]
 
 [ext_resource type="Shader" path="res://flowing_squares.gdshader" id="1_rtrpn"]
 [ext_resource type="Script" path="res://main.gd" id="1_rw06d"]
@@ -16,6 +16,7 @@
 [ext_resource type="Script" path="res://systems/interactions/WorldHitTest.gd" id="40_world_hit"]
 [ext_resource type="Script" path="res://inventory_slot.gd" id="12_26g80"]
 [ext_resource type="Resource" uid="uid://c1rm8ll7i4il7" path="res://items/wires.tres" id="14_vb2n3"]
+[ext_resource type="Resource" path="res://items/insulation_tape.tres" id="42_tape"]
 [ext_resource type="PackedScene" uid="uid://cfhmk4tjehyse" path="res://interactibles/desk.tscn" id="16_5p6vc"]
 [ext_resource type="PackedScene" uid="uid://c7fsimpojygjv" path="res://interactibles/object.tscn" id="16_h2lng"]
 [ext_resource type="Resource" uid="uid://c7oecn17tljh4" path="res://items/big_wire.tres" id="18_k8fjm"]
@@ -63,9 +64,14 @@ script = ExtResource("12_26g80")
 item = ExtResource("18_k8fjm")
 count = 3
 
+[sub_resource type="Resource" id="Resource_tape"]
+script = ExtResource("12_26g80")
+item = ExtResource("42_tape")
+count = 1
+
 [sub_resource type="Resource" id="Resource_grmg7"]
 script = ExtResource("19_gesh8")
-items = Array[ExtResource("12_26g80")]([SubResource("Resource_boupi")])
+items = Array[ExtResource("12_26g80")]([SubResource("Resource_boupi"), SubResource("Resource_tape")])
 
 [sub_resource type="Resource" id="Resource_3funf"]
 script = ExtResource("12_26g80")
