@@ -10,7 +10,7 @@ signal load_requested
 signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2)
 @export var inv: Inv
 @export_enum("backpack", "hotbar") var mode: String = "backpack"
-@export_range(1, 12, 1) var preferred_columns: int = 7
+@export_range(1, 12, 1) var preferred_columns: int = 10
 @export_range(1, 20, 1) var empty_slots_to_show: int = 10
 
 @onready var grid_container: GridContainer = $Layout/Scroll/GridContainer
@@ -132,7 +132,10 @@ func refresh() -> void:
         if filtering == 0:
             # Show the full authored backpack grid, including empty slots.
             indices.append_array(available)
-    grid_container.columns = 9 if mode == "hotbar" else 7
+    grid_container.columns = 9 if mode == "hotbar" else 10
+    if mode != "hotbar":
+        while indices.size() % 10 != 0:
+            indices.append(-1)
     for child in grid_container.get_children():
         grid_container.remove_child(child)
         child.queue_free()
@@ -141,6 +144,8 @@ func refresh() -> void:
         grid_container.add_child(cell)
         cell.configure(inv, i, self, mode == "hotbar", backpack)
         cell.refresh()
+        if i == -1:
+            cell.disabled = true
     var actual_stacks: int = inv.size() - available.size()
     var item_count: int = 0
     for i in range(inv.size()):
