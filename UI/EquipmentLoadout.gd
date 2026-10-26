@@ -29,9 +29,8 @@ func can_assign(slot_id: String, item: InvItem, backpack: Inv) -> bool:
         return false
     if item == null:
         return true
-    var valid_type: bool = bool(item.type & InvItem.IS_WEAPON) if slot_id.begins_with("weapon_") else bool(item.type & InvItem.IS_AUGMENTATION)
-    if not valid_type or not item.equipment_slots.has(slot_id):
-        return false
+    # Physical sockets deliberately accept odd placements; bad decisions can
+    # have story/physics consequences instead of a rejecting UI cursor.
     var occupied: int = 0
     for key in SOCKETS:
         if key != slot_id and Inv.matches(item_at(key), item):
@@ -50,9 +49,6 @@ func can_relocate(from_id: String, to_id: String, backpack: Inv) -> bool:
         return true
     var current: InvItem = item_at(from_id)
     if current == null or backpack == null or not SOCKETS.has(to_id):
-        return false
-    var allowed: bool = bool(current.type & InvItem.IS_WEAPON) if to_id.begins_with("weapon_") else bool(current.type & InvItem.IS_AUGMENTATION)
-    if not allowed or not current.equipment_slots.has(to_id):
         return false
     var destination: InvItem = item_at(to_id)
     if Inv.matches(destination, current):
@@ -86,8 +82,7 @@ func reconcile(backpack: Inv) -> void:
             continue
         var item_identity: String = Inv.item_key(item)
         var assigned: int = int(usage.get(item_identity, 0))
-        var valid_type: bool = bool(item.type & InvItem.IS_WEAPON) if key.begins_with("weapon_") else bool(item.type & InvItem.IS_AUGMENTATION)
-        if not valid_type or not item.equipment_slots.has(key) or backpack.count(item) <= assigned:
+        if backpack.count(item) <= assigned:
             set(key, null)
             modified = true
         else:
@@ -123,9 +118,6 @@ func restore(state: Dictionary, backpack: Inv) -> bool:
                     item = stack.item
                     break
             if item == null:
-                return false
-            var allowed: bool = bool(item.type & InvItem.IS_WEAPON) if key.begins_with("weapon_") else bool(item.type & InvItem.IS_AUGMENTATION)
-            if not allowed or not item.equipment_slots.has(key):
                 return false
             totals[id] = int(totals.get(id, 0)) + 1
             if backpack.count(item) < int(totals[id]):
