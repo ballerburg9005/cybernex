@@ -16,6 +16,9 @@ func _run() -> void:
     if main_scene == null:
         quit(1)
         return
+    # SceneTree --script starts with a 64x64 headless root, not the real 720p
+    # game window. Model the actual supported viewport before sizing HUD.
+    root.size = Vector2i(1280, 720)
     var game: Control = main_scene.instantiate()
     root.add_child(game)
     var drawer: Control = game.get_node("HUD/FullInventory")
