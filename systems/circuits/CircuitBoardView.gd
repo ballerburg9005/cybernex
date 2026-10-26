@@ -17,6 +17,7 @@ signal incoming_part(item: InvItem, cell: Vector2i)
             queue_redraw()
 @export_range(24, 128, 4) var cell_size: int = 64
 var allow_dragging: bool = true
+var workbench: CircuitWorkbench
 var hottest_part: int = -1
 
 const FRAME := Color("#1a2731")
