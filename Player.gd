@@ -4,6 +4,7 @@ extends CharacterBody2D
 @export var health = 100.0
 
 const is_player = true
+signal weapon_fired(hit: Node, energy_wh: float)
 
 const SPEED = 300.0
 const JUMP_VELOCITY = -400.0
@@ -19,6 +20,7 @@ var combinables = []
 @export var inventory : Inv
 @export var quickinventory : Inv
 @export var equipment: EquipmentLoadout
+var equipment_runtime := EquipmentRuntime.new()
 
 func _ready():
     last_health = health
@@ -65,12 +67,15 @@ func _input(event: InputEvent) -> void:
         for obj in activatables.duplicate():
             if is_instance_valid(obj):
                 obj.activate(self)
+    if event.is_action_pressed("action_2") and not event.is_echo():
+        fire_arc_tool()
     if event.is_action_pressed("action_inventory"):
         var panel: Control = get_node("/root/main/HUD/FullInventory")
         panel.visible = not panel.visible
 
 
 func _physics_process(delta):
+    equipment_runtime.tick(delta, equipment, inventory)
     counter = (counter+1)%9999999999
 
     # Handle jump.
@@ -89,7 +94,7 @@ func _physics_process(delta):
         if (SCALE*position).distance_to(mouse_target) < 10:
             mouse_target = null
 
-    velocity = velocity.normalized()*SPEED
+    velocity = velocity.normalized() * SPEED * equipment_runtime.locomotion_multiplier(equipment, inventory)
 
     if velocity.x < 0:
         $Sprite.flip_h = true
@@ -119,3 +124,36 @@ func _physics_process(delta):
     
 func p(s):
     get_node("/root/main").p(s)
+
+func service_reach() -> float:
+    return 200.0 + equipment_runtime.service_reach_bonus(equipment, inventory)
+
+func diagnostic_level() -> int:
+    return equipment_runtime.diagnostic_level(equipment, inventory)
+
+func recharge_from(item: InvItem) -> bool:
+    return equipment_runtime.recharge(item, inventory)
+
+func fire_arc_tool() -> bool:
+    # Short, electrically powered nonlethal emergency discharge. Deliberately
+    # less useful than solving a route via maintenance, access or stealth.
+    var shot: Dictionary = equipment_runtime.try_discharge(equipment, inventory)
+    if not bool(shot.get("ok", false)):
+        return false
+    var origin: Vector2 = global_position
+    var aim: Vector2 = get_global_mouse_position() - origin
+    if aim.length_squared() < 0.001:
+        aim = Vector2.RIGHT
+    var destination: Vector2 = origin + aim.normalized() * float(shot["range"])
+    var query := PhysicsRayQueryParameters2D.create(
+        origin, destination, (1 << 14) | (1 << 15) | (1 << 19),
+        [get_rid()])
+    var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
+    var collider: Node = hit.get("collider", null)
+    var target: Node = collider
+    if target != null and not target.is_in_group("enemies") and target.get_parent().is_in_group("enemies"):
+        target = target.get_parent()
+    if target != null and target.is_in_group("enemies") and target.has_method("stun_for"):
+        target.stun_for(1.6)
+    weapon_fired.emit(target, float(shot["energy_spent_wh"]))
+    return true
