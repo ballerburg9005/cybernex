@@ -22,6 +22,7 @@ func _run() -> void:
     test_equipment_snapshot_atomicity()
     test_search_filter_count()
     test_crafting_index()
+    test_equipment_identity_and_manual_grouping()
     if failures != 0:
         push_error("INVENTORY TESTS FAILED: " + str(failures))
         quit(1)
@@ -277,3 +278,29 @@ func test_crafting_index() -> void:
         panel._assemble_selected()
         check(bag.count(heavy) == 0 and bag.count(wires) == 3 and bag.count(cutters) == 1, "Assembly bar must use atomic crafting, consuming material but not tools.")
     panel.queue_free()
+
+func test_equipment_identity_and_manual_grouping() -> void:
+    var pistol: InvItem = item("arc_pistol")
+    var alias := InvItem.new()
+    alias.name = "Alternate loaded definition of arc pistol"
+    alias.item_id = pistol.item_id
+    alias.type = InvItem.IS_WEAPON
+    alias.equipment_slots = PackedStringArray(["weapon_primary", "weapon_secondary"])
+    var bag := Inv.new(5)
+    bag.add_item(pistol, 1)
+    var loadout := EquipmentLoadout.new()
+    check(loadout.assign("weapon_primary", alias, bag), "Same item ID from distinct Resource instance counts as one owned pistol.")
+    check(not loadout.assign("weapon_secondary", pistol, bag), "ID alias must not permit a duplicate second weapon without two physical items.")
+    loadout.reconcile(bag)
+    check(loadout.occupied_sockets() == 1, "Reconcile must count stable IDs across independently loaded item objects.")
+    bag.add_item(pistol, 1)
+    check(loadout.assign("weapon_secondary", pistol, bag), "Second physical copy must allow two aliases in separate sockets.")
+    bag.remove_item(pistol, 1)
+    loadout.reconcile(bag)
+    check(loadout.occupied_sockets() == 1, "Removing a physical copy must clear one of the equivalent equipment sockets.")
+    var separate := Inv.new(4)
+    separate.auto_group_stacks = false
+    separate.items[0] = InvSlot.new(pistol, 2)
+    separate.items[3] = InvSlot.new(alias, 1)
+    check(separate.normalize(), "Explicit normalize must succeed regardless of automatic grouping policy.")
+    check(separate.slot_at(0).count == 3 and separate.slot_at(1) == null, "Manual Normalize must group equivalent item ID piles without changing total.")
