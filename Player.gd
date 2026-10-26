@@ -175,6 +175,12 @@ func fire_arc_tool() -> bool:
         target = target.get_parent()
     if target != null and target.is_in_group("enemies") and target.has_method("stun_for"):
         target.stun_for(1.6)
+    # Visual discharge is a separate short-lived world effect; ray physics
+    # still determines the actual hit, not the particle animation.
+    var flash: ArcFlash = preload("res://systems/effects/ArcFlash.gd").new()
+    get_parent().add_child(flash)
+    flash.global_position = origin + Vector2(0, -13.0 * global_scale.y)
+    flash.burst(hit["position"] if hit.has("position") else destination)
     weapon_fired.emit(target, float(shot["energy_spent_wh"]))
     return true
 
