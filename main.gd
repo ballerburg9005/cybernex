@@ -278,7 +278,7 @@ func tooltip_timer_update() -> void:
     var mouse_viewport: Vector2 = get_viewport().get_mouse_position()
     var moved: bool = mouse_viewport.distance_to(tooltip_last_mouse_position) >= 3.0
     tooltip_last_mouse_position = mouse_viewport
-    if moved or mouse_over_ui or $HUD/FullInventory.visible:
+    if moved or is_hud_drop_region(mouse_viewport):
         tooltip_display = 0
         _clear_world_tooltip()
         return
