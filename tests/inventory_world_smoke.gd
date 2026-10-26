@@ -55,8 +55,7 @@ func _run() -> void:
     var solder_before: int = player.inventory.count(solder)
     bench.selected_index = 1
     bench._remove_selected()
-    bench.palette.select(0)
-    bench._on_board_click(Vector2i(2, 1))
+    bench._install_inventory_part(resistor, Vector2i(2, 1))
     check(player.inventory.count(resistor) == resistor_before - 1, "Installing physical resistor should use one real item.")
     check(player.inventory.count(solder) == solder_before - 1, "Soldering should spend exactly one solder.")
     for tick in range(15):
@@ -77,8 +76,7 @@ func _run() -> void:
     var second: CircuitWorkbench = load("res://systems/circuits/CircuitWorkbench.tscn").instantiate()
     game.get_node("HUD").add_child(second)
     second.set_field_inventory(player.inventory)
-    second.palette.select(1)
-    second._on_board_click(Vector2i(4, 0))
+    second._install_inventory_part(jumper, Vector2i(4, 0))
     check(player.inventory.count(jumper) == 0 and second.board.placement_at(Vector2i(4, 0)) >= 0,
         "Crafted jumper should be consumed as an actual editable wire component.")
     check(player.inventory.count(solder) == 0, "Installing crafted jumper must additionally consume solder.")
