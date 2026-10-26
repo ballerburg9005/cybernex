@@ -22,6 +22,7 @@ region = Rect2(64, 0, 16, 16)
 [resource]
 script = ExtResource("item")
 name = "Copper terminal contacts"
+item_id = "copper_contacts"
 short_name = "contacts"
 texture = SubResource("icon")
 damage = 0.0
