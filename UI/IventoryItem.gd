@@ -43,6 +43,13 @@ func refresh() -> void:
                 recipe.with.name, recipe.yields.name, recipe.amount, tool_note])
     tooltip_text = "\n".join(lines)
 
+func _gui_input(event: InputEvent) -> void:
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and event.double_click:
+        var slot: InvSlot = inventory.slot_at(index) if inventory != null else null
+        if slot != null and parent_view != null and parent_view.has_method("request_use"):
+            parent_view.request_use(slot.item)
+            accept_event()
+
 func _get_drag_data(_at_position: Vector2) -> Variant:
     if inventory == null:
         return null
