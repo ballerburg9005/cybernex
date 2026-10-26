@@ -36,9 +36,13 @@ func _ready():
     quick_index.configure(player.quickinventory, player.inventory, "hotbar")
     var mannequin: EquipmentMannequin = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer/Equipment
     mannequin.setup(player.inventory, player.equipment)
+    mannequin.set_runtime(player.equipment_runtime)
     full_index.feedback.connect(p)
     quick_index.feedback.connect(p)
     mannequin.feedback.connect(p)
+    full_index.use_requested.connect(_use_inventory_item)
+    quick_index.use_requested.connect(_use_inventory_item)
+    player.weapon_fired.connect(_on_weapon_fired)
     full_index.world_drop_requested.connect(_handle_world_drop)
     quick_index.world_drop_requested.connect(_handle_world_drop)
 
@@ -179,7 +183,7 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
     if not player.inventory.has(item):
         return
     var world_point: Vector2 = world.get_global_transform_with_canvas().affine_inverse() * viewport_position
-    if world_point.distance_to(player.global_position) > 200.0:
+    if world_point.distance_to(player.global_position) > player.service_reach():
         p("Out of reach. Walk nearer before dropping supplies.")
         return
     if not player.inventory.remove_item(item, 1):
@@ -189,3 +193,22 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
     world.add_child(dropped)
     dropped.global_position = world_point
     p("Put %s on the floor. Remaining: %d." % [item.name, player.inventory.count(item)])
+
+func _use_inventory_item(item: InvItem) -> void:
+    if item == null:
+        return
+    if item.energy_wh > 0.0:
+        if player.recharge_from(item):
+            p("Installed %s. Suit battery: %.1f/%.0f Wh." % [
+                item.name, player.equipment_runtime.charge_wh,
+                player.equipment_runtime.capacity_wh])
+        else:
+            p("Cell not installed: battery full or stock unavailable.")
+    else:
+        p("%s has no direct use. Combine it or fit it to an appropriate socket." % item.name)
+
+func _on_weapon_fired(hit: Node, energy_spent_wh: float) -> void:
+    if hit != null and hit.is_in_group("enemies"):
+        p("Arc burst disrupted %s (%.2f Wh)." % [str(hit.get("myname")), energy_spent_wh])
+    else:
+        p("Arc burst discharged (%.2f Wh). No target disrupted." % energy_spent_wh)
