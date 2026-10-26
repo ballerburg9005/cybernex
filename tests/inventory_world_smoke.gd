@@ -22,10 +22,13 @@ func _run() -> void:
     var game: Control = main_scene.instantiate()
     root.add_child(game)
     var drawer: Control = game.get_node("HUD/FullInventory")
+    drawer.visible = true
+    game._layout_hud()
     print("HUD 720: viewport=", game.get_viewport_rect().size, " drawer=", drawer.get_global_rect())
     check(drawer.size.x >= 345.0 and drawer.size.x < 450.0,
         "Inventory must use a fixed compact width at default 720p and cannot push the grid off-screen.")
     check(drawer.position.x <= 12.0, "Exploration inventory drawer must stay left of centered player.")
+    drawer.visible = false
     var item: InvItem = load("res://items/wires.tres")
     var player = game.get_node("World/Player")
     var world: Node2D = game.get_node("World")
