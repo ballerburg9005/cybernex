@@ -6,6 +6,8 @@ class_name CircuitPlacement
 @export var cell: Vector2i
 @export_range(0, 3, 1) var rotation: int = 0
 @export var fixed_to_board: bool = false
+## Stable inventory identity for a removable conductive tool, not a soldered part.
+@export var held_item_id: String = ""
 @export var failed_open: bool = false
 ## Cold tape splices are not ideal contacts: explicit per-placement ohms.
 @export_range(0.0, 10.0, 0.01) var joint_resistance_ohms: float = 0.0
