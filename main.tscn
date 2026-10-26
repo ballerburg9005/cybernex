@@ -120,6 +120,7 @@ hostile_towards = "enemies"
 
 [node name="Terminal" parent="World" instance=ExtResource("6_rq1bm")]
 position = Vector2(206.667, 119)
+puzzle_type = "circuit"
 
 [node name="Door-0-0" parent="World" instance=ExtResource("5_gs8tt")]
 position = Vector2(256.333, 111.667)
