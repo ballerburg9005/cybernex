@@ -86,6 +86,7 @@ static func capture(game: Control) -> Dictionary:
     var entries: Dictionary = {}
     var pickups: Array[Dictionary] = []
     var robots: Dictionary = {}
+    var object_states: Dictionary = {}
     for node in world.get_children():
         if node is WorldItemPickup and node.itemslot != null and node.itemslot.occupied():
             pickups.append({
@@ -98,6 +99,8 @@ static func capture(game: Control) -> Dictionary:
                 "access": node.access_granted, "active": node.is_activated,
                 "loot": _capture_inventory(node.loot)
             }
+        if "howoften" in node and "broken" in node:
+            object_states[node.name] = {"remaining": node.howoften, "broken": node.broken}
         if node.is_in_group("enemies") and "health" in node:
             robots[node.name] = {
                 "health": node.health,
@@ -115,7 +118,8 @@ static func capture(game: Control) -> Dictionary:
         "loadout": actor.equipment.snapshot(),
         "terminals": entries,
         "pickups": pickups,
-        "enemies": robots
+        "enemies": robots,
+        "objects": object_states
     }
 
 static func restore(game: Control, data: Dictionary) -> bool:
@@ -193,6 +197,22 @@ static func restore(game: Control, data: Dictionary) -> bool:
             return _reject("if pos == null or not is_finite(hp) or hp < 0.0 or hp > 10000.0:")
         next_robots[robot_name] = {"node": robot, "pos": pos, "health": hp}
 
+    var object_records: Variant = data.get("objects", {})
+    if typeof(object_records) != TYPE_DICTIONARY:
+        return _reject("Object salvage state must be a dictionary.")
+    var validated_objects: Dictionary = {}
+    for object_name in object_records:
+        var object_node: Node = world.get_node_or_null(str(object_name))
+        var object_record: Variant = object_records[object_name]
+        if object_node == null or not ("howoften" in object_node) or typeof(object_record) != TYPE_DICTIONARY:
+            return _reject("Unknown salvaged world object.")
+        var quantity: int = int(object_record.get("remaining", -1))
+        if quantity < 0 or quantity > 10000:
+            return _reject("Invalid salvage counter.")
+        validated_objects[object_name] = {
+            "remaining": quantity, "broken": bool(object_record.get("broken", false))
+        }
+
     # Everything validated; commit models and recreate world pickups.
     actor.inventory = new_bag
     actor.quickinventory = new_hotbar
@@ -201,6 +221,10 @@ static func restore(game: Control, data: Dictionary) -> bool:
     actor.position = player_position
     actor.health = health
     actor.last_health = health
+    for name in validated_objects:
+        var object_node: Node = world.get_node(str(name))
+        object_node.howoften = validated_objects[name]["remaining"]
+        object_node.broken = validated_objects[name]["broken"]
     for key in next_terminals:
         var record: Dictionary = next_terminals[key]
         var terminal: Node = record["node"]
