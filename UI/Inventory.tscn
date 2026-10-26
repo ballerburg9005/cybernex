@@ -69,14 +69,14 @@ text = "ASSEMBLE"
 
 [node name="Scroll" type="ScrollContainer" parent="Layout"]
 layout_mode = 2
-vertical_scroll_mode = 2
+vertical_scroll_mode = 1
 horizontal_scroll_mode = 0
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [node name="GridContainer" type="GridContainer" parent="Layout/Scroll"]
 layout_mode = 2
-theme_override_constants/h_separation = 2
+theme_override_constants/h_separation = 1
 theme_override_constants/v_separation = 2
 size_flags_horizontal = 4
 columns = 10
