@@ -28,16 +28,19 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
         return false
     if data.get("kind", "") != "inventory_item" and data.get("kind", "") != "equipped_item":
         return false
+    if data.get("kind", "") == "equipped_item":
+        return loadout.can_relocate(str(data.get("slot", "")), slot_id, backpack)
     return loadout.can_assign(slot_id, data.get("item"), backpack)
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
     if not _can_drop_data(_at_position, data):
         return
     var item: InvItem = data.get("item")
-    if not loadout.assign(slot_id, item, backpack):
+    if data.get("kind", "") == "equipped_item":
+        if not loadout.relocate(str(data.get("slot", "")), slot_id, backpack):
+            return
+    elif not loadout.assign(slot_id, item, backpack):
         return
-    if data.get("kind", "") == "equipped_item" and data.get("slot", "") != slot_id:
-        loadout.assign(data["slot"], null, backpack)
     if owner_panel != null and owner_panel.has_method("message"):
         owner_panel.message("Equipped %s to %s." % [item.name, slot_id])
 
