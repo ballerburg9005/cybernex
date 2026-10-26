@@ -34,6 +34,16 @@ func _on_backpack_changed() -> void:
 func _update_sockets() -> void:
     for socket in sockets:
         socket.update_display()
+    if is_node_ready() and loadout != null:
+        var guns: int = 0
+        var augmentations: int = 0
+        for key in EquipmentLoadout.SOCKETS:
+            if loadout.item_at(key) != null:
+                if key.begins_with("weapon_"):
+                    guns += 1
+                else:
+                    augmentations += 1
+        $Frame/Layout/LoadoutStatus.text = "%d / 8 SOCKETS    |    %d WEAPONS    |    %d AUGMENTATIONS" % [loadout.occupied_sockets(), guns, augmentations]
 
 func message(value: String) -> void:
     $Frame/Layout/Hint.text = value
