@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="item"]
+[ext_resource type="Texture2D" path="res://assets/items.png" id="atlas"]
+
+[sub_resource type="AtlasTexture" id="icon"]
+atlas = ExtResource("atlas")
+region = Rect2(48, 0, 16, 16)
+
+[resource]
+script = ExtResource("item")
+name = "Neural diagnostic regulator"
+short_name = "neural regulator"
+texture = SubResource("icon")
+damage = 0.0
+combos = []
+type = 32
+equipment_slots = PackedStringArray("augment_neural", "augment_head")
+description = "Interface diagnostic augmentation for station telemetry."
