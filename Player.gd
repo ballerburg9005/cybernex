@@ -64,22 +64,23 @@ func add_inventory_item(itemslot: InvSlot, start: int = -1, inv: Inv = null) -> 
 
 
 func _input(event: InputEvent) -> void:
+    var host: Node = get_node_or_null("/root/main")
+    if host == null:
+        return
+    if event.is_action_pressed("action_inventory") and not event.is_echo():
+        # Tab always returns to the backpack from another drawer page.
+        host.toggle_inventory()
+        get_viewport().set_input_as_handled()
+        return
+    if host.ui_captures_world_input():
+        return
     if event.is_action_pressed("action_1"):
         for obj in activatables.duplicate():
             if is_instance_valid(obj):
                 obj.activate(self)
     if event.is_action_pressed("action_2") and not event.is_echo():
-        var interface: Node = get_node_or_null("/root/main")
-        if interface != null and not interface.mouse_over_ui and not interface.get_node("HUD/FullInventory").visible:
+        if not host.mouse_over_ui:
             fire_arc_tool()
-    if event.is_action_pressed("action_inventory"):
-        var host: Node = get_node("/root/main")
-        var panel: Control = host.get_node("HUD/FullInventory")
-        if host.puzzle_active:
-            host.cycle_drawer(1)
-        else:
-            panel.visible = not panel.visible
-
 
 func _physics_process(delta):
     equipment_runtime.tick(delta, equipment, inventory)
@@ -90,7 +91,11 @@ func _physics_process(delta):
     #	velocity.y = JUMP_VELOCITY
 
     # keyboard
-    var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+    var host: Node = get_node_or_null("/root/main")
+    var blocked: bool = host != null and host.ui_captures_world_input()
+    var direction: Vector2 = Vector2.ZERO if blocked else Input.get_vector("move_left", "move_right", "move_up", "move_down")
+    if blocked:
+        mouse_target = null
     velocity = direction * SPEED
     if direction.x + direction.y > 0.1:
         mouse_target = null
@@ -171,6 +176,9 @@ func fire_arc_tool() -> bool:
     return true
 
 func _unhandled_key_input(event: InputEvent) -> void:
+    var host: Node = get_node_or_null("/root/main")
+    if host != null and host.ui_captures_world_input():
+        return
     if not (event is InputEventKey) or not event.pressed or event.echo:
         return
     if event.keycode >= KEY_1 and event.keycode <= KEY_9:
