@@ -4,6 +4,7 @@ class_name InventoryView
 ## One inventory is the source of truth. Change signals rebuild only visible
 ## controls, replacing 200ms polling and per-cell physics collisions.
 signal feedback(message: String)
+signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2)
 @export var inv: Inv
 @export_enum("backpack", "hotbar") var mode: String = "backpack"
 @export_range(1, 12, 1) var preferred_columns: int = 7
@@ -128,3 +129,7 @@ func refresh() -> void:
 func message(value: String) -> void:
     info.text = value
     feedback.emit(value)
+
+func request_world_drop(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2) -> void:
+    if item != null:
+        world_drop_requested.emit(origin, origin_index, item, viewport_position)
