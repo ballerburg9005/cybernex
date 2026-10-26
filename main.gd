@@ -14,6 +14,7 @@ var tooltip_timer = Timer.new()
 var tooltip_last_mouse_position = Vector2(-1,-1)
 var tooltip_display = 0
 var hud_tooltip
+var last_hovered_world: CollisionObject2D
 
 var mouse_over_ui = false
 var puzzle_active: bool = false
@@ -295,20 +296,27 @@ func _hover_target_name(collider: CollisionObject2D) -> String:
     return result
 
 func tooltip_timer_update() -> void:
-    # HUD Controls own their native tooltips. The single world picker lives
-    # in the camera-driven World canvas. No CanvasLayer physics query or HUD
-    # Area2D is permitted here: that caused 4.3 pan/zoom hover offsets.
+    # Re-hit-test even with a stationary cursor. Moving sprites and the player
+    # invalidate the old tooltip without requiring a mousemove event.
     var mouse_viewport: Vector2 = get_viewport().get_mouse_position()
     var moved: bool = mouse_viewport.distance_to(tooltip_last_mouse_position) >= 3.0
     tooltip_last_mouse_position = mouse_viewport
-    if moved or is_hud_drop_region(mouse_viewport):
+    if is_hud_drop_region(mouse_viewport):
+        tooltip_display = 0
+        last_hovered_world = null
+        _clear_world_tooltip()
+        return
+    var collider: CollisionObject2D = $World/WorldHitTest.pick_viewport_point(mouse_viewport)
+    var changed: bool = collider != last_hovered_world
+    if changed or moved:
+        last_hovered_world = collider
         tooltip_display = 0
         _clear_world_tooltip()
+    if collider == null or not is_instance_valid(collider):
         return
     tooltip_display += 1
     if tooltip_display < TOOLTIP_WAIT or is_instance_valid(hud_tooltip):
         return
-    var collider: CollisionObject2D = $World/WorldHitTest.pick_viewport_point(mouse_viewport)
     var label: String = _hover_target_name(collider)
     if label.is_empty():
         return
@@ -316,7 +324,10 @@ func tooltip_timer_update() -> void:
     hud_tooltip.name = "world_hover_tooltip"
     hud_tooltip.get_node("MarginContainer/Label").text = label
     hud.add_child(hud_tooltip)
-    hud_tooltip.global_position = $HUD.get_final_transform().affine_inverse() * mouse_viewport + Vector2(14, 10)
+    var desired: Vector2 = $HUD.get_final_transform().affine_inverse() * mouse_viewport + Vector2(14, 10)
+    hud_tooltip.position = Vector2(
+        clampf(desired.x, 2.0, maxf(2.0, get_viewport_rect().size.x - hud_tooltip.size.x - 4.0)),
+        clampf(desired.y, 2.0, maxf(2.0, get_viewport_rect().size.y - hud_tooltip.size.y - 4.0)))
     hud_tooltip.z_index = 2000
 
 func _on_ui_mouse_entered():
