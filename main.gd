@@ -107,7 +107,7 @@ func _layout_hud() -> void:
     if not is_inside_tree():
         return
     var viewport: Vector2 = get_viewport_rect().size
-    var drawer_width: float = clampf(viewport.x * 0.29, 350.0, 520.0)
+    var drawer_width: float = clampf(viewport.x * 0.32, 366.0, 500.0)
     var drawer: Control = $HUD/FullInventory
     drawer.anchor_left = 0.0
     drawer.anchor_right = 0.0
@@ -123,7 +123,7 @@ func _layout_hud() -> void:
     quick.anchor_top = 0.0
     quick.anchor_bottom = 0.0
     quick.offset_left = 8.0
-    quick.offset_right = 464.0
+    quick.offset_right = minf(480.0, viewport.x * 0.47)
     quick.offset_top = viewport.y - 65.0
     quick.offset_bottom = viewport.y - 8.0
     if active_circuit != null and is_instance_valid(active_circuit):
