@@ -392,6 +392,16 @@ func is_hud_drop_region(screen_point: Vector2) -> bool:
             return true
     return false
 
+func _solid_drop_target(point: Vector2) -> bool:
+    var shape := CircleShape2D.new()
+    shape.radius = 5.0
+    var query := PhysicsShapeQueryParameters2D.new()
+    query.shape = shape
+    query.transform = Transform2D(0.0, point)
+    query.collision_mask = (1 << 19) | (1 << 21) | (1 << 22) | (1 << 23) | (1 << 6)
+    query.collide_with_bodies = true
+    return not world.get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
+
 func _safe_drop_position(target: Vector2) -> Dictionary:
     # Never instantiate a physics item intersecting station tiles/walls.
     var clearance := CircleShape2D.new()
@@ -464,9 +474,10 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
             else:
                 p("%s bounced off the machine." % item.name)
             return
-    # An incompatible release on a solid object is NOT permission to throw
-    # the physical item through that object into the wall behind it.
-    if collider != null:
+    # A wall isn't a reachable ground drop. Reject the RELEASE position
+    # itself before looking for safe floor nearby; shifting a rejected object
+    # 24px sideways used to make pliers appear stuck ABOVE a wall.
+    if collider != null or _solid_drop_target(world_point):
         p("%s cannot be used there." % item.name)
         return
     var safe: Dictionary = _safe_drop_position(world_point)
