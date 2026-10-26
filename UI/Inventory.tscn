@@ -7,7 +7,7 @@ custom_minimum_size = Vector2(365, 190)
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("view_script")
-preferred_columns = 7
+preferred_columns = 10
 empty_slots_to_show = 10
 
 [node name="Layout" type="VBoxContainer" parent="."]
@@ -74,8 +74,10 @@ horizontal_scroll_mode = 0
 
 [node name="GridContainer" type="GridContainer" parent="Layout/Scroll"]
 layout_mode = 2
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
 size_flags_horizontal = 3
-columns = 7
+columns = 10
 
 [node name="Feedback" type="Label" parent="Layout"]
 layout_mode = 2
