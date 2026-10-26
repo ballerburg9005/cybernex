@@ -97,7 +97,8 @@ static func capture(game: Control) -> Dictionary:
         if node.has_method("play_activate") and "access_granted" in node and "loot" in node:
             entries[node.name] = {
                 "access": node.access_granted, "active": node.is_activated,
-                "loot": _capture_inventory(node.loot)
+                "loot": _capture_inventory(node.loot),
+                "computer_powered": node.computer_powered
             }
         if "howoften" in node and "broken" in node:
             object_states[node.name] = {"remaining": node.howoften, "broken": node.broken}
@@ -167,7 +168,8 @@ static func restore(game: Control, data: Dictionary) -> bool:
         next_terminals[node_name] = {
             "node": node, "loot": storage,
             "access": bool(record.get("access", false)),
-            "active": bool(record.get("active", false))
+            "active": bool(record.get("active", false)),
+            "computer_powered": bool(record.get("computer_powered", true))
         }
     var pickup_entries: Variant = data.get("pickups")
     if typeof(pickup_entries) != TYPE_ARRAY or pickup_entries.size() > 2000:
@@ -229,6 +231,7 @@ static func restore(game: Control, data: Dictionary) -> bool:
         var record: Dictionary = next_terminals[key]
         var terminal: Node = record["node"]
         terminal.loot = record["loot"]
+        terminal.computer_powered = record["computer_powered"]
         terminal.access_granted = record["access"]
         terminal.has_loot = terminal.loot.count() > 0
         terminal.playing_first_time = true
