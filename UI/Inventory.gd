@@ -118,7 +118,7 @@ func refresh() -> void:
         cell.refresh()
     var actual_stacks: int = inv.size() - available.size()
     var item_count: int = 0
-    for i in occupied:
+    for i in range(inv.size()):
         var stack: InvSlot = inv.slot_at(i)
         item_count += stack.count if stack != null else 0
     counter.text = ("%d/%d stacks  |  %d items" % [actual_stacks, inv.size(), item_count]) if mode != "hotbar" else "QUICK ACCESS"
