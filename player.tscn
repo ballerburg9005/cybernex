@@ -1,6 +1,7 @@
 [gd_scene load_steps=36 format=3 uid="uid://c1bhreaem7qlk"]
 
 [ext_resource type="Script" path="res://Player.gd" id="1_x588u"]
+[ext_resource type="Resource" path="res://UI/player_loadout.tres" id="loadout"]
 [ext_resource type="Resource" uid="uid://belbro1hfjjh3" path="res://playerinventory.tres" id="2_4ssf6"]
 [ext_resource type="Resource" uid="uid://dba0oafttyvuv" path="res://quickinventory.tres" id="3_phgyy"]
 [ext_resource type="Texture2D" uid="uid://ctaqpvt85mg5i" path="res://assets/Players/players grey x1.png" id="4_ortc0"]
@@ -231,6 +232,7 @@ motion_mode = 1
 script = ExtResource("1_x588u")
 inventory = ExtResource("2_4ssf6")
 quickinventory = ExtResource("3_phgyy")
+equipment = ExtResource("loadout")
 
 [node name="hitbox" type="AnimatableBody2D" parent="."]
 z_index = 101
