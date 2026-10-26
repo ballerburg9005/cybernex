@@ -72,7 +72,7 @@ func _input(event: InputEvent) -> void:
         host.toggle_inventory()
         get_viewport().set_input_as_handled()
         return
-    if host.ui_captures_world_input():
+    if host.ui_captures_world_input() or host.mouse_over_ui:
         return
     if event.is_action_pressed("action_1"):
         for obj in activatables.duplicate():
@@ -92,7 +92,7 @@ func _physics_process(delta):
 
     # keyboard
     var host: Node = get_node_or_null("/root/main")
-    var blocked: bool = host != null and host.ui_captures_world_input()
+    var blocked: bool = host != null and host.puzzle_active
     var direction: Vector2 = Vector2.ZERO if blocked else Input.get_vector("move_left", "move_right", "move_up", "move_down")
     if blocked:
         mouse_target = null
