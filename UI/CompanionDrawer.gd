@@ -9,6 +9,15 @@ var page_index: int = 0
 @onready var backpack_view: InventoryView = $Layout/InventoryItems
 
 func _ready() -> void:
+    var backdrop := StyleBoxFlat.new()
+    backdrop.bg_color = Color(0.05, 0.075, 0.09, 0.95)
+    backdrop.border_color = Color(0.31, 0.39, 0.4)
+    backdrop.set_border_width_all(1)
+    backdrop.content_margin_left = 5
+    backdrop.content_margin_right = 5
+    backdrop.content_margin_top = 5
+    backdrop.content_margin_bottom = 5
+    add_theme_stylebox_override("panel", backdrop)
     $Layout/Nav/Previous.pressed.connect(func() -> void: select_page(page_index - 1))
     $Layout/Nav/Next.pressed.connect(func() -> void: select_page(page_index + 1))
     select_page(0)
