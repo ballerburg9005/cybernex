@@ -27,6 +27,8 @@ var offered_recipes: Array[Dictionary] = []
 var backpack: Inv
 var cells_scene: PackedScene = preload("res://UI/InventoryItem.tscn")
 var filtering: int = 0
+var _layout_indices: Array[int] = []
+var _display_rows: int = -1
 
 func _ready() -> void:
     filter_button.add_item("ALL ITEMS")
@@ -79,6 +81,13 @@ func configure(model: Inv, owner_inventory: Inv = null, display_mode: String = "
         backpack.changed.connect(_backpack_updated)
     if is_node_ready():
         refresh()
+
+func _notification(what: int) -> void:
+    if what == NOTIFICATION_RESIZED and is_node_ready() and inv != null:
+        var rows: int = maxi(1, floori(maxf(50.0, size.y - 35.0) / 50.0))
+        if rows != _display_rows:
+            _display_rows = rows
+            call_deferred("refresh")
 
 func _backpack_updated() -> void:
     # Expire linked quickslots when the last actual item is consumed.
@@ -134,24 +143,38 @@ func refresh() -> void:
         else:
             indices.append_array(occupied)
     grid_container.columns = 10
-    var visible_rows: int = maxi(12, ceili(float(get_viewport_rect().size.y) / 50.0))
+    # Fill the actual panel, not the entire game viewport: desk inventories
+    # must not acquire dozens of offscreen slots and scrollbars.
+    var available_height: float = size.y if size.y >= 120 else 550.0
+    var visible_rows: int = maxi(1, floori(maxf(50.0, available_height - 35.0) / 50.0))
     if mode != "hotbar":
         while indices.size() < maxi(inv.size(), visible_rows * 10):
             indices.append(-1)
     if mode != "hotbar":
         while indices.size() % 10 != 0:
             indices.append(-1)
-    for child in grid_container.get_children():
-        grid_container.remove_child(child)
-        child.queue_free()
-    for i in indices:
-        var cell: InventoryCell = cells_scene.instantiate()
-        grid_container.add_child(cell)
-        cell.configure(inv, i, self, mode == "hotbar", backpack)
+    # A pickup used to free and recreate 100-160 Button nodes for EACH view
+    # synchronously, stalling controls and invalidating in-flight drags.
+    # Keep the same physical controls/identity until the actual layout changes.
+    var existing: int = grid_container.get_child_count()
+    for i in range(existing, indices.size()):
+        var created: InventoryCell = cells_scene.instantiate()
+        grid_container.add_child(created)
+    if existing > indices.size():
+        for i in range(existing - 1, indices.size() - 1, -1):
+            var old_cell: Control = grid_container.get_child(i)
+            grid_container.remove_child(old_cell)
+            old_cell.queue_free()
+    for position in range(indices.size()):
+        var cell: InventoryCell = grid_container.get_child(position)
+        var slot_index: int = indices[position]
+        if cell.inventory != inv or cell.index != slot_index or cell.backpack != backpack \
+            or cell.is_hotbar != (mode == "hotbar"):
+            cell.configure(inv, slot_index, self, mode == "hotbar", backpack)
+        cell.disabled = slot_index == -1
+        cell.modulate = Color("#858b91") if slot_index == -1 else Color.WHITE
         cell.refresh()
-        if i == -1:
-            cell.disabled = true
-            cell.modulate = Color("#858b91")
+    _layout_indices = indices
     var actual_stacks: int = inv.size() - available.size()
     var item_count: int = 0
     for i in range(inv.size()):
