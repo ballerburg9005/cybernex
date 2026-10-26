@@ -103,7 +103,7 @@ func _setup_compact_hud() -> void:
     $HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer/RichTextLabel.scroll_following = true
 
 func _layout_hud() -> void:
-    if not is_node_ready():
+    if not is_inside_tree():
         return
     var viewport: Vector2 = get_viewport_rect().size
     var drawer_width: float = clampf(viewport.x * 0.29, 350.0, 520.0)
