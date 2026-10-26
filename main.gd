@@ -158,7 +158,7 @@ func _layout_hud() -> void:
     if active_circuit != null and is_instance_valid(active_circuit):
         active_circuit.set_anchors_preset(Control.PRESET_TOP_LEFT)
         active_circuit.position = Vector2(4, 4)
-        active_circuit.size = Vector2(maxf(380.0, drawer.offset_left - 7.0),
+        active_circuit.size = Vector2(maxf(380.0, drawer.offset_left - 15.0),
             maxf(350.0, viewport.y - 143.0))
 
 func _select_drawer_page(index: int) -> void:
