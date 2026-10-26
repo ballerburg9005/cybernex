@@ -10,6 +10,7 @@ region = Rect2(48, 0, 16, 16)
 [resource]
 script = ExtResource("item")
 name = "Neural diagnostic regulator"
+item_id = "neural_regulator"
 short_name = "neural regulator"
 texture = SubResource("icon")
 damage = 0.0
