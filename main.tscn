@@ -147,30 +147,44 @@ position = Vector2(346, -32)
 disabled = true
 loot = SubResource("Resource_g6cdm")
 
+desk_note = "RADIATION SURVEY / 03:14\nThe personal dosimeter saturated before its logger completed a frame. The shift was never signed out."
+computer_readout = "RAD-MON / LOCAL\nDetector overload. External particle flux beyond calibrated range."
 [node name="Desk2" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(346, 0)
 disabled = true
 loot = SubResource("Resource_2qi1w")
 
+desk_note = "STAFF SHIFT CARD\nThree engineering badges remain in their desk drawers. One has a small dried mark across the name field."
+computer_readout = "CORE VAULT / PERSONNEL\nAccess log incomplete. Last badge used: ENGINEERING."
 [node name="Desk3" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(346, 32)
 disabled = true
 loot = SubResource("Resource_3daxw")
 
+desk_note = "ROVER TELEMETRY\nThe last camera frame from the surface was white from edge to edge. The image checksum passed."
+computer_readout = "ROVER / NO CARRIER\nArchive frame exposure exceeded sensor range."
 [node name="Desk4" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(166, -32)
 
+desk_note = "MEDICAL STORES\nBlue insulated case marked INSULIN. The cold-chain logger stopped at 04:19."
+computer_readout = "MED / STORAGE\nRefrigeration fault. Inventory awaiting manual audit."
 [node name="Desk5" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(166, 0)
 
+desk_note = "COMMS ROTATION\nEarthside acknowledgement remains overdue. Array dish scheduled for a new pointing solution at first light."
+computer_readout = "TX ARRAY / QUEUED\nOutbound beam slot remains reserved."
 [node name="Desk6" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(166, 32)
 loot = SubResource("Resource_grmg7")
 
+desk_note = "RECEIVER WORKSHEET\nA narrow carrier appears repeatedly in the noise floor. Nobody could identify its origin before the shift changed."
+computer_readout = "RX ARRAY / MONITOR\nUnknown periodic structure in the last captured spectrum."
 [node name="Desk8" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(258.333, 4.66667)
 loot = SubResource("Resource_lkee5")
 
+desk_note = "CORE MAINTENANCE NOTE\nThe computing room was built with unusually thick lead around the racks. Nobody ever explained the weight budget."
+computer_readout = "CORE / ENCLOSURE\nRadiation attenuator: manual inspection overdue."
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="TextBox" type="VBoxContainer" parent="HUD"]
