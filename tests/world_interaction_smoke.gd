@@ -67,6 +67,30 @@ func _run() -> void:
     check(enemy.health < health_before and enemy.health > health_before - 3.0,
         "Dragging pliers onto robot must deal real but limited mechanical damage.")
     check(player.inventory.count(cutters) == previous_cutters, "A melee tool cannot vanish after a strike.")
+
+    # Real door can be energized temporarily with cutters across naked opposing
+    # pads, but closing the solved panel must never make the tool disappear.
+    var terminal: Node = game.get_node("World/Terminal")
+    terminal.activate(player)
+    var workbench: CircuitWorkbench = terminal.ui_menu
+    check(workbench != null, "Main-world relay must open electronics workbench.")
+    if workbench != null:
+        var gap: Vector2i = Vector2i(2, 1)
+        workbench._apply_tool_to_board(cutters, gap) # Snap burnt resistor.
+        check(workbench.board.placement_at(gap) < 0, "Cutters must first remove the faulty resistor.")
+        workbench._apply_tool_to_board(cutters, gap) # Rest tool on exposed contacts.
+        check(workbench.board.placement_at(gap) >= 0 and player.inventory.count(cutters) == previous_cutters - 1,
+            "A physical bridge holds the actual metal tool out of the backpack.")
+        for tick in range(18):
+            if terminal.ui_menu == null:
+                break
+            workbench._on_simulation_tick()
+        check(terminal.access_granted and terminal.ui_menu == null,
+            "Conductive tool bridge should produce a real, correctly modeled electrical relay pulse.")
+        check(player.inventory.count(cutters) == previous_cutters,
+            "Auto-closing solved panel must return pliers, never lose or duplicate the temporary conductor.")
+        check(not game.puzzle_active, "Circuit modal capture must end after relay latches.")
+
     game.queue_free()
     if failures == 0:
         print("WORLD INTERACTION TESTS PASSED")
