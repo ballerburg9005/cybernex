@@ -29,6 +29,16 @@ func _ready():
 	hud_full_inventory = find_myname_recursively($HUD, "hud_full_inventory")
 	hud_quick_inventory = find_myname_recursively($HUD, "hud_quick_inventory")
 	hud_textbox = find_myname_recursively($HUD, "hud_textbox")
+	# Runtime inventory bindings share the player model rather than serialized UI copies.
+	var full_index: InventoryView = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems
+	var quick_index: InventoryView = $HUD/QuickInventory/InventoryItems
+	full_index.configure(player.inventory, null, "backpack")
+	quick_index.configure(player.quickinventory, player.inventory, "hotbar")
+	var mannequin: EquipmentMannequin = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer/Equipment
+	mannequin.setup(player.inventory, player.equipment)
+	full_index.feedback.connect(p)
+	quick_index.feedback.connect(p)
+	mannequin.feedback.connect(p)
 
 	tooltip_timer.one_shot = false
 	tooltip_timer.timeout.connect(tooltip_timer_update)
