@@ -350,7 +350,7 @@ func _use_inventory_item(item: InvItem) -> void:
         else:
             p("Cell not installed: battery full or stock unavailable.")
     else:
-        p("%s has no direct use. Combine it or fit it to an appropriate socket." % item.name)
+        p("Nothing happens.")
 
 func _on_weapon_fired(hit: Node, energy_spent_wh: float) -> void:
     if hit != null and hit.is_in_group("enemies"):
