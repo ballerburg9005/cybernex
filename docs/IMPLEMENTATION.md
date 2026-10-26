@@ -2,9 +2,9 @@
 
 ## Scope and status
 
-This is an intentionally separate migration branch. The existing main world scene and old inventory gameplay are not yet replaced. The branch updates the Godot project feature level to **4.7**, disables the old GitPlugin's automatic startup, and introduces a runnable **CircuitWorkbench.tscn** that can be opened separately from the legacy main scene.
+This is an intentionally separate migration branch. The original main world remains, but its HUD inventory, terminal workbench bridge and equipment panel have been substantially integrated with the new Resource-driven systems. The branch updates the Godot project feature level to **4.7**, disables the old GitPlugin's automatic startup, and introduces a runnable **CircuitWorkbench.tscn** that can be opened separately from the legacy main scene.
 
-No local Godot executable was available in the authoring environment. GitHub Actions has now successfully run **Godot 4.7.2** headless import, circuit/thermal/station unit tests, a camera-pan/zoom world picking regression with a HUD CanvasLayer, and scene startup for the workbench and legacy main world. Interactive Inspector editing, rendering, mouse drag-and-drop, and full gameplay still require manual visual testing. This is a technical foundation, not a claim that the whole game is migrated.
+No local Godot executable was available in the authoring environment. GitHub Actions has now successfully run **Godot 4.7.2** headless import, circuit/thermal/station unit tests, a camera-pan/zoom world picking regression with a HUD CanvasLayer, and scene startup for the workbench and legacy main world. Editor visual layout, mouse drag ergonomics, and full gameplay still require manual graphical testing. This is a technical foundation, not a claim that the whole game is migrated.
 
 ### Run the prototype
 
@@ -108,3 +108,23 @@ CI covers the entire maintenance chain, scarcity transactions, converter failure
 `UI/circuit_puzzle.gd` currently searches `Area2D` overlaps and recursively traverses whole components; this can falsely join the two paths of an insulated crossing. `UI/PuzzleSlot.gd` relies on node names and sprite dimensions for geometry and has a suspicious drag-override conditional using `disallow_rotate`. `interactibles/Terminal.gd` has access flags but not a reliable circuit-to-terminal solver connection. These remain in the project to avoid breaking the old game before the replacement has integration tests.
 
 **Decision:** migrate one vertical slice at a time, replace the old source only after new behavior is validated, and use the Godot editor to author scenes/resources rather than embedding entire levels in code.
+
+## Main-world inventory index, crafting and equipment mannequin
+
+The original game HUD now instantiates `res://UI/Inventory.tscn` for the backpack and quickbar and `res://UI/EquipmentMannequin.tscn` in place of the former noise-texture display. These are **native editable Godot scenes** using `Control._get_drag_data/_can_drop_data/_drop_data`, not physics Areas or duplicated world bodies. `main.gd` binds both indices and the mannequin to the **same player backpack**, so viewing/equipping/quickbinding never creates phantom extra stock.
+
+**Controls and feedback:**
+
+- Press the existing inventory action to show the index and body profile. Hover an item to see exact quantity, description, and available forward combination recipes; drag it onto a compatible ingredient to craft.
+- Drag side cutters onto heavy cable to create **three usable wire segments** without consuming the tool. Combine wire with one solder segment to create an **insulated jumper** linked to the `wire_straight.tres` board component. Other related authored recipes include contacts plus solder. Assembling that part on a circuit board still consumes *installation* solder.
+- Drag a weapon or compatible augmentation from the index to one of eight anatomical sockets. Equipment is a **reference to owned physical stock**; equipping one pistol into two weapon sockets requires two actual pistols. Socket restrictions, automatic unequipping after item loss, and nonduplicating moves are enforced by `EquipmentLoadout.gd`.
+- A search field filters name, shorthand and description without changing inventory. A category dropdown filters weapon/augment/tool/material/food, with an explicit Sort/Group control. The index displays **unit counts and stack counts** for whole inventory and search results. Stack badges show ×1 as well as larger amounts.
+- Quickbar entries are **links** to backpack stock and show the real available quantity; removal of the last owned item expires the link. Dropping inventory outside the HUD creates one genuine world pickup per item and removes exactly one; picking it up again restores the count.
+
+**Model invariants:**
+
+- `Inv.gd` stages changes before committing, sums counts rather than occupied slots, and automatically merges stacks using explicit stable `InvItem.item_id` identities or Resource paths. Duplicate item Resources with the same stable ID group correctly. Stack limits and fixed slot capacity cannot silently discard items. Runtime player models duplicate their starter templates to avoid cross-instance state leaking.
+- `InventoryOperations.gd` stages **both inventories** when crafting or dragging across containers. It consumes recipe quantities across multiple stacks, handles reusable tool catalysts, reverses valid recipes on either drag orientation, merges existing stacks, allows safe cross-container swaps, and rejects recipes with invalid output or insufficient space **without partial consumption**.
+- `EquipmentLoadout.gd` checks physical stock, slot affinity and weapon/augmentation type, exposes a JSON-compatible snapshot and validates restorations transactionally. The centered mannequin is procedurally drawn by `MannequinCanvas.gd` with eight independently editable slot Buttons placed around the silhouette rather than obscuring it.
+
+Automated Godot 4.7.2 tests: `res://tests/inventory_smoke.gd` (grouping, identity, category/search counts, exact recipe costs, multi-stack consumption, swaps, overflow atomicity, equipment validity and snapshot restoration, drag control wiring) and `res://tests/inventory_world_smoke.gd` (real pickup/drop conservation, a repair terminal using the same backpack, and crafting a jumper which maps to a usable electrical component). The `main.tscn` and both standalone system scenes receive headless startup checks. **These do not substitute for an interactive visual playtest.**
