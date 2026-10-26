@@ -51,7 +51,7 @@ static func compile(board: CircuitBoard) -> Dictionary:
                     elements.append({
                         "id": "%d:%d" % [i, j], "part_index": i,
                         "kind": "resistor", "from_key": pin_keys[wire_pin.name],
-                        "to_key": group_keys[j], "ohms": maxf(part.value * 0.5, 0.0001)
+                        "to_key": group_keys[j], "ohms": maxf(part.value * 0.5 + placement.joint_resistance_ohms * 0.5, 0.0001)
                     })
         elif part.model != "ground":
             elements.append({
