@@ -525,3 +525,45 @@ func _apply_tool_to_board(item: InvItem, cell: Vector2i) -> void:
     selected_index = board.placements.size() - 1
     _topology_changed()
     _announce("%s rests across the contacts." % item.name)
+
+## A solved panel closes automatically. Tool bridges are not soldered fixtures:
+## before it disappears, reclaim every real tool, atomically checking space in
+## backpack and (if available) terminal service tray. The relay has latched.
+func reclaim_loose_tools(spare_tray: Inv = null) -> bool:
+    if board == null or field_inventory == null:
+        return true
+    var staged_pack: Inv = field_inventory.duplicate(true)
+    var staged_tray: Inv = spare_tray.duplicate(true) if spare_tray != null else null
+    var recoveries: Array[Dictionary] = []
+    for i in range(board.placements.size() - 1, -1, -1):
+        var placed: CircuitPlacement = board.placements[i]
+        if placed.held_item_id.is_empty():
+            continue
+        var item: InvItem = preload("res://items/junk.tres") if placed.failed_open else _tool_item(placed.held_item_id)
+        if item == null:
+            return false
+        var location: String = "pack"
+        if not staged_pack.add_item(item, 1):
+            if staged_tray == null or not staged_tray.add_item(item, 1):
+                return false
+            location = "tray"
+        recoveries.append({"index": i, "item": item, "location": location})
+    if recoveries.is_empty():
+        return true
+    var initial_pack: Array[Dictionary] = field_inventory._state()
+    var initial_tray: Array[Dictionary] = spare_tray._state() if spare_tray != null else []
+    if not field_inventory._commit(staged_pack._state()):
+        return false
+    if spare_tray != null and not spare_tray._commit(staged_tray._state()):
+        field_inventory._commit(initial_pack)
+        return false
+    timer.stop()
+    for entry in recoveries:
+        board.placements.remove_at(int(entry["index"]))
+    _topology_changed()
+    for entry in recoveries:
+        if entry["location"] == "tray":
+            _announce("%s recovered to the relay service tray." % entry["item"].name)
+        else:
+            _announce("%s returned to the backpack; relay latched." % entry["item"].name)
+    return true
