@@ -187,7 +187,7 @@ desk_note = "CORE MAINTENANCE NOTE\nThe computing room was built with unusually 
 computer_readout = "CORE / ENCLOSURE\nRadiation attenuator: manual inspection overdue."
 [node name="HUD" type="CanvasLayer" parent="."]
 
-[node name="TextBox" type="VBoxContainer" parent="HUD"]
+[node name="TextBox" type="Control" parent="HUD"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -202,7 +202,12 @@ size_flags_stretch_ratio = 6.0
 mouse_filter = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HUD/TextBox"]
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
