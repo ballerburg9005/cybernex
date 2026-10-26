@@ -69,6 +69,8 @@ func activate(caller, action = "default"):
             toggled = true
         ui_menu.queue_free()
         ui_menu = null
+        if get_node("/root/main").puzzle_active:
+            get_node("/root/main").exit_circuit_mode()
 
     if toggled:
         return false
@@ -100,17 +102,18 @@ func _open_circuit_puzzle(caller) -> void:
     ui_menu = preload("res://systems/circuits/CircuitWorkbench.tscn").instantiate()
     get_node("/root/main/HUD").add_child(ui_menu)
     ui_menu.z_index = 3000
-    ui_menu.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     if caller != null and "inventory" in caller:
         ui_menu.set_field_inventory(caller.inventory)
     ui_menu.puzzle_solved.connect(_on_circuit_solved)
-    get_node("/root/main").p("Terminal requires a repaired relay. Use actual spare parts and solder.")
+    get_node("/root/main").enter_circuit_mode(ui_menu)
+    get_node("/root/main").p("Relay housing opened.")
 
 func _on_circuit_solved() -> void:
     access_granted = true
     if is_instance_valid(ui_menu):
         ui_menu.queue_free()
     ui_menu = null
+    get_node("/root/main").exit_circuit_mode()
     play_activate()
     get_node("/root/main").p("Service relay accepted. Terminal interface unlocked.")
 
@@ -190,6 +193,7 @@ func _on_influence_body_shape_exited(body_rid, body, body_shape_index, local_sha
     if ui_menu:
         ui_menu.queue_free()
         ui_menu = null
+        get_node("/root/main").exit_circuit_mode()
     if "activatables" in body and body.activatables.has(self):
         body.activatables.erase(self)
     if $AnimatedSprite2D:
