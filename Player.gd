@@ -37,7 +37,8 @@ func _ready():
     if equipment == null:
         equipment = EquipmentLoadout.new()
     if inventory != null:
-        inventory.normalize()
+        inventory.auto_group_stacks = false
+        inventory.ensure_slots()
     
     get_node("/root/main/HUD/FullInventory").visible = false
     for e in [inventory, quickinventory]:
@@ -81,9 +82,8 @@ func _input(event: InputEvent) -> void:
         for obj in activatables.duplicate():
             if is_instance_valid(obj):
                 obj.activate(self)
-    if event.is_action_pressed("action_2") and not event.is_echo():
-        if not host.mouse_over_ui:
-            fire_arc_tool()
+    if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_X:
+        fire_arc_tool()
 
 func _physics_process(delta):
     equipment_runtime.tick(delta, equipment, inventory)
