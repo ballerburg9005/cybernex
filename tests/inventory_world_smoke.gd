@@ -53,6 +53,11 @@ func _run() -> void:
         and log.mouse_filter == Control.MOUSE_FILTER_STOP,
         "Opaque HUD background, navigation, shortcut bar and journal must consume GUI mouse events.")
     var journal: RichTextLabel = game.hud_textbox
+    check(journal.get_global_rect().position.y >= 0.0
+        and journal.get_global_rect().size.y >= 65.0
+        and journal.get_global_rect().end.y <= 720.0
+        and journal.text.contains("System initialized."),
+        "Accessible lower-right journal must show actual text inside a tall, onscreen layout.")
     check(journal.scroll_active and journal.mouse_filter == Control.MOUSE_FILTER_STOP,
         "Mouse wheel must scroll the event journal without triggering world interactions.")
     check(game.get_node("World/Player").quickinventory.size() == 10
