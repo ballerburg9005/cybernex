@@ -167,4 +167,29 @@ func test_world_save() -> void:
     check(InputMap.action_has_event("action_2", x_key)
         and not InputMap.action_has_event("action_2", enter),
         "Project input map must bind weapon to physical X rather than Return/Enter.")
+    player.equipment_runtime.tick(1.0, player.equipment, player.inventory)
+    var right_click := InputEventMouseButton.new()
+    right_click.button_index = MOUSE_BUTTON_RIGHT
+    right_click.pressed = true
+    right_click.position = Vector2(620, 310)
+    var before_world_click: int = 0
+    for node in game.world.get_children():
+        if node is ArcFlash:
+            before_world_click += 1
+    player._input(right_click)
+    var after_world_click: int = 0
+    for node in game.world.get_children():
+        if node is ArcFlash:
+            after_world_click += 1
+    check(after_world_click == before_world_click + 1,
+        "Right-click on the game world must discharge the equipped gun.")
+    player.equipment_runtime.tick(1.0, player.equipment, player.inventory)
+    right_click.position = game.get_node("HUD/QuickInventory").get_global_rect().get_center()
+    player._input(right_click)
+    var after_hud_click: int = 0
+    for node in game.world.get_children():
+        if node is ArcFlash:
+            after_hud_click += 1
+    check(after_hud_click == after_world_click,
+        "Right-click on any backed quickbar/inventory region must not discharge gun.")
     game.queue_free()
