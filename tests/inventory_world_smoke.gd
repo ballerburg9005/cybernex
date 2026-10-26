@@ -32,8 +32,8 @@ func _run() -> void:
     check(backpack_panel.grid_container.columns == 10, "Player inventory must be ten cells wide.")
     var first_cell: InventoryCell = backpack_panel.grid_container.get_child(0)
     check(first_cell.custom_minimum_size == Vector2(48, 48)
-        and first_cell.number.get_theme_font_size("font_size") <= 10,
-        "Every authored 16px inventory glyph must use the original integer 3x / 48px size and tiny count.")
+        and first_cell.number.get_theme_font_size("font_size") >= 18,
+        "Every authored 16px glyph stays 3x/48px and stack digits now have readable 18px size.")
     check(first_cell.number.text == "1x" and not first_cell.tooltip_text.contains("COMBINE WITH"),
         "Physical stacks need small 1x notation and item-identifying, not instructional, tooltips.")
     check(backpack_panel.grid_container.get_child_count() % 10 == 0, "Last inventory row must have visible empty cells.")
@@ -76,14 +76,21 @@ func _run() -> void:
         "1080p exploration drawer must stay fully onscreen at fixed left margin.")
     game._select_drawer_page(1)
     await process_frame # Godot Container defers child sorting after move_child.
-    var visible_backpack: Control = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems")
-    check(visible_backpack.visible, "Body systems MUST include the same draggable backpack, simultaneously.")
+    var visible_backpack: Control = game.companion_drawer.backpack_view
+    check(visible_backpack.visible and game.companion_drawer.visible
+        and game.companion_drawer.backpack_view.inv == game.player.inventory,
+        "Body systems must keep a distinct switchable companion with the ACTUAL backpack.")
     var mannequin: Control = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer/Equipment")
-    print("BODY 1080: mannequin=", mannequin.get_global_rect(), " backpack=", visible_backpack.get_global_rect(), " drawer=", drawer.get_global_rect())
     check(mannequin.get_global_rect().end.x <= visible_backpack.get_global_rect().position.x + 3.0,
-        "Mannequin slots must be LEFT of the backpack, not offscreen or replacing it.")
-    check(mannequin.get_global_rect().end.x <= drawer.get_global_rect().end.x + 3.0,
-        "The mannequin and its physical sockets must fit within the drawer at 1080p.")
+        "Fixed-width mannequin must remain LEFT of the independent inventory/instrument pane.")
+    check(game.companion_drawer.get_global_rect().end.x <= 1920.0,
+        "Auxiliary instrument/backpack pane must fit on screen.")
+    check(drawer.position.x <= 12.0 and drawer.size.x < 570,
+        "Body selection must not shift or widen the primary page/navigation box.")
+    game.companion_drawer.select_page(1)
+    check(not visible_backpack.visible and game.companion_drawer.get_node("Layout/Info").visible,
+        "Player can page to multimeter without leaving Body Systems.")
+    game.companion_drawer.select_page(0)
     game._select_drawer_page(0)
     drawer.visible = false
     root.size = Vector2i(1280, 720)
