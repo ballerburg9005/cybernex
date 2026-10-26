@@ -14,6 +14,7 @@ func _run() -> void:
     test_station_power_and_protocols()
     test_rotated_oversized_footprint()
     test_original_sprite_geometry_and_taped_joint()
+    test_tool_as_removable_electrical_bridge()
     test_transactional_inventory()
     test_capacitor_and_inductor_transients()
     test_playable_maintenance_chain()
@@ -247,3 +248,62 @@ func test_original_sprite_geometry_and_taped_joint() -> void:
         check(workbench.restore(record), "Taped splice must roundtrip through board snapshot.")
         check(workbench.board.placements.back().joint_resistance_ohms > 0.3, "Joint quality survives save/load.")
     workbench.queue_free()
+
+func test_tool_as_removable_electrical_bridge() -> void:
+    var scene: PackedScene = load("res://systems/circuits/CircuitWorkbench.tscn")
+    var bench: CircuitWorkbench = scene.instantiate()
+    root.add_child(bench)
+    var bag := Inv.new(12)
+    var pliers: InvItem = load("res://items/side_cutters.tres")
+    var gun: InvItem = load("res://items/arc_pistol.tres")
+    bag.add_item(pliers, 1)
+    bag.add_item(gun, 1)
+    bench.set_field_inventory(bag)
+    var no_conductor: Vector2i = Vector2i(5, 5)
+    check(not bench.can_bridge_with_tool(gun, Vector2i(2, 1)),
+        "Nonconductive gun must not be treated as an improvised jumper.")
+    check(not bench.can_bridge_with_tool(pliers, no_conductor),
+        "Loose metal tools only connect exposed *opposing* real terminals.")
+    check(not bench.can_bridge_with_tool(pliers, Vector2i(2, 1)),
+        "Burnt resistor must be cut out before any bridge can fit the footprint.")
+    bench.selected_index = 1
+    bench._remove_selected()
+    check(bench.board.placement_at(Vector2i(2, 1)) < 0,
+        "Side cutters can snap the broken resistor without consuming cutters.")
+    check(bench.can_bridge_with_tool(pliers, Vector2i(2, 1)),
+        "Exposed source-to-motor pad admits a conductive metal tool.")
+    var drop: Dictionary = {"kind": "inventory_item", "item": pliers, "inventory": bag,
+        "index": bag.find(pliers)}
+    var coordinate: Vector2 = bench.board_view.pan_offset + Vector2(2.5, 1.5) * bench.board_view.cell_size
+    check(bench.board_view._can_drop_data(coordinate, drop),
+        "Real native inventory drag target must accept side cutters as a contact bridge.")
+    bench.board_view._drop_data(coordinate, drop)
+    var idx: int = bench.board.placement_at(Vector2i(2, 1))
+    check(idx >= 0 and bag.count(pliers) == 0 and bag.count(gun) == 1,
+        "Real metal tool must leave backpack during contact and not disturb other stock.")
+    if idx >= 0:
+        var contact: CircuitPlacement = bench.board.placements[idx]
+        check(contact.held_item_id == pliers.item_id and contact.part.model == "wire",
+            "Bridge must persist the actual held tool identity, not fabricate a spare resistor.")
+        check(absf(contact.part.value - pliers.contact_resistance_ohms) < 0.001,
+            "Contact has physical tool-specific resistance, not an ideal short.")
+        var outcome: Dictionary = CircuitSimulation.new().step(bench.board, 0.5)
+        check(outcome["errors"].is_empty() and float(outcome["loads"].get("door_motor", -1.0)) > 4.0,
+            "Metal tool must carry modeled electrical current and deliver realistic voltage.")
+        var snapshot: Dictionary = bench.snapshot()
+        check(snapshot["placements"].back()["held_item"] == pliers.item_id,
+            "Tool remains recoverable after station world-save serialization.")
+        check(bench.restore(snapshot), "Valid tool contact must restore from board save state.")
+        check(not bench.restore({"placements": [{
+            "part_id": "contact_forged", "x": 2, "y": 1, "held_item": "forged",
+            "rotation": 0, "fixed": false, "failed": false, "joint": 0.0
+        }]}), "Forged contact tool identity must not load arbitrary unknown resources.")
+        check(bench.restore(snapshot), "Valid snapshot must still load after rejection.")
+        var restore_index: int = bench.board.placement_at(Vector2i(2, 1))
+        check(bench.extract_to_backpack(restore_index, bag),
+            "Tool can be lifted away from deenergized board without fresh solder.")
+        check(bag.count(pliers) == 1 and bag.count(gun) == 1,
+            "Returning tool must restore exactly one physical item, without duplication.")
+        check(bench.board.placement_at(Vector2i(2, 1)) < 0,
+            "Removing improvised bridge leaves original exposed electrical gap.")
+    bench.queue_free()
