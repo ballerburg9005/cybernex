@@ -41,6 +41,8 @@ func _ready():
     quick_index.feedback.connect(p)
     mannequin.feedback.connect(p)
     full_index.use_requested.connect(_use_inventory_item)
+    full_index.save_requested.connect(save_game)
+    full_index.load_requested.connect(load_game)
     quick_index.use_requested.connect(_use_inventory_item)
     player.weapon_fired.connect(_on_weapon_fired)
     full_index.world_drop_requested.connect(_handle_world_drop)
@@ -212,3 +214,23 @@ func _on_weapon_fired(hit: Node, energy_spent_wh: float) -> void:
         p("Arc burst disrupted %s (%.2f Wh)." % [str(hit.get("myname")), energy_spent_wh])
     else:
         p("Arc burst discharged (%.2f Wh). No target disrupted." % energy_spent_wh)
+
+func save_game() -> bool:
+    var success: bool = WorldSave.write(self)
+    p("Saved to local slot 1." if success else "Save failed: check writable user storage.")
+    return success
+
+func load_game() -> bool:
+    var success: bool = WorldSave.read(self)
+    if not success:
+        p("No compatible saved world state found.")
+        return false
+    var full_index: InventoryView = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems
+    var quick_index: InventoryView = $HUD/QuickInventory/InventoryItems
+    var mannequin: EquipmentMannequin = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer/Equipment
+    full_index.configure(player.inventory, null, "backpack")
+    quick_index.configure(player.quickinventory, player.inventory, "hotbar")
+    mannequin.setup(player.inventory, player.equipment)
+    mannequin.set_runtime(player.equipment_runtime)
+    p("World slot loaded. Inventory, terminals, position and equipped systems restored.")
+    return true
