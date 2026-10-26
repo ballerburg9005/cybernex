@@ -30,6 +30,11 @@ func _run() -> void:
     check(panel.bag_view.inv == player.inventory and panel.desk_view.inv == desk.loot,
         "Desk and backpack must show two actual physical inventory models at the same time.")
     check(panel.bag_view.visible and panel.desk_view.visible, "Contents page must show desk and player pack.")
+    check(panel.bag_view.get_global_rect().end.x <= panel.desk_view.get_global_rect().position.x + 5.0,
+        "Desk screen must have original backpack on LEFT and pageable desk contents on RIGHT.")
+    check(panel.get_node("Columns/DeskPanel/Layout/Navigation/Page").get_theme_font_size("font_size") >= 28
+        and panel.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel/Description").get_theme_font_size("normal_font_size") >= 36,
+        "Desk note and computer text should be large and readable with same page-nav hierarchy.")
     var cutters: InvItem = load("res://items/side_cutters.tres")
     var cutter_count: int = player.inventory.count(cutters)
     var inside: Vector2 = panel.get_global_rect().get_center()
@@ -37,12 +42,12 @@ func _run() -> void:
     check(player.inventory.count(cutters) == cutter_count,
         "Physical tools dropped onto ANY chest panel area must not leak into world.")
     panel._select_page(1)
-    check(panel.bag_view.visible and panel.get_node("Layout/Contents/DetailPanel").visible,
+    check(panel.bag_view.visible and panel.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel").visible,
         "Notes page must keep actual backpack visible alongside inspection pane.")
-    check(panel.get_node("Layout/Contents/DetailPanel/Description").text.contains("dosimeter"),
+    check(panel.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel/Description").text.contains("dosimeter"),
         "Desk notes should be authored evidence from this actual desk, not generic UI help.")
     panel._select_page(2)
-    check(panel.get_node("Layout/Contents/DetailPanel/Description").text.contains("RAD-MON"),
+    check(panel.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel/Description").text.contains("RAD-MON"),
         "Desk computer should show its own signal/text log while powered on.")
     panel.toggle_power()
     check(not panel.computer_powered and not desk.computer_powered
@@ -68,7 +73,7 @@ func _run() -> void:
         "Revisiting desk after save/load must show the real OFF condition.")
     if revisited != null:
         revisited._select_page(2)
-        check(revisited.get_node("Layout/Contents/DetailPanel/Description").text == "Black display.",
+        check(revisited.get_node("Columns/DeskPanel/Layout/Contents/DetailPanel/Description").text == "Black display.",
             "Unpowered desk terminal must not reveal computer data.")
         revisited.close()
     var old_count: int = player.inventory.count(cutters)
