@@ -26,6 +26,7 @@ var selected_index: int = -1
 var already_solved: bool = false
 var last_measurement: Dictionary = {}
 var meter_unlocked: bool = false
+var last_joint_method: String = "solder"
 
 func _ready() -> void:
     if authored_board == null:
@@ -68,6 +69,7 @@ func _on_board_click(cell: Vector2i) -> void:
     if board.can_place(new_part):
         if not _spend_component(new_part.part):
             return
+        new_part.joint_resistance_ohms = 0.32 if last_joint_method == "tape" else 0.0
         board.placements.append(new_part)
         selected_index = board.placements.size() - 1
         _topology_changed()
@@ -214,15 +216,21 @@ func _refresh_palette_labels() -> void:
         i += 1
 
 func _spend_component(part: CircuitPart) -> bool:
+    last_joint_method = "solder"
     if field_inventory != null:
         var item: InvItem = _part_item(part)
         var solder: InvItem = preload("res://items/solder.tres")
-        if item == null or not field_inventory.has(item) or not field_inventory.has(solder):
-            status.text = "Need a compatible spare component and a solder segment."
+        var tape: InvItem = preload("res://items/insulation_tape.tres")
+        var joining: InvItem = solder
+        if not field_inventory.has(solder) and part.model == "wire" and field_inventory.has(tape):
+            joining = tape
+            last_joint_method = "tape"
+        if item == null or not field_inventory.has(item) or not field_inventory.has(joining):
+            _announce("The joint needs a compatible spare and solder or suitable insulation tape.")
             return false
         if not field_inventory.remove_item(item, 1):
             return false
-        if not field_inventory.remove_item(solder, 1):
+        if not field_inventory.remove_item(joining, 1):
             field_inventory.add_item(item, 1)
             return false
         _refresh_palette_labels()
@@ -252,7 +260,8 @@ func snapshot() -> Dictionary:
                 "x": placement.cell.x, "y": placement.cell.y,
                 "rotation": placement.rotation,
                 "fixed": placement.fixed_to_board,
-                "failed": placement.failed_open
+                "failed": placement.failed_open,
+                "joint": placement.joint_resistance_ohms
             })
     return {"placements": parts}
 
@@ -280,6 +289,9 @@ func restore(data: Dictionary) -> bool:
         placement.rotation = posmod(int(saved.get("rotation", 0)), 4)
         placement.fixed_to_board = bool(saved.get("fixed", false))
         placement.failed_open = bool(saved.get("failed", false))
+        placement.joint_resistance_ohms = float(saved.get("joint", 0.0))
+        if not is_finite(placement.joint_resistance_ohms) or placement.joint_resistance_ohms < 0.0 or placement.joint_resistance_ohms > 10.0:
+            return false
         if not restored.can_place(placement):
             return false
         restored.placements.append(placement)
@@ -348,6 +360,7 @@ func _install_inventory_part(item: InvItem, cell: Vector2i) -> void:
     if not _spend_component(placement.part):
         _announce("Missing spare part or fresh solder for the joint.")
         return
+    placement.joint_resistance_ohms = 0.32 if last_joint_method == "tape" else 0.0
     board.placements.append(placement)
     selected_index = board.placements.size() - 1
     _topology_changed()
@@ -362,6 +375,8 @@ func can_extract_to(index: int, pack: Inv) -> bool:
         return false
     if placement.failed_open:
         return pack.has(preload("res://items/side_cutters.tres"))
+    if placement.joint_resistance_ohms > 0.0:
+        return true # Peel cold tape off without heating a solder joint.
     return pack.has(preload("res://items/solder.tres"))
 
 func extract_to_backpack(index: int, pack: Inv) -> bool:
@@ -381,6 +396,8 @@ func _extraction_cost(index: int) -> bool:
         if not field_inventory.has(preload("res://items/side_cutters.tres")):
             _announce("Side cutters required to snap out the burnt lead.")
             return false
+        return true
+    if placement.joint_resistance_ohms > 0.0:
         return true
     var solder: InvItem = preload("res://items/solder.tres")
     if not field_inventory.remove_item(solder, 1):
