@@ -1,11 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://UI/EquipmentMannequin.gd" id="panel"]
 [ext_resource type="Script" path="res://UI/MannequinCanvas.gd" id="canvas"]
 [ext_resource type="Script" path="res://UI/EquipmentSlot.gd" id="socket"]
 
 [node name="EquipmentMannequin" type="PanelContainer"]
-custom_minimum_size = Vector2(362, 440)
+custom_minimum_size = Vector2(462, 518)
 mouse_filter = 0
 script = ExtResource("panel")
 
@@ -18,107 +18,121 @@ theme_override_constants/margin_bottom = 6
 
 [node name="Layout" type="VBoxContainer" parent="Frame"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="Frame/Layout"]
 layout_mode = 2
-text = "BODY SYSTEMS  //  LOADOUT"
+text = "BODY SYSTEMS  /  EQUIPMENT LOADOUT"
 horizontal_alignment = 1
 
 [node name="Canvas" type="Control" parent="Frame/Layout"]
-custom_minimum_size = Vector2(350, 395)
+custom_minimum_size = Vector2(450, 430)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("canvas")
 
 [node name="WeaponPrimary" type="Button" parent="Frame/Layout/Canvas"]
-offset_left = 0.0
-offset_top = 180.0
-offset_right = 96.0
-offset_bottom = 231.0
+offset_left = 6.0
+offset_top = 352.0
+offset_right = 128.0
+offset_bottom = 406.0
 mouse_filter = 0
-text = "WEAPON PRIMARY"
+text = "WEAPON / A"
 clip_text = true
+theme_override_font_sizes/font_size = 12
 script = ExtResource("socket")
 slot_id = "weapon_primary"
 
 [node name="WeaponSecondary" type="Button" parent="Frame/Layout/Canvas"]
-offset_left = 254.0
-offset_top = 180.0
-offset_right = 350.0
-offset_bottom = 231.0
+offset_left = 322.0
+offset_top = 352.0
+offset_right = 444.0
+offset_bottom = 406.0
 mouse_filter = 0
-text = "WEAPON SECONDARY"
+text = "WEAPON / B"
 clip_text = true
+theme_override_font_sizes/font_size = 12
 script = ExtResource("socket")
 slot_id = "weapon_secondary"
 
 [node name="AugmentHead" type="Button" parent="Frame/Layout/Canvas"]
-offset_left = 123.0
-offset_top = 11.0
-offset_right = 219.0
-offset_bottom = 62.0
+offset_left = 6.0
+offset_top = 20.0
+offset_right = 128.0
+offset_bottom = 80.0
 mouse_filter = 0
-text = "AUGMENT HEAD"
+text = "HEAD"
 clip_text = true
+theme_override_font_sizes/font_size = 12
 script = ExtResource("socket")
 slot_id = "augment_head"
 
 [node name="AugmentTorso" type="Button" parent="Frame/Layout/Canvas"]
-offset_left = 121.0
-offset_top = 108.0
-offset_right = 217.0
-offset_bottom = 159.0
+offset_left = 322.0
+offset_top = 126.0
+offset_right = 444.0
+offset_bottom = 186.0
 mouse_filter = 0
-text = "AUGMENT TORSO"
+text = "TORSO"
 clip_text = true
+theme_override_font_sizes/font_size = 12
 script = ExtResource("socket")
 slot_id = "augment_torso"
 
 [node name="AugmentLeft" type="Button" parent="Frame/Layout/Canvas"]
-offset_left = 0.0
-offset_top = 110.0
-offset_right = 96.0
-offset_bottom = 161.0
+offset_left = 6.0
+offset_top = 126.0
+offset_right = 128.0
+offset_bottom = 186.0
 mouse_filter = 0
-text = "AUGMENT LEFT ARM"
+text = "LEFT ARM"
 clip_text = true
+theme_override_font_sizes/font_size = 12
 script = ExtResource("socket")
 slot_id = "augment_left_arm"
 
 [node name="AugmentRight" type="Button" parent="Frame/Layout/Canvas"]
-offset_left = 254.0
-offset_top = 110.0
-offset_right = 350.0
-offset_bottom = 161.0
+offset_left = 322.0
+offset_top = 232.0
+offset_right = 444.0
+offset_bottom = 292.0
 mouse_filter = 0
-text = "AUGMENT RIGHT ARM"
+text = "RIGHT ARM"
 clip_text = true
+theme_override_font_sizes/font_size = 12
 script = ExtResource("socket")
 slot_id = "augment_right_arm"
 
 [node name="AugmentLegs" type="Button" parent="Frame/Layout/Canvas"]
-offset_left = 120.0
-offset_top = 278.0
-offset_right = 216.0
-offset_bottom = 329.0
+offset_left = 6.0
+offset_top = 232.0
+offset_right = 128.0
+offset_bottom = 292.0
 mouse_filter = 0
-text = "AUGMENT LEGS"
+text = "LEGS"
 clip_text = true
+theme_override_font_sizes/font_size = 12
 script = ExtResource("socket")
 slot_id = "augment_legs"
 
 [node name="AugmentNeural" type="Button" parent="Frame/Layout/Canvas"]
-offset_left = 254.0
+offset_left = 322.0
 offset_top = 20.0
-offset_right = 350.0
-offset_bottom = 71.0
+offset_right = 444.0
+offset_bottom = 80.0
 mouse_filter = 0
-text = "AUGMENT NEURAL"
+text = "NEURAL"
 clip_text = true
+theme_override_font_sizes/font_size = 12
 script = ExtResource("socket")
 slot_id = "augment_neural"
+
+[node name="LoadoutStatus" type="Label" parent="Frame/Layout"]
+layout_mode = 2
+text = "0 / 8 sockets active"
+horizontal_alignment = 1
 
 [node name="Hint" type="Label" parent="Frame/Layout"]
 layout_mode = 2
 autowrap_mode = 3
-text = "Drag a weapon or augmentation from your backpack into its socket."
+text = "Drag gear onto a body socket. Move equipment between sockets or drag it back to the index."
