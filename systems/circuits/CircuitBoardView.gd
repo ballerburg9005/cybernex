@@ -133,9 +133,18 @@ func _draw() -> void:
                 int(rect.size.x - 12), 17, INK)
         # Black corner notch denotes hard-fastened and immovable equipment.
         if placement.fixed_to_board or not part.can_remove:
-            var pts := PackedVector2Array([rect.position + Vector2(1, 1),
-                rect.position + Vector2(18, 1), rect.position + Vector2(1, 18)])
-            draw_colored_polygon(pts, Color.BLACK)
+            # Tiny 5px fastening notches in all four corners.
+            var corners: Array[Vector2] = [rect.position + Vector2(1, 1),
+                Vector2(rect.end.x - 1, rect.position.y + 1),
+                rect.end - Vector2(1, 1),
+                Vector2(rect.position.x + 1, rect.end.y - 1)]
+            for corner_index in range(4):
+                var corner: Vector2 = corners[corner_index]
+                var horizontal: float = 5.0 if corner_index in [0, 3] else -5.0
+                var vertical: float = 5.0 if corner_index in [0, 1] else -5.0
+                draw_colored_polygon(PackedVector2Array([
+                    corner, corner + Vector2(horizontal, 0), corner + Vector2(0, vertical)
+                ]), Color.BLACK)
         else:
             # Static blue-gray denotes removable parts. No distracting flashing.
             draw_rect(rect.grow(-3.0), SAFE_EDGE, false, 2.0)
