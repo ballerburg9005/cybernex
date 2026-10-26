@@ -25,8 +25,8 @@ func _run() -> void:
     drawer.visible = true
     game._layout_hud()
     print("HUD 720: viewport=", game.get_viewport_rect().size, " drawer=", drawer.get_global_rect())
-    check(drawer.size.x >= 345.0 and drawer.size.x < 450.0,
-        "Inventory must use a fixed compact width at default 720p and cannot push the grid off-screen.")
+    check(drawer.size.x >= 505.0 and drawer.size.x <= 555.0,
+        "Original 3x art requires 10 complete 48-pixel cells in the drawer without clipping.")
     check(drawer.position.x <= 12.0, "Exploration inventory drawer must stay left of centered player.")
     var backpack_panel: InventoryView = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems")
     check(backpack_panel.grid_container.columns == 10, "Player inventory must be ten cells wide.")
@@ -36,14 +36,18 @@ func _run() -> void:
     check(game.get_node("HUD/FullInventory/VBoxContainer/PdaPage").has_theme_stylebox_override("normal"), "PDA text must render against an opaque-enough UI panel.")
     game._select_drawer_page(4)
     game.toggle_inventory()
-    check(game.current_drawer_page == 0 and drawer.visible, "Tab from a later page must always return to backpack.")
+    check(not drawer.visible, "Tab on any drawer page must close inventory, never switch page.")
+    game.toggle_inventory()
+    check(drawer.visible and game.current_drawer_page == 0,
+        "Reopening inventory must start on backpack after Tab closed any page.")
     var quick: Control = game.get_node("HUD/QuickInventory")
     var log: Control = game.get_node("HUD/TextBox")
-    check(quick.visible and quick.get_global_rect().end.x + 2.0 <= log.get_global_rect().position.x,
-        "Normal quickbar must remain visible on left without overlapping the event journal.")
-    check(game.ui_captures_world_input(), "Open inventory must suppress world-action keys.")
+    check(quick.visible and absf(quick.get_global_rect().get_center().x - 640.0) < 5.0
+        and quick.get_global_rect().end.x + 2.0 <= log.get_global_rect().position.x,
+        "Ten physical quickbar shortcuts must be centered at the bottom and not overlap the journal.")
+    check(not game.ui_captures_world_input(), "Normal inventory must allow walking and Space interactions.")
     game.toggle_inventory()
-    check(not game.ui_captures_world_input(), "Closing UI should restore world controls.")
+    check(not game.ui_captures_world_input(), "Closing UI should retain world controls.")
     root.size = Vector2i(1920, 1080)
     drawer.visible = true
     game._layout_hud()
