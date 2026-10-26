@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://ctfh5rdwvcfap"]
+[gd_scene load_steps=34 format=3 uid="uid://ctfh5rdwvcfap"]
 
 [ext_resource type="Shader" path="res://flowing_squares.gdshader" id="1_rtrpn"]
 [ext_resource type="Script" path="res://main.gd" id="1_rw06d"]
@@ -12,7 +12,6 @@
 [ext_resource type="PackedScene" uid="uid://bax3ydx4vf0i5" path="res://items/item_world.tscn" id="7_n8dxg"]
 [ext_resource type="Resource" uid="uid://djrjkdayl2olj" path="res://items/side_cutters.tres" id="9_bamd0"]
 [ext_resource type="PackedScene" uid="uid://btv4v1ibnrmla" path="res://UI/Inventory.tscn" id="10_vg8hb"]
-[ext_resource type="Texture2D" uid="uid://dfvjd8p1p1lc3" path="res://assets/noise.jpg" id="12_3inrd"]
 [ext_resource type="PackedScene" path="res://UI/EquipmentMannequin.tscn" id="30_eqp"]
 [ext_resource type="Script" path="res://inventory_slot.gd" id="12_26g80"]
 [ext_resource type="Resource" uid="uid://c1rm8ll7i4il7" path="res://items/wires.tres" id="14_vb2n3"]
