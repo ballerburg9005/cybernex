@@ -71,9 +71,11 @@ func _run() -> void:
     check(drawer.get_global_rect().end.x < 1920.0 and drawer.get_global_rect().position.x <= 12.0,
         "1080p exploration drawer must stay fully onscreen at fixed left margin.")
     game._select_drawer_page(1)
+    await process_frame # Godot Container defers child sorting after move_child.
     var visible_backpack: Control = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems")
     check(visible_backpack.visible, "Body systems MUST include the same draggable backpack, simultaneously.")
     var mannequin: Control = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer/Equipment")
+    print("BODY 1080: mannequin=", mannequin.get_global_rect(), " backpack=", visible_backpack.get_global_rect(), " drawer=", drawer.get_global_rect())
     check(mannequin.get_global_rect().end.x <= visible_backpack.get_global_rect().position.x + 3.0,
         "Mannequin slots must be LEFT of the backpack, not offscreen or replacing it.")
     check(mannequin.get_global_rect().end.x <= drawer.get_global_rect().end.x + 3.0,
