@@ -19,6 +19,10 @@ var mouse_over_ui = false
 var puzzle_active: bool = false
 var active_circuit: CircuitWorkbench
 var current_drawer_page: int = 0
+var desk_inspection: Control
+const BACKPACK_DRAWER_WIDTH := 522.0
+const BODY_DRAWER_WIDTH := 872.0
+const QUICKBAR_WIDTH := 510.0
 const DRAWER_PAGES := ["BACKPACK", "BODY SYSTEMS", "NOTES", "MAP", "MULTIMETER", "OSCILLOSCOPE"]
 
 var start_music_volume_temp = 0.0
@@ -99,12 +103,15 @@ func _setup_compact_hud() -> void:
     dark.content_margin_top = 9.0
     dark.content_margin_bottom = 9.0
     paper.add_theme_stylebox_override("panel", dark)
-    var nav_back: StyleBoxFlat = dark.duplicate()
-    nav_back.content_margin_left = 6.0
-    nav_back.content_margin_right = 6.0
-    nav_back.content_margin_top = 4.0
-    nav_back.content_margin_bottom = 4.0
-    $HUD/FullInventory/VBoxContainer/DrawerNav.add_theme_stylebox_override("panel", nav_back)
+    var enclosing: StyleBoxFlat = dark.duplicate()
+    enclosing.content_margin_left = 5.0
+    enclosing.content_margin_right = 5.0
+    enclosing.content_margin_top = 5.0
+    enclosing.content_margin_bottom = 5.0
+    $HUD/FullInventory.add_theme_stylebox_override("panel", enclosing)
+    # Navigation and contents share this ONE outer panel, not disconnected
+    # dark cards floating over the game world.
+    $HUD/FullInventory/VBoxContainer/DrawerNav.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
     var page_back: StyleBoxFlat = dark.duplicate()
     page_back.content_margin_left = 14.0
     page_back.content_margin_right = 14.0
@@ -122,44 +129,47 @@ func _setup_compact_hud() -> void:
     $HUD/TextBox/HBoxContainer/MarginContainer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     $HUD/TextBox/HBoxContainer.custom_minimum_size.y = 122.0
     $HUD/TextBox/HBoxContainer.size_flags_vertical = Control.SIZE_SHRINK_END
-    $HUD/TextBox/HBoxContainer/MarginContainer/PanelContainer/RichTextLabel.scroll_following = true
+    feed.scroll_following = true
+    feed.scroll_active = true
+    feed.mouse_filter = Control.MOUSE_FILTER_STOP
+    feed.add_theme_font_size_override("normal_font_size", 14)
+    feed.add_theme_font_size_override("bold_font_size", 14)
 
 func _layout_hud() -> void:
     if not is_inside_tree():
         return
     var viewport: Vector2 = get_viewport_rect().size
-    var drawer_width: float = clampf(viewport.x / 3.0, 384.0, 515.0)
+    var body_page: bool = current_drawer_page == 1
+    var drawer_width: float = BODY_DRAWER_WIDTH if body_page else BACKPACK_DRAWER_WIDTH
+    drawer_width = minf(drawer_width, viewport.x - 16.0)
     var drawer: Control = $HUD/FullInventory
-    drawer.anchor_left = 0.0
-    drawer.anchor_right = 0.0
-    drawer.anchor_top = 0.0
-    drawer.anchor_bottom = 0.0
-    drawer.offset_left = viewport.x - drawer_width - 8.0 if puzzle_active else 8.0
-    drawer.offset_right = viewport.x - 8.0 if puzzle_active else drawer_width + 8.0
+    drawer.set_anchors_preset(Control.PRESET_TOP_LEFT)
+    # On the BODY page, one unified panel holds the actual mannequin LEFT and
+    # the same backpack RIGHT. Other pages use identical fixed-width panels.
+    drawer.offset_left = viewport.x - drawer_width - 8.0 if puzzle_active else (viewport.x - drawer_width) * 0.5 if body_page else 8.0
+    drawer.offset_right = drawer.offset_left + drawer_width
     drawer.offset_top = 6.0
-    drawer.offset_bottom = maxf(360.0, viewport.y - 140.0)
+    drawer.offset_bottom = maxf(360.0, viewport.y - 95.0)
+
     var quick: Control = $HUD/QuickInventory
-    quick.anchor_left = 0.0
-    quick.anchor_right = 0.0
-    quick.anchor_top = 0.0
-    quick.anchor_bottom = 0.0
-    quick.offset_left = 8.0
-    quick.offset_right = minf(407.0, viewport.x * 0.33)
-    quick.offset_top = viewport.y - 62.0
-    quick.offset_bottom = viewport.y - 8.0
-    # Permanently reserve the left bottom strip for real quickslots. The
-    # existing narrated event journal occupies the separate right-hand strip.
+    quick.set_anchors_preset(Control.PRESET_TOP_LEFT)
+    quick.offset_left = (viewport.x - QUICKBAR_WIDTH) * 0.5
+    quick.offset_right = quick.offset_left + QUICKBAR_WIDTH
+    quick.offset_top = viewport.y - 65.0
+    quick.offset_bottom = viewport.y - 6.0
+
     var journal: Control = $HUD/TextBox
     journal.set_anchors_preset(Control.PRESET_TOP_LEFT)
     journal.offset_left = 6.0 if puzzle_active else quick.offset_right + 8.0
     journal.offset_right = viewport.x - 6.0
-    journal.offset_top = viewport.y - 130.0
+    journal.offset_top = viewport.y - 65.0
     journal.offset_bottom = viewport.y - 6.0
+
     if active_circuit != null and is_instance_valid(active_circuit):
         active_circuit.set_anchors_preset(Control.PRESET_TOP_LEFT)
         active_circuit.position = Vector2(4, 4)
         active_circuit.size = Vector2(maxf(380.0, drawer.offset_left - 15.0),
-            maxf(350.0, viewport.y - 143.0))
+            maxf(350.0, viewport.y - 73.0))
 
 func _select_drawer_page(index: int) -> void:
     current_drawer_page = posmod(index, DRAWER_PAGES.size())
@@ -170,8 +180,13 @@ func _select_drawer_page(index: int) -> void:
     var body: Control = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer
     var pda: RichTextLabel = $HUD/FullInventory/VBoxContainer/PdaPage
     row.visible = current_drawer_page < 2
-    backpack.visible = current_drawer_page == 0
+    backpack.visible = current_drawer_page <= 1
     body.visible = current_drawer_page == 1
+    var contents: HBoxContainer = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer
+    if current_drawer_page == 1:
+        contents.move_child(body, 0)
+    else:
+        contents.move_child(backpack, 0)
     pda.visible = current_drawer_page >= 2
     if current_drawer_page == 2:
         pda.text = "[b]STATION NOTES[/b]\n\nNo recovered entries."
@@ -179,27 +194,21 @@ func _select_drawer_page(index: int) -> void:
         pda.text = "[b]MAP[/b]\n\nMapping module has no cartographic data."
     elif current_drawer_page >= 4:
         pda.text = "[b]%s[/b]\n\nInstrument not installed." % page
+    _layout_hud()
 
 func cycle_drawer(step: int) -> void:
     _select_drawer_page(current_drawer_page + step)
 
 func ui_captures_world_input() -> bool:
-    # Editing circuits, text pages, or moving physical equipment suppresses
-    # movement, attacks, interactions and hotkeys in World2D.
-    return puzzle_active or $HUD/FullInventory.visible
+    # Only a real modal/precision circuit view takes over player movement.
+    # Regular inventory/PDA are transparent to walking and Space interactions.
+    return puzzle_active or (desk_inspection != null and is_instance_valid(desk_inspection))
 
 func toggle_inventory() -> void:
     var drawer: Control = $HUD/FullInventory
-    if puzzle_active:
+    drawer.visible = not drawer.visible
+    if drawer.visible:
         _select_drawer_page(0)
-    elif not drawer.visible:
-        drawer.visible = true
-        _select_drawer_page(0)
-        player.mouse_target = null
-    elif current_drawer_page != 0:
-        _select_drawer_page(0)
-    else:
-        drawer.visible = false
     _layout_hud()
 
 func enter_circuit_mode(workbench: CircuitWorkbench) -> void:
@@ -251,7 +260,7 @@ func _hover_target_name(collider: CollisionObject2D) -> String:
         return ""
     var result: String = str(node.get("myname"))
     if "itemslot" in node and node.itemslot != null and node.itemslot.occupied():
-        result += "  ×%d" % node.itemslot.count
+        result += "  %dx" % node.itemslot.count
     if player.diagnostic_level() > 0:
         if "access_granted" in node and "disabled" in node:
             result += "\n[NEURAL SCAN]  PLC: %s  |  HW: %s" % [
@@ -330,6 +339,41 @@ func _process(delta):
             $StartMusic.volume_db = start_music_volume_temp
             $BackgroundMusic.volume_db = background_music_volume_temp 
 
+func is_hud_drop_region(screen_point: Vector2) -> bool:
+    var ui_panels: Array[Control] = [
+        $HUD/FullInventory, $HUD/QuickInventory, $HUD/TextBox
+    ]
+    if active_circuit != null and is_instance_valid(active_circuit):
+        ui_panels.append(active_circuit)
+    if desk_inspection != null and is_instance_valid(desk_inspection):
+        ui_panels.append(desk_inspection)
+    for control in ui_panels:
+        if control.is_visible_in_tree() and control.get_global_rect().has_point(screen_point):
+            return true
+    return false
+
+func _safe_drop_position(target: Vector2) -> Dictionary:
+    # Never instantiate a physics item intersecting station tiles/walls.
+    var clearance := CircleShape2D.new()
+    clearance.radius = 9.0
+    var shape_query := PhysicsShapeQueryParameters2D.new()
+    shape_query.shape = clearance
+    shape_query.collision_mask = (1 << 19) | (1 << 21) | (1 << 22) | (1 << 23) | (1 << 6)
+    shape_query.collide_with_bodies = true
+    var candidates: Array[Vector2] = [
+        Vector2.ZERO, Vector2(24, 0), Vector2(-24, 0),
+        Vector2(0, 24), Vector2(0, -24), Vector2(36, 36),
+        Vector2(-36, 36), Vector2(36, -36), Vector2(-36, -36)
+    ]
+    for shift in candidates:
+        var point: Vector2 = target + shift
+        if point.distance_to(player.global_position) > player.service_reach():
+            continue
+        shape_query.transform = Transform2D(0.0, point)
+        if world.get_world_2d().direct_space_state.intersect_shape(shape_query, 1).is_empty():
+            return {"ok": true, "point": point}
+    return {"ok": false}
+
 ## A GUI drag is only an item Resource payload. If released over valid world
 ## ground, create exactly one proper world body at the camera-converted point.
 ## No UI collision shapes or world-side drag clones are ever involved.
@@ -338,11 +382,12 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
         return
     if source != player.inventory and source != player.quickinventory:
         return
-    if not player.inventory.has(item):
+    var drag_cell: InvSlot = source.slot_at(source_index)
+    # Never look up an arbitrary item by type if a queued GUI refresh changed
+    # the source slot during drag: that made pliers turn into other gear.
+    if drag_cell == null or not Inv.matches(drag_cell.item, item) or not player.inventory.has(item):
         return
-    # GUI drag ends do not reliably emit mouse_exited; use the actual release
-    # point rather than a stale global mouse_over_ui flag.
-    if $HUD/FullInventory.visible and $HUD/FullInventory.get_global_rect().has_point(viewport_position):
+    if puzzle_active or is_hud_drop_region(viewport_position):
         return
     var picker: WorldHitTest = $World/WorldHitTest
     # WorldHitTest returns global world-canvas positions, never World-local
@@ -377,13 +422,21 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
             else:
                 p("%s bounced off the machine." % item.name)
             return
-    # No valid target: drop exactly one physical object on the floor.
+    # An incompatible release on a solid object is NOT permission to throw
+    # the physical item through that object into the wall behind it.
+    if collider != null:
+        p("%s cannot be used there." % item.name)
+        return
+    var safe: Dictionary = _safe_drop_position(world_point)
+    if not bool(safe.get("ok", false)):
+        p("There is nowhere for %s to land." % item.name)
+        return
     if not player.inventory.remove_item(item, 1):
         return
     var dropped: Node2D = preload("res://items/item_world.tscn").instantiate()
     dropped.set("itemslot", InvSlot.new(item, 1))
     world.add_child(dropped)
-    dropped.global_position = world_point
+    dropped.global_position = safe["point"]
     p("%s dropped. Remaining: %d." % [item.name, player.inventory.count(item)])
 
 func _use_inventory_item(item: InvItem) -> void:
