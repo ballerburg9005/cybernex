@@ -39,6 +39,29 @@ func _run() -> void:
     game.mouse_over_ui = false
     game._handle_world_drop(player.inventory, player.inventory.find(item), item, screen_point + Vector2(900, 0))
     check(player.inventory.count(item) == quantity, "Out-of-reach world drop must preserve stock.")
+    # World terminal must use the SAME physical backpack as the grid/mannequin.
+    var terminal = game.get_node("World/Terminal")
+    check(terminal.puzzle_type == "circuit", "Main-map terminal should offer electronic repair.")
+    terminal.activate(player)
+    var bench: CircuitWorkbench = terminal.ui_menu
+    check(bench != null and bench.field_inventory == player.inventory, "Terminal workbench should bind actual player backpack.")
+    var resistor: InvItem = load("res://items/resistor10.tres")
+    var solder: InvItem = load("res://items/solder.tres")
+    var resistor_before: int = player.inventory.count(resistor)
+    var solder_before: int = player.inventory.count(solder)
+    bench.selected_index = 1
+    bench._remove_selected()
+    bench.palette.select(0)
+    bench._on_board_click(Vector2i(2, 1))
+    check(player.inventory.count(resistor) == resistor_before - 1, "Installing physical resistor should use one real item.")
+    check(player.inventory.count(solder) == solder_before - 1, "Soldering should spend exactly one solder.")
+    for tick in range(15):
+        bench._on_simulation_tick()
+    check(terminal.access_granted, "Electrically valid repair should grant legacy map terminal access.")
+    check(terminal.ui_menu == null, "Solved repair should dismiss the workbench overlay.")
+    var jumper: InvItem = load("res://items/wire_bridge.tres")
+    var wire_model: CircuitPart = load("res://systems/circuits/parts/wire_straight.tres")
+    check(jumper.circuit_part == wire_model, "Crafted jumper is mapped to a usable real circuit part.")
     game.queue_free()
     if failures == 0:
         print("WORLD INVENTORY TESTS PASSED")
