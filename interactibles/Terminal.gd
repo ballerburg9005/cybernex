@@ -29,6 +29,9 @@ signal do_toggle
 
 
 func _ready():
+    # Scene-owned loot: never mutate a globally cached .tres in another
+    # terminal, second level or loaded save.
+    loot = loot.duplicate(true) if loot != null else Inv.new(9)
     if loot.count() > 0:
         has_loot = true
         for i in range(0,max(9, loot.items.size())):
