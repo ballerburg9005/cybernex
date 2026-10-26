@@ -328,9 +328,16 @@ func test_physical_slot_positions_and_gesture_amounts() -> void:
     root.add_child(inventory_ui)
     inventory_ui.configure(bag)
     var occupied_slot: InventoryCell = inventory_ui.grid_container.get_child(35)
+    var stable_cell: InventoryCell = inventory_ui.grid_container.get_child(0)
+    var prior_cell_count: int = inventory_ui.grid_container.get_child_count()
+    check(bag.add_item(copper, 1), "Picking up a wire should update live backpack.")
+    check(inventory_ui.grid_container.get_child_count() == prior_cell_count
+        and inventory_ui.grid_container.get_child(35) == occupied_slot
+        and inventory_ui.grid_container.get_child(0) == stable_cell,
+        "Pickup must refresh existing Button sprites instead of freeing/rebuilding whole grid and stalling drag.")
     var left_payload: Dictionary = occupied_slot._make_drag_payload(false)
     var right_payload: Dictionary = occupied_slot._make_drag_payload(true)
-    check(left_payload["amount"] == 1 and right_payload["amount"] == 6,
+    check(left_payload["amount"] == 1 and right_payload["amount"] == bag.slot_at(35).count,
         "Godot physical drag payloads distinguish left one versus right whole pile.")
     check(inventory_ui.grid_container.get_child(0).index == 0
         and inventory_ui.grid_container.get_child(35).index == 35,
