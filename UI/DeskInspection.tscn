@@ -3,13 +3,16 @@
 [ext_resource type="Script" path="res://UI/DeskInspection.gd" id="screen"]
 [ext_resource type="PackedScene" path="res://UI/Inventory.tscn" id="inventory"]
 
-[node name="DeskInspection" type="PanelContainer"]
+[node name="DeskInspection" type="Control"]
 mouse_filter = 0
 script = ExtResource("screen")
 
 [node name="Columns" type="HBoxContainer" parent="."]
-layout_mode = 2
-theme_override_constants/separation = 0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 14
 
 [node name="BackpackPanel" type="PanelContainer" parent="Columns"]
 layout_mode = 2
