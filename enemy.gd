@@ -30,6 +30,8 @@ var counter = 0
 var attack_targets = []
 var attack_pursue_targets = []
 var can_shoot_target = false
+## Small electric discharges disrupt the bot temporarily, without killing it.
+var stunned_seconds: float = 0.0
 
 var starting_health
 var is_dying = false
@@ -118,7 +120,24 @@ func spawn_projectile(target):
 
 	return true
 
+func stun_for(seconds: float) -> void:
+    if health <= 0.0:
+        return
+    stunned_seconds = maxf(stunned_seconds, seconds)
+    projectile_pre_timer.stop()
+    projectile_timer_ok = false
+
 func _physics_process(delta):
+    if stunned_seconds > 0.0:
+        stunned_seconds = maxf(0.0, stunned_seconds - delta)
+        velocity = Vector2.ZERO
+        can_shoot_target = false
+        $Sprite.play("default")
+        $Sprite.modulate = Color("#78c8e5")
+        move_and_slide()
+        if stunned_seconds <= 0.0:
+            projectile_timer_ok = true
+        return
 
 	if health <= 0:
 		is_dying = true
