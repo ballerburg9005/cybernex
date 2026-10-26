@@ -5,6 +5,12 @@ class_name WorldSave
 ## rather than arbitrary paths embedded in user:// files.
 const VERSION: int = 1
 const SAVE_PATH: String = "user://cybernex_save_v1.json"
+static var last_error: String = ""
+
+static func _reject(message: String) -> bool:
+    last_error = message
+    push_warning("World save rejected: " + message)
+    return false
 const ITEM_NAMES := [
     "arc_pistol", "big_wire", "copper_contacts", "junk", "neural_regulator",
     "power_cell", "resistor10", "servo_brace", "side_cutters", "solder",
@@ -114,46 +120,46 @@ static func capture(game: Control) -> Dictionary:
 
 static func restore(game: Control, data: Dictionary) -> bool:
     if int(data.get("version", -1)) != VERSION:
-        return false
+        return _reject("if int(data.get(\"version\", -1)) != VERSION:")
     var actor: Node2D = game.get_node("World/Player")
     var world: Node2D = game.get_node("World")
     var catalogue: Dictionary = _catalogue()
     var player_data: Variant = data.get("player")
     if typeof(player_data) != TYPE_DICTIONARY:
-        return false
+        return _reject("if typeof(player_data) != TYPE_DICTIONARY:")
     var player_position: Variant = _vector_from(player_data.get("position"))
     var health: float = float(player_data.get("health", -1.0))
     if player_position == null or not is_finite(health) or health < 0.0 or health > 100.0:
-        return false
+        return _reject("if player_position == null or not is_finite(health) or health < 0.0 or health > 100.0:")
     var new_bag: Inv = _prepare_inventory(data.get("inventory"), actor.inventory.size(), actor.inventory.max_stack, catalogue)
     if new_bag == null:
-        return false
+        return _reject("if new_bag == null:")
     var new_hotbar: Inv = _prepare_quickbar(data.get("quickbar"), new_bag, actor.quickinventory.size(), catalogue)
     if new_hotbar == null:
-        return false
+        return _reject("if new_hotbar == null:")
     var equipment_state: Variant = data.get("loadout")
     if typeof(equipment_state) != TYPE_DICTIONARY:
-        return false
+        return _reject("if typeof(equipment_state) != TYPE_DICTIONARY:")
     var new_loadout := EquipmentLoadout.new()
     if not new_loadout.restore(equipment_state, new_bag):
-        return false
+        return _reject("if not new_loadout.restore(equipment_state, new_bag):")
     var new_energy := EquipmentRuntime.new()
     if not new_energy.restore(player_data.get("equipment_energy", {})):
-        return false
+        return _reject("if not new_energy.restore(player_data.get(\"equipment_energy\", {})):")
     # Validate everything, including the complete world item manifest, before
     # any currently-live model changes.
     var terminal_states: Variant = data.get("terminals", {})
     if typeof(terminal_states) != TYPE_DICTIONARY:
-        return false
+        return _reject("if typeof(terminal_states) != TYPE_DICTIONARY:")
     var next_terminals: Dictionary = {}
     for node_name in terminal_states:
         var node: Node = world.get_node_or_null(str(node_name))
         var record: Variant = terminal_states[node_name]
         if node == null or not node.has_method("play_activate") or typeof(record) != TYPE_DICTIONARY:
-            return false
+            return _reject("if node == null or not node.has_method(\"play_activate\") or typeof(record) != TYPE_DICTIONARY:")
         var storage: Inv = _prepare_inventory(record.get("loot", []), node.loot.size(), node.loot.max_stack, catalogue)
         if storage == null:
-            return false
+            return _reject("if storage == null:")
         next_terminals[node_name] = {
             "node": node, "loot": storage,
             "access": bool(record.get("access", false)),
@@ -161,30 +167,30 @@ static func restore(game: Control, data: Dictionary) -> bool:
         }
     var pickup_entries: Variant = data.get("pickups")
     if typeof(pickup_entries) != TYPE_ARRAY or pickup_entries.size() > 2000:
-        return false
+        return _reject("if typeof(pickup_entries) != TYPE_ARRAY or pickup_entries.size() > 2000:")
     var saved_pickups: Array[Dictionary] = []
     for record in pickup_entries:
         if typeof(record) != TYPE_DICTIONARY:
-            return false
+            return _reject("if typeof(record) != TYPE_DICTIONARY:")
         var pos: Variant = _vector_from(record.get("pos"))
         var id: String = str(record.get("item", ""))
         var quantity: int = int(record.get("count", 0))
         if pos == null or not catalogue.has(id) or quantity < 1 or quantity > 9999:
-            return false
+            return _reject("if pos == null or not catalogue.has(id) or quantity < 1 or quantity > 9999:")
         saved_pickups.append({"position": pos, "item": catalogue[id], "count": quantity})
     var robot_states: Variant = data.get("enemies", {})
     if typeof(robot_states) != TYPE_DICTIONARY:
-        return false
+        return _reject("if typeof(robot_states) != TYPE_DICTIONARY:")
     var next_robots: Dictionary = {}
     for robot_name in robot_states:
         var robot: Node = world.get_node_or_null(str(robot_name))
         var record: Variant = robot_states[robot_name]
         if robot == null or not robot.is_in_group("enemies") or typeof(record) != TYPE_DICTIONARY:
-            return false
+            return _reject("if robot == null or not robot.is_in_group(\"enemies\") or typeof(record) != TYPE_DICTIONARY:")
         var pos: Variant = _vector_from(record.get("pos"))
         var hp: float = float(record.get("health", -1.0))
         if pos == null or not is_finite(hp) or hp < 0.0 or hp > 10000.0:
-            return false
+            return _reject("if pos == null or not is_finite(hp) or hp < 0.0 or hp > 10000.0:")
         next_robots[robot_name] = {"node": robot, "pos": pos, "health": hp}
 
     # Everything validated; commit models and recreate world pickups.
