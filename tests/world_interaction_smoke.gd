@@ -12,8 +12,10 @@ func check(ok: bool, message: String) -> void:
         push_error(message)
 
 func _run() -> void:
+    root.size = Vector2i(1280, 720)
     var game: Control = load("res://main.tscn").instantiate()
     root.add_child(game)
+    game._layout_hud()
     var world: Node2D = game.get_node("World")
     var player: CharacterBody2D = game.get_node("World/Player")
     var picker: WorldHitTest = game.get_node("World/WorldHitTest")
