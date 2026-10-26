@@ -1,20 +1,51 @@
-[gd_resource type="Resource" script_class="Inv" load_steps=7 format=3 uid="uid://belbro1hfjjh3"]
+[gd_resource type="Resource" script_class="Inv" load_steps=17 format=3 uid="uid://belbro1hfjjh3"]
 
-[ext_resource type="Resource" uid="uid://djrjkdayl2olj" path="res://items/side_cutters.tres" id="1_lhkow"]
-[ext_resource type="Script" path="res://inventory.gd" id="1_nb7ap"]
-[ext_resource type="Script" path="res://inventory_slot.gd" id="2_qjob3"]
-[ext_resource type="Resource" uid="uid://c4a6126edpi8a" path="res://items/missing.tres" id="3_phkou"]
+[ext_resource type="Script" path="res://inventory.gd" id="inventory"]
+[ext_resource type="Script" path="res://inventory_slot.gd" id="slot"]
+[ext_resource type="Resource" path="res://items/side_cutters.tres" id="item0"]
+[ext_resource type="Resource" path="res://items/wires.tres" id="item1"]
+[ext_resource type="Resource" path="res://items/big_wire.tres" id="item2"]
+[ext_resource type="Resource" path="res://items/solder.tres" id="item3"]
+[ext_resource type="Resource" path="res://items/arc_pistol.tres" id="item4"]
+[ext_resource type="Resource" path="res://items/neural_regulator.tres" id="item5"]
+[ext_resource type="Resource" path="res://items/servo_brace.tres" id="item6"]
 
-[sub_resource type="Resource" id="Resource_sg31o"]
-script = ExtResource("2_qjob3")
-item = ExtResource("1_lhkow")
-count = 10
+[sub_resource type="Resource" id="stack0"]
+script = ExtResource("slot")
+item = ExtResource("item0")
+count = 1
 
-[sub_resource type="Resource" id="Resource_e5mao"]
-script = ExtResource("2_qjob3")
-item = ExtResource("3_phkou")
+[sub_resource type="Resource" id="stack1"]
+script = ExtResource("slot")
+item = ExtResource("item1")
+count = 3
+
+[sub_resource type="Resource" id="stack2"]
+script = ExtResource("slot")
+item = ExtResource("item2")
+count = 1
+
+[sub_resource type="Resource" id="stack3"]
+script = ExtResource("slot")
+item = ExtResource("item3")
+count = 2
+
+[sub_resource type="Resource" id="stack4"]
+script = ExtResource("slot")
+item = ExtResource("item4")
+count = 1
+
+[sub_resource type="Resource" id="stack5"]
+script = ExtResource("slot")
+item = ExtResource("item5")
+count = 1
+
+[sub_resource type="Resource" id="stack6"]
+script = ExtResource("slot")
+item = ExtResource("item6")
 count = 1
 
 [resource]
-script = ExtResource("1_nb7ap")
-items = Array[ExtResource("2_qjob3")]([SubResource("Resource_sg31o"), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, SubResource("Resource_e5mao")])
+script = ExtResource("inventory")
+max_stack = 999
+items = Array[ExtResource("slot")]([SubResource("stack0"), SubResource("stack1"), SubResource("stack2"), SubResource("stack3"), SubResource("stack4"), SubResource("stack5"), SubResource("stack6"), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null])
