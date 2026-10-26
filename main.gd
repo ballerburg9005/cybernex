@@ -513,6 +513,14 @@ func _handle_world_drop(source: Inv, source_index: int, item: InvItem, viewport_
     if collider != null or _solid_drop_target(world_point):
         p("%s cannot be used there." % item.name)
         return
+    var ray := PhysicsRayQueryParameters2D.create(player.global_position,
+        world_point, (1 << 19) | (1 << 21) | (1 << 22) | (1 << 23))
+    ray.collide_with_bodies = true
+    # Even an apparently empty tile BEHIND a wall is unreachable for a
+    # physical drop. No teleporting tools across station partitions.
+    if not world.get_world_2d().direct_space_state.intersect_ray(ray).is_empty():
+        p("The wall blocks the object.")
+        return
     var safe: Dictionary = _safe_drop_position(world_point)
     if not bool(safe.get("ok", false)):
         p("There is nowhere for %s to land." % item.name)
