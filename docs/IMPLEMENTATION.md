@@ -128,3 +128,44 @@ The original game HUD now instantiates `res://UI/Inventory.tscn` for the backpac
 - `EquipmentLoadout.gd` checks physical stock, slot affinity and weapon/augmentation type, exposes a JSON-compatible snapshot and validates restorations transactionally. The centered mannequin is procedurally drawn by `MannequinCanvas.gd` with eight independently editable slot Buttons placed around the silhouette rather than obscuring it.
 
 Automated Godot 4.7.2 tests: `res://tests/inventory_smoke.gd` (grouping, identity, category/search counts, exact recipe costs, multi-stack consumption, swaps, overflow atomicity, equipment validity and snapshot restoration, drag control wiring) and `res://tests/inventory_world_smoke.gd` (real pickup/drop conservation, a repair terminal using the same backpack, and crafting a jumper which maps to a usable electrical component). The `main.tscn` and both standalone system scenes receive headless startup checks. **These do not substitute for an interactive visual playtest.**
+
+## Follow-on pass: powered equipment, crafting ledger, main-world saves
+
+### Gameplay effects of installed gear
+
+An equipment slot is no longer only cosmetic. The `EquipmentRuntime.gd` rules operate on **equipped actual backpack stock** and a finite 24 Wh suit power store (16 Wh initially charged). Each powered augmentation draws its own Watts each simulation tick:
+
+- **Servo forearm brace**: ×1.16 walking speed and +32 world-maintenance reach while powered, with 4.5 W consumption.
+- **Neural diagnostic regulator**: additional terminal/robot diagnostic information in the original-world hover tooltip while powered, with 1.25 W consumption.
+- **Arc maintenance pistol**: a short-range (150 world unit) 0.45 Wh electrical pulse, maximum one per 0.75 seconds, temporarily disables a robot's shooting/motion for 1.6 seconds. This is an emergency utility tool, not an intended combat progression path.
+
+A new authored `items/power_cell.tres` provides 12 Wh usable charge per consumed cell; initial physical inventory contains two. **Double-click** the power cell in the backpack to refill the suit if not already full. The mannequin displays actual Wh remaining and only counts owned equipped weapons/augmentations. At zero Wh, powered locomotion/reach and diagnostics stop working; firing is blocked. The implementation is explicitly a simple energy-budget model, not a battery chemistry simulation.
+
+### Visible recipe index
+
+In addition to dragging ingredients onto each other, the backpack now contains an **ASSEMBLE** row. This enumerates `InvItem.combos` authored in the Inspector from items the player owns, including missing target materials, output quantity and reusable catalysts. Selecting a craftable entry and pressing ASSEMBLE invokes the existing atomic inventory operation. No separate crafting rules are hardcoded into the UI; physical stock must be available and there must be enough capacity for the result. This enables forward recipe discovery without arbitrary "click every item pair" guessing.
+
+The toolbar uses two rows to keep Search, Sort/Group, Save/Load and Assemble visible at the narrower original HUD widths.
+
+### Main-world saves
+
+`WorldSave.gd` creates a versioned JSON save in `user://cybernex_save_v1.json`. Use **SAVE** and **LOAD** in the full backpack's action row. It captures:
+
+- Physical backpack stacks and exact units; linked quickbar slots; mannequin slots and installed item identities.
+- Player world position, health, suit energy and discharge cooldown.
+- Terminal and desk looting/authorization/activation state.
+- Current world pickup positions, item identity and stack sizes; robot position/health and removal of already-defeated robots.
+
+The loader resolves items only through a known catalogue of Inspector-authored item Resources, preflights all inventories, loadout, positions and world pickup records, and commits after validation. Malformed versions and unknown items are rejected rather than partially applied. Runtime player inventory Resources, terminal loot and equipment are per-scene instances rather than shared global templates. After a successful load the three HUD panels are rebound to the restored authoritative stock.
+
+**Save coverage is intentionally scoped to the legacy original world**. It is not yet a complete global save for the separate `StationMaintenanceBay.tscn` scenario (which has its own snapshot). Nor does it persist arbitrary future mod/plugin-added item IDs, live projectiles, animation playback, user settings or all possible environmental effects.
+
+### Canvas hover cleanup
+
+The original `main.tscn` now owns a **WorldHitTest Node2D as an Inspector-visible world child**. Its physics canvas comes from the Player's real `PhysicsBody2D`; viewport-to-world coordinates derive from the camera transform. Old `main.gd` queried both a HUD CanvasLayer and World2D physics space and sorted misleading collision results. The replacement performs a single world-only hit query, while native Godot Controls use GUI tooltips. A powered neural diagnostic augmentation can add actual terminal accessibility or robot chassis-integrity data. The old 4.3 engine regression itself is not claimed reproduced or fixed inside Godot; this removes the cross-canvas design dependency.
+
+### Added test coverage
+
+`tests/equipment_save_smoke.gd` checks suit loadout energy consumption, deactivation on low battery, physical cells, reusable weapon cooldown and the complete original-world save/reload round-trip. Corrupt saves and invalid item IDs must fail atomically. `tests/inventory_smoke.gd` now covers the discoverable ASSEMBLE control, missing-stock recipes, duplicate Resource item identity, and explicit versus automatic grouping. `tests/inventory_world_smoke.gd` additionally validates that the original world's physics picking maps camera/world coordinates correctly.
+
+Tests execute under GitHub Actions' Godot 4.7.2 headless runner. **Headless checks cannot establish that the new UI is attractive, responsive on every screen size or suitable for controller/touch use.** Leave this as a draft for visual playtesting.
