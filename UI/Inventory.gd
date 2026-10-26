@@ -14,6 +14,8 @@ signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewp
 @onready var counter: Label = $Layout/Toolbar/Counter
 @onready var filter_button: OptionButton = $Layout/Toolbar/Filter
 @onready var sort_button: Button = $Layout/Toolbar/Sort
+@onready var search_input: LineEdit = $Layout/SearchBar/Search
+@onready var visible_count: Label = $Layout/SearchBar/VisibleCount
 @onready var info: Label = $Layout/Feedback
 
 var backpack: Inv
@@ -29,6 +31,9 @@ func _ready() -> void:
     filter_button.add_item("FOOD")
     filter_button.item_selected.connect(func(idx: int) -> void:
         filtering = idx
+        refresh()
+    )
+    search_input.text_changed.connect(func(_new_text: String) -> void:
         refresh()
     )
     sort_button.pressed.connect(func() -> void:
@@ -77,6 +82,11 @@ func _backpack_updated() -> void:
     refresh()
 
 func _allowed(item: InvItem) -> bool:
+    if mode != "hotbar" and is_node_ready() and not search_input.text.strip_edges().is_empty():
+        var search: String = search_input.text.strip_edges().to_lower()
+        var haystack: String = (item.name + " " + item.short_name + " " + item.description).to_lower()
+        if not haystack.contains(search):
+            return false
     if filtering == 0 or mode == "hotbar":
         return true
     match filtering:
@@ -92,11 +102,13 @@ func refresh() -> void:
         return
     var occupied: Array[int] = []
     var available: Array[int] = []
+    var shown_quantity: int = 0
     for i in range(inv.size()):
         var slot: InvSlot = inv.slot_at(i)
         if slot != null:
             if _allowed(slot.item):
                 occupied.append(i)
+                shown_quantity += slot.count
         else:
             available.append(i)
     var indices: Array[int] = []
@@ -123,6 +135,8 @@ func refresh() -> void:
         var stack: InvSlot = inv.slot_at(i)
         item_count += stack.count if stack != null else 0
     counter.text = ("%d/%d stacks  |  %d items" % [actual_stacks, inv.size(), item_count]) if mode != "hotbar" else "QUICK ACCESS"
+    visible_count.text = "%d entries / %d units" % [occupied.size(), shown_quantity] if mode != "hotbar" else "Linked; physical stock in backpack"
+    $Layout/SearchBar.visible = mode != "hotbar"
     sort_button.visible = mode != "hotbar"
     filter_button.visible = mode != "hotbar"
 
