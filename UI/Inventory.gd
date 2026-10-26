@@ -130,9 +130,9 @@ func refresh() -> void:
     else:
         indices.append_array(occupied)
         if filtering == 0:
-            for i in range(mini(empty_slots_to_show, available.size())):
-                indices.append(available[i])
-    grid_container.columns = 9 if mode == "hotbar" else preferred_columns
+            # Show the full authored backpack grid, including empty slots.
+            indices.append_array(available)
+    grid_container.columns = 9 if mode == "hotbar" else 7
     for child in grid_container.get_children():
         grid_container.remove_child(child)
         child.queue_free()
@@ -146,23 +146,22 @@ func refresh() -> void:
     for i in range(inv.size()):
         var stack: InvSlot = inv.slot_at(i)
         item_count += stack.count if stack != null else 0
-    counter.text = ("%d/%d stacks  |  %d items" % [actual_stacks, inv.size(), item_count]) if mode != "hotbar" else "QUICK ACCESS"
+    counter.text = ("%d/%d stacks  |  %d items" % [actual_stacks, inv.size(), item_count]) if mode != "hotbar" else ""
     visible_count.text = "%d entries / %d units" % [occupied.size(), shown_quantity] if mode != "hotbar" else "Linked; physical stock in backpack"
-    $Layout/SearchBar.visible = mode != "hotbar"
-    $Layout/Crafting.visible = mode != "hotbar"
-    if mode != "hotbar":
-        _refresh_recipe_index()
-    sort_button.visible = mode != "hotbar"
-    $Layout/Actions/Save.visible = mode != "hotbar"
-    $Layout/Actions/Load.visible = mode != "hotbar"
-    filter_button.visible = mode != "hotbar"
+    # Crafting is intentionally discovered by dragging physical ingredients.
+    # The legacy programmatic controls remain for authoring/tests only.
+    $Layout/Toolbar.visible = false
+    $Layout/Actions.visible = false
+    $Layout/SearchBar.visible = false
+    $Layout/Crafting.visible = false
+    $Layout/Feedback.visible = false
 
 func request_use(item: InvItem) -> void:
     if item != null and backpack != null and backpack.has(item):
         use_requested.emit(item)
 
 func message(value: String) -> void:
-    info.text = value
+    # Only the original lower-right event feed narrates gameplay.
     feedback.emit(value)
 
 func request_world_drop(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2) -> void:
