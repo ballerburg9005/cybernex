@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://UI/Inventory.gd" id="view_script"]
 
 [node name="InventoryItems" type="PanelContainer"]
-custom_minimum_size = Vector2(365, 190)
+custom_minimum_size = Vector2(505, 190)
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("view_script")
@@ -74,8 +74,8 @@ horizontal_scroll_mode = 0
 
 [node name="GridContainer" type="GridContainer" parent="Layout/Scroll"]
 layout_mode = 2
-theme_override_constants/h_separation = 3
-theme_override_constants/v_separation = 3
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
 size_flags_horizontal = 3
 columns = 10
 
