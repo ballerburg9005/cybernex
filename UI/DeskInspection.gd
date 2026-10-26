@@ -144,5 +144,5 @@ func _log(value: String) -> void:
         journal.call(value)
 
 func close() -> void:
+    hide()
     closed.emit()
-    queue_free()
