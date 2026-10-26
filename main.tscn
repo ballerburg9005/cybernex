@@ -13,6 +13,7 @@
 [ext_resource type="Resource" uid="uid://djrjkdayl2olj" path="res://items/side_cutters.tres" id="9_bamd0"]
 [ext_resource type="PackedScene" uid="uid://btv4v1ibnrmla" path="res://UI/Inventory.tscn" id="10_vg8hb"]
 [ext_resource type="Texture2D" uid="uid://dfvjd8p1p1lc3" path="res://assets/noise.jpg" id="12_3inrd"]
+[ext_resource type="PackedScene" path="res://UI/EquipmentMannequin.tscn" id="30_eqp"]
 [ext_resource type="Script" path="res://inventory_slot.gd" id="12_26g80"]
 [ext_resource type="Resource" uid="uid://c1rm8ll7i4il7" path="res://items/wires.tres" id="14_vb2n3"]
 [ext_resource type="PackedScene" uid="uid://cfhmk4tjehyse" path="res://interactibles/desk.tscn" id="16_5p6vc"]
@@ -298,14 +299,8 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="TextureRect" type="TextureRect" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer"]
-custom_minimum_size = Vector2(200, 300)
+[node name="Equipment" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer" instance=ExtResource("30_eqp")]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-mouse_filter = 2
-texture = ExtResource("12_3inrd")
-expand_mode = 1
 
 [node name="S3" type="Control" parent="HUD/FullInventory/VBoxContainer/HBoxContainer"]
 layout_mode = 2
