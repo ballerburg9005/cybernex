@@ -21,20 +21,20 @@ var combinables = []
 @export var equipment: EquipmentLoadout
 
 func _ready():
-	last_health = health
-	if equipment == null:
-		equipment = EquipmentLoadout.new()
-	if inventory != null:
-		inventory.normalize()
-	
-	get_node("/root/main/HUD/FullInventory").visible = false
-	for e in [inventory, quickinventory]:
-		for i in range(0, e.items.size()):
-			if not e.items[i]:
-				e.items[i] = InvSlot.new()
-	$PlayerReach/Sprite2D.visible = false
-	pass
-	
+    last_health = health
+    if equipment == null:
+        equipment = EquipmentLoadout.new()
+    if inventory != null:
+        inventory.normalize()
+    
+    get_node("/root/main/HUD/FullInventory").visible = false
+    for e in [inventory, quickinventory]:
+        for i in range(0, e.items.size()):
+            if not e.items[i]:
+                e.items[i] = InvSlot.new()
+    $PlayerReach/Sprite2D.visible = false
+    pass
+    
 ## UI inventory operations use native Godot Control drag/drop. No cloned
 ## physics bodies are created in CanvasLayer or Camera2D spaces.
 
@@ -45,10 +45,10 @@ func use_item_on_item(from_inv: Inv, to_inv: Inv, fidx: int, tidx: int) -> bool:
 
 
 func add_inventory_item(itemslot: InvSlot, start: int = -1, inv: Inv = null) -> bool:
-	var actual: Inv = inventory if inv == null else inv
-	if actual == null or itemslot == null:
-		return false
-	return actual.add_stack(itemslot, start)
+    var actual: Inv = inventory if inv == null else inv
+    if actual == null or itemslot == null:
+        return false
+    return actual.add_stack(itemslot, start)
 
 
 func _input(event: InputEvent) -> void:
@@ -62,51 +62,51 @@ func _input(event: InputEvent) -> void:
 
 
 func _physics_process(delta):
-	counter = (counter+1)%9999999999
+    counter = (counter+1)%9999999999
 
-	# Handle jump.
-	#if Input.is_action_just_pressed("action_1") and is_on_floor():
-	#	velocity.y = JUMP_VELOCITY
+    # Handle jump.
+    #if Input.is_action_just_pressed("action_1") and is_on_floor():
+    #	velocity.y = JUMP_VELOCITY
 
-	# keyboard
-	var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = direction * SPEED
-	if direction.x + direction.y > 0.1:
-		mouse_target = null
+    # keyboard
+    var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+    velocity = direction * SPEED
+    if direction.x + direction.y > 0.1:
+        mouse_target = null
 
-	# mouse
-	if mouse_target:
-		velocity += (SCALE*position).direction_to(mouse_target) * SPEED
-		if (SCALE*position).distance_to(mouse_target) < 10:
-			mouse_target = null
+    # mouse
+    if mouse_target:
+        velocity += (SCALE*position).direction_to(mouse_target) * SPEED
+        if (SCALE*position).distance_to(mouse_target) < 10:
+            mouse_target = null
 
-	velocity = velocity.normalized()*SPEED
+    velocity = velocity.normalized()*SPEED
 
-	if velocity.x < 0:
-		$Sprite.flip_h = true
-	elif velocity.x > 0:
-		$Sprite.flip_h = false
+    if velocity.x < 0:
+        $Sprite.flip_h = true
+    elif velocity.x > 0:
+        $Sprite.flip_h = false
 
-	if abs(velocity.x) + abs(velocity.y) < 0.1:
-		$Sprite.play("default")
-	else:
-		$Sprite.play("run")
-		
-	# update stuff less frequently
-	if counter%10 == 0:
-		var mr = min(health,100)/100.0
-		$Sprite.set_modulate(Color(1,mr,mr,1))
-	if counter%10 == 0:
-		if health < last_health:
-			var mr = min(last_health - health,20)/20.0
-			mr *= 100.0/(health if health > 0 else 1) if health-50 < 0 else 1
-			mr = 1 if mr > 1 else mr
-			$HurtBox/HurtShader.material.set_shader_parameter("alpha", mr)
-			last_health -= 1
-		else:
-			$HurtBox/HurtShader.material.set_shader_parameter("alpha", 0.0)
+    if abs(velocity.x) + abs(velocity.y) < 0.1:
+        $Sprite.play("default")
+    else:
+        $Sprite.play("run")
+        
+    # update stuff less frequently
+    if counter%10 == 0:
+        var mr = min(health,100)/100.0
+        $Sprite.set_modulate(Color(1,mr,mr,1))
+    if counter%10 == 0:
+        if health < last_health:
+            var mr = min(last_health - health,20)/20.0
+            mr *= 100.0/(health if health > 0 else 1) if health-50 < 0 else 1
+            mr = 1 if mr > 1 else mr
+            $HurtBox/HurtShader.material.set_shader_parameter("alpha", mr)
+            last_health -= 1
+        else:
+            $HurtBox/HurtShader.material.set_shader_parameter("alpha", 0.0)
 
-	move_and_slide()
-	
+    move_and_slide()
+    
 func p(s):
-	get_node("/root/main").p(s)
+    get_node("/root/main").p(s)
