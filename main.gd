@@ -59,10 +59,10 @@ func _ready():
     tooltip_timer.start(0.2)
     
     $HUD.visible = true
-    $HUD/FullInventory/VBoxContainer/DrawerNav/Previous.pressed.connect(func() -> void:
+    $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Previous.pressed.connect(func() -> void:
         cycle_drawer(-1)
     )
-    $HUD/FullInventory/VBoxContainer/DrawerNav/Next.pressed.connect(func() -> void:
+    $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Next.pressed.connect(func() -> void:
         cycle_drawer(1)
     )
     $HUD/FullInventory/VBoxContainer.move_child($HUD/FullInventory/VBoxContainer/DrawerNav, 0)
@@ -93,7 +93,28 @@ func _setup_compact_hud() -> void:
     dark.border_color = Color(0.31, 0.39, 0.4)
     dark.set_border_width_all(1)
     dark.set_corner_radius_all(7)
+    # Journal sides are twice as spacious as top/bottom.
+    dark.content_margin_left = 18.0
+    dark.content_margin_right = 18.0
+    dark.content_margin_top = 9.0
+    dark.content_margin_bottom = 9.0
     paper.add_theme_stylebox_override("panel", dark)
+    var nav_back: StyleBoxFlat = dark.duplicate()
+    nav_back.content_margin_left = 6.0
+    nav_back.content_margin_right = 6.0
+    nav_back.content_margin_top = 4.0
+    nav_back.content_margin_bottom = 4.0
+    $HUD/FullInventory/VBoxContainer/DrawerNav.add_theme_stylebox_override("panel", nav_back)
+    var page_back: StyleBoxFlat = dark.duplicate()
+    page_back.content_margin_left = 14.0
+    page_back.content_margin_right = 14.0
+    page_back.content_margin_top = 9.0
+    page_back.content_margin_bottom = 9.0
+    $HUD/FullInventory/VBoxContainer/PdaPage.add_theme_stylebox_override("normal", page_back)
+    $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Section.add_theme_font_size_override("font_size", 14)
+    $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Section.add_theme_color_override("font_color", Color("#e7ece7"))
+    $HUD/TextBox/S2.visible = false
+    $HUD/TextBox/HBoxContainer/S3.visible = false
     var feed: RichTextLabel = hud_textbox
     feed.add_theme_font_size_override("normal_font_size", 17)
     feed.add_theme_font_size_override("bold_font_size", 17)
@@ -107,7 +128,7 @@ func _layout_hud() -> void:
     if not is_inside_tree():
         return
     var viewport: Vector2 = get_viewport_rect().size
-    var drawer_width: float = clampf(viewport.x * 0.32, 366.0, 500.0)
+    var drawer_width: float = clampf(viewport.x / 3.0, 384.0, 515.0)
     var drawer: Control = $HUD/FullInventory
     drawer.anchor_left = 0.0
     drawer.anchor_right = 0.0
@@ -123,19 +144,27 @@ func _layout_hud() -> void:
     quick.anchor_top = 0.0
     quick.anchor_bottom = 0.0
     quick.offset_left = 8.0
-    quick.offset_right = minf(480.0, viewport.x * 0.47)
-    quick.offset_top = viewport.y - 65.0
+    quick.offset_right = minf(407.0, viewport.x * 0.33)
+    quick.offset_top = viewport.y - 62.0
     quick.offset_bottom = viewport.y - 8.0
+    # Permanently reserve the left bottom strip for real quickslots. The
+    # existing narrated event journal occupies the separate right-hand strip.
+    var journal: Control = $HUD/TextBox
+    journal.set_anchors_preset(Control.PRESET_TOP_LEFT)
+    journal.offset_left = 6.0 if puzzle_active else quick.offset_right + 8.0
+    journal.offset_right = viewport.x - 6.0
+    journal.offset_top = viewport.y - 130.0
+    journal.offset_bottom = viewport.y - 6.0
     if active_circuit != null and is_instance_valid(active_circuit):
         active_circuit.set_anchors_preset(Control.PRESET_TOP_LEFT)
-        active_circuit.position = Vector2(6, 6)
-        active_circuit.size = Vector2(maxf(390.0, viewport.x - drawer_width - 24.0),
-            maxf(350.0, viewport.y - 148.0))
+        active_circuit.position = Vector2(4, 4)
+        active_circuit.size = Vector2(maxf(380.0, drawer.offset_left - 7.0),
+            maxf(350.0, viewport.y - 143.0))
 
 func _select_drawer_page(index: int) -> void:
     current_drawer_page = posmod(index, DRAWER_PAGES.size())
     var page: String = DRAWER_PAGES[current_drawer_page]
-    $HUD/FullInventory/VBoxContainer/DrawerNav/Section.text = page
+    $HUD/FullInventory/VBoxContainer/DrawerNav/NavRow/Section.text = page
     var row: Control = $HUD/FullInventory/VBoxContainer/HBoxContainer
     var backpack: Control = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems
     var body: Control = $HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer
@@ -154,12 +183,30 @@ func _select_drawer_page(index: int) -> void:
 func cycle_drawer(step: int) -> void:
     _select_drawer_page(current_drawer_page + step)
 
+func ui_captures_world_input() -> bool:
+    # Editing circuits, text pages, or moving physical equipment suppresses
+    # movement, attacks, interactions and hotkeys in World2D.
+    return puzzle_active or $HUD/FullInventory.visible
+
+func toggle_inventory() -> void:
+    var drawer: Control = $HUD/FullInventory
+    if puzzle_active:
+        _select_drawer_page(0)
+    elif not drawer.visible:
+        drawer.visible = true
+        _select_drawer_page(0)
+        player.mouse_target = null
+    elif current_drawer_page != 0:
+        _select_drawer_page(0)
+    else:
+        drawer.visible = false
+    _layout_hud()
+
 func enter_circuit_mode(workbench: CircuitWorkbench) -> void:
     puzzle_active = true
     active_circuit = workbench
     $HUD/QuickInventory.visible = false
     $HUD/FullInventory.visible = true
-    $HUD/TextBox/HBoxContainer/S3.visible = false
     _select_drawer_page(0)
     _layout_hud()
     workbench.journal_event.connect(p)
@@ -170,7 +217,6 @@ func exit_circuit_mode() -> void:
     active_circuit = null
     $HUD/FullInventory.visible = false
     $HUD/QuickInventory.visible = true
-    $HUD/TextBox/HBoxContainer/S3.visible = true
     _layout_hud()
 
 func find_myname_recursively(node, name):
