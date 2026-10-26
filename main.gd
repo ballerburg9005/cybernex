@@ -24,7 +24,7 @@ var desk_inspection: Control
 const BACKPACK_DRAWER_WIDTH := 522.0
 const BODY_DRAWER_WIDTH := 522.0
 var companion_drawer: CompanionDrawer
-const QUICKBAR_WIDTH := 510.0
+const QUICKBAR_WIDTH := 506.0
 const DRAWER_PAGES := ["BACKPACK", "BODY SYSTEMS", "NOTES", "MAP", "MULTIMETER", "OSCILLOSCOPE"]
 
 var start_music_volume_temp = 0.0
@@ -112,12 +112,15 @@ func _setup_compact_hud() -> void:
     dark.content_margin_bottom = 9.0
     paper.add_theme_stylebox_override("panel", dark)
     var hotbar_back: StyleBoxFlat = dark.duplicate()
-    hotbar_back.bg_color = Color("#34383d")
+    hotbar_back.bg_color = Color("#111d2f")
+    hotbar_back.set_corner_radius_all(19)
+    hotbar_back.border_color = Color("#2b4358")
     hotbar_back.content_margin_left = 4
     hotbar_back.content_margin_right = 4
     hotbar_back.content_margin_top = 3
     hotbar_back.content_margin_bottom = 3
     $HUD/QuickInventory.add_theme_stylebox_override("panel", hotbar_back)
+    $HUD/QuickInventory/InventoryItems.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
     var enclosing: StyleBoxFlat = dark.duplicate()
     enclosing.content_margin_left = 5.0
     enclosing.content_margin_right = 5.0
@@ -145,12 +148,13 @@ func _setup_compact_hud() -> void:
     $HUD/TextBox/HBoxContainer.custom_minimum_size.y = 0.0
     $HUD/TextBox/HBoxContainer/MarginContainer.add_theme_constant_override("margin_right", 8)
     $HUD/TextBox/HBoxContainer/MarginContainer.add_theme_constant_override("margin_bottom", 6)
-    $HUD/TextBox/HBoxContainer.size_flags_vertical = Control.SIZE_SHRINK_END
+    $HUD/TextBox/HBoxContainer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    feed.fit_content = false
     feed.scroll_following = true
     feed.scroll_active = true
     feed.mouse_filter = Control.MOUSE_FILTER_STOP
-    feed.add_theme_font_size_override("normal_font_size", 14)
-    feed.add_theme_font_size_override("bold_font_size", 14)
+    feed.add_theme_font_size_override("normal_font_size", 17)
+    feed.add_theme_font_size_override("bold_font_size", 17)
 
 func _layout_hud() -> void:
     if not is_inside_tree():
@@ -184,8 +188,8 @@ func _layout_hud() -> void:
     journal.set_anchors_preset(Control.PRESET_TOP_LEFT)
     journal.offset_left = 6.0 if puzzle_active else quick.offset_right + 8.0
     journal.offset_right = viewport.x - 6.0
-    journal.offset_top = viewport.y - 70.0
-    journal.offset_bottom = viewport.y - 2.0
+    journal.offset_top = viewport.y - 125.0
+    journal.offset_bottom = viewport.y - 4.0
 
     if active_circuit != null and is_instance_valid(active_circuit):
         active_circuit.set_anchors_preset(Control.PRESET_TOP_LEFT)
