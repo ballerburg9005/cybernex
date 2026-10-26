@@ -16,11 +16,13 @@ func setup(equipment: EquipmentLoadout, inventory: Inv, panel: Control) -> void:
 
 func update_display() -> void:
     var item: InvItem = loadout.item_at(slot_id) if loadout != null else null
-    text = (item.short_name if not item.short_name.is_empty() else item.name) if item != null else slot_id.replace("_", " ").to_upper()
+    var name_tag: String = slot_id.replace("augment_", "").replace("weapon_", "").replace("_", " ").to_upper()
+    text = (name_tag + "  /  " + (item.short_name if not item.short_name.is_empty() else item.name)) if item != null else name_tag + "  /  EMPTY"
     icon = item.texture if item != null else null
     expand_icon = true
     icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    tooltip_text = (item.name + "\n" + item.description) if item != null else ("EQUIP: " + slot_id.replace("_", " "))
+    var owned: int = backpack.count(item) if item != null and backpack != null else 0
+    tooltip_text = ("%s    owned ×%d\n%s" % [item.name, owned, item.description]) if item != null else ("EQUIP: " + slot_id.replace("_", " "))
     modulate = Color("#d4eee9") if item != null else Color("#92a7bd")
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
