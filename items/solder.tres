@@ -10,6 +10,7 @@ region = Rect2(96, 0, 16, 16)
 [resource]
 script = ExtResource("item")
 name = "Solder segments"
+item_id = "solder_segments"
 short_name = "solder"
 texture = SubResource("icon")
 damage = 0.0
