@@ -21,6 +21,7 @@ var combinables = []
 @export var quickinventory : Inv
 @export var equipment: EquipmentLoadout
 var equipment_runtime := EquipmentRuntime.new()
+var unsecured_head_seconds: float = 0.0
 
 func _ready():
     last_health = health
@@ -97,6 +98,7 @@ func _physics_process(delta):
             mouse_target = null
 
     velocity = velocity.normalized() * SPEED * equipment_runtime.locomotion_multiplier(equipment, inventory)
+    _test_unsecured_head(delta)
 
     if velocity.x < 0:
         $Sprite.flip_h = true
@@ -178,16 +180,27 @@ func use_quickslot(index: int) -> bool:
             p("Installed %s. Suit charge: %.1f Wh." % [item.name, equipment_runtime.charge_wh])
             return true
         return false
-    if item.type & InvItem.IS_WEAPON:
-        if equipment.assign("weapon_primary", item, inventory):
-            p("%s connected to primary weapon socket." % item.name)
-            return true
-        return false
-    if item.type & InvItem.IS_AUGMENTATION:
-        for socket in item.equipment_slots:
-            if equipment.item_at(socket) != null and Inv.matches(equipment.item_at(socket), item):
-                return true
-            if equipment.assign(socket, item, inventory):
-                p("%s fitted to %s." % [item.name, socket.replace("_", " ")])
-                return true
+    # Quick-access links no longer silently move equipment around the body.
+    # Player has to drag equipment onto a physical body socket.
     return false
+
+func _test_unsecured_head(delta: float) -> void:
+    if equipment == null or inventory == null:
+        return
+    var item: InvItem = equipment.item_at("augment_head")
+    if item == null or item.equipment_slots.has("augment_head"):
+        unsecured_head_seconds = 0.0
+        return
+    if velocity.length() < 1.0:
+        return
+    unsecured_head_seconds += delta
+    if unsecured_head_seconds < 2.0:
+        return
+    unsecured_head_seconds = 0.0
+    equipment.assign("augment_head", null, inventory)
+    if inventory.remove_item(item, 1):
+        var dropped: Node2D = preload("res://items/item_world.tscn").instantiate()
+        dropped.set("itemslot", InvSlot.new(item, 1))
+        get_parent().add_child(dropped)
+        dropped.global_position = global_position + Vector2(12, 0)
+    p("Your hair lacked sufficient strength to hold %s in place." % item.name)
