@@ -71,7 +71,10 @@ func activate(caller, action = "default"):
     if ui_menu:
         if not (caller == ui_menu and action in ["loot", "activate"]):
             toggled = true
-        ui_menu.queue_free()
+        if ui_menu == get_node("/root/main").desk_inspection_cache:
+            ui_menu.close()
+        else:
+            ui_menu.queue_free()
         ui_menu = null
         if get_node("/root/main").puzzle_active:
             get_node("/root/main").exit_circuit_mode()
@@ -131,19 +134,12 @@ func spawn_lootbox() -> void:
     var game: Node = get_node("/root/main")
     if game.desk_inspection != null and is_instance_valid(game.desk_inspection):
         return
-    ui_menu = preload("res://UI/DeskInspection.tscn").instantiate()
-    game.get_node("HUD").add_child(ui_menu)
-    ui_menu.z_index = 3000
+    ui_menu = game.desk_inspection_cache
+    game.desk_inspection_terminal = self
     game.desk_inspection = ui_menu
+    ui_menu.show()
     ui_menu.configure_contents(loot, game.player.inventory, Callable(game, "p"),
         desk_note, computer_readout, computer_powered)
-    ui_menu.power_changed.connect(func(value: bool) -> void:
-        computer_powered = value
-    )
-    ui_menu.closed.connect(func() -> void:
-        ui_menu = null
-        game.desk_inspection = null
-    )
     game.p("Desk opened.")
 
 func spawn_multiui_menu():
