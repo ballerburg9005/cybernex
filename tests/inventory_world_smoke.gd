@@ -62,6 +62,23 @@ func _run() -> void:
     var jumper: InvItem = load("res://items/wire_bridge.tres")
     var wire_model: CircuitPart = load("res://systems/circuits/parts/wire_straight.tres")
     check(jumper.circuit_part == wire_model, "Crafted jumper is mapped to a usable real circuit part.")
+    # Cut/rebuild usable electronics: world backpack recipe -> actual circuit part.
+    var wires: InvItem = load("res://items/wires.tres")
+    var crafted: Dictionary = InventoryOperations.move_or_combine(
+        player.inventory, player.inventory.find(wires), player.inventory, player.inventory.find(solder))
+    check(bool(crafted.get("ok", false)) and player.inventory.count(jumper) == 1,
+        "Wire plus solder must yield a real playable circuit jumper.")
+    # A separately scavenged solder segment is required to INSTALL the crafted part.
+    player.inventory.add_item(solder, 1)
+    var second: CircuitWorkbench = load("res://systems/circuits/CircuitWorkbench.tscn").instantiate()
+    game.get_node("HUD").add_child(second)
+    second.set_field_inventory(player.inventory)
+    second.palette.select(1)
+    second._on_board_click(Vector2i(4, 0))
+    check(player.inventory.count(jumper) == 0 and second.board.placement_at(Vector2i(4, 0)) >= 0,
+        "Crafted jumper should be consumed as an actual editable wire component.")
+    check(player.inventory.count(solder) == 0, "Installing crafted jumper must additionally consume solder.")
+    second.queue_free()
     game.queue_free()
     if failures == 0:
         print("WORLD INVENTORY TESTS PASSED")
