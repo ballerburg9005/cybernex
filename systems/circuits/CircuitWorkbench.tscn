@@ -29,96 +29,105 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("workbench")
 authored_board = ExtResource("board")
 catalog = Array[ExtResource("part_script")]([ExtResource("r"), ExtResource("wire"), ExtResource("corner"), ExtResource("junction"), ExtResource("crossover"), ExtResource("diode"), ExtResource("npn"), ExtResource("pnp"), ExtResource("nmos"), ExtResource("pmos"), ExtResource("capacitor"), ExtResource("inductor")])
 item_catalog = Array[ExtResource("item_script")]([ExtResource("resistor_item"), ExtResource("jumper_item")])
 
-[node name="Padding" type="MarginContainer" parent="."]
+[node name="Panel" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
 
-[node name="Layout" type="VBoxContainer" parent="Padding"]
+[node name="Padding" type="MarginContainer" parent="Panel"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="Header" type="Label" parent="Padding/Layout"]
+[node name="Layout" type="VBoxContainer" parent="Panel/Padding"]
 layout_mode = 2
-text = "CYBERNEX / MAINTENANCE TERMINAL 04   —   ACTUATOR REPAIR"
+theme_override_constants/separation = 6
 
-[node name="Description" type="Label" parent="Padding/Layout"]
+[node name="HeaderBar" type="PanelContainer" parent="Panel/Padding/Layout"]
 layout_mode = 2
-text = "A resistor is burned open. Select it and REMOVE; select a salvaged part and click the empty cell. Then RUN."
-autowrap_mode = 3
 
-[node name="MainRow" type="HBoxContainer" parent="Padding/Layout"]
+[node name="Header" type="Label" parent="Panel/Padding/Layout/HeaderBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "SERVICE ELECTRONICS / ACTUATOR"
+horizontal_alignment = 1
+
+[node name="MainRow" type="HBoxContainer" parent="Panel/Padding/Layout"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 22
 
-[node name="BoardFrame" type="PanelContainer" parent="Padding/Layout/MainRow"]
-layout_mode = 2
-
-[node name="BoardView" type="Control" parent="Padding/Layout/MainRow/BoardFrame"]
-unique_name_in_owner = true
+[node name="BoardFrame" type="PanelContainer" parent="Panel/Padding/Layout/MainRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BoardScroll" type="ScrollContainer" parent="Panel/Padding/Layout/MainRow/BoardFrame"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 1
+
+[node name="BoardView" type="Control" parent="Panel/Padding/Layout/MainRow/BoardFrame/BoardScroll"]
+unique_name_in_owner = true
+layout_mode = 2
 mouse_filter = 0
 script = ExtResource("view")
 board = ExtResource("board")
-cell_size = 68
+cell_size = 64
 
-[node name="SidePanel" type="VBoxContainer" parent="Padding/Layout/MainRow"]
-custom_minimum_size = Vector2(240, 0)
+[node name="Bottom" type="HBoxContainer" parent="Panel/Padding/Layout"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="PaletteLabel" type="Label" parent="Padding/Layout/MainRow/SidePanel"]
-layout_mode = 2
-text = "SALVAGE INVENTORY / PROTOTYPE"
-
-[node name="Palette" type="OptionButton" parent="Padding/Layout/MainRow/SidePanel"]
+[node name="RunButton" type="Button" parent="Panel/Padding/Layout/Bottom"]
 unique_name_in_owner = true
 layout_mode = 2
+custom_minimum_size = Vector2(96, 42)
+text = "POWER"
 
-[node name="RotateButton" type="Button" parent="Padding/Layout/MainRow/SidePanel"]
+[node name="StatusFrame" type="PanelContainer" parent="Panel/Padding/Layout/Bottom"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Status" type="Label" parent="Panel/Padding/Layout/Bottom/StatusFrame"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "ROTATE SELECTED"
-
-[node name="RemoveButton" type="Button" parent="Padding/Layout/MainRow/SidePanel"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "REMOVE SELECTED"
-
-[node name="RunButton" type="Button" parent="Padding/Layout/MainRow/SidePanel"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "RUN"
-
-[node name="Status" type="Label" parent="Padding/Layout/MainRow/SidePanel"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(230, 90)
-layout_mode = 2
-text = "Open in Godot 4.7.2"
+theme_override_font_sizes/font_size = 14
+text = ""
 autowrap_mode = 3
 
-[node name="ProbeReport" type="Label" parent="Padding/Layout/MainRow/SidePanel"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 110)
+[node name="SidePanel" type="VBoxContainer" parent="Panel/Padding/Layout"]
+visible = false
 layout_mode = 2
-autowrap_mode = 3
-text = "DMM / select a board component, run circuit."
 
-[node name="Footnote" type="Label" parent="Padding/Layout"]
+[node name="Palette" type="OptionButton" parent="Panel/Padding/Layout/SidePanel"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Proof of concept — part values and pin geometry are editable .tres Resources in Godot Inspector."
+
+[node name="RotateButton" type="Button" parent="Panel/Padding/Layout/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ROTATE"
+
+[node name="RemoveButton" type="Button" parent="Panel/Padding/Layout/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "REMOVE"
+
+[node name="ProbeReport" type="Label" parent="Panel/Padding/Layout/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
 
 [node name="SolveTimer" type="Timer" parent="."]
 unique_name_in_owner = true
