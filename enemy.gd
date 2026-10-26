@@ -42,8 +42,11 @@ var do_drop_timer = Timer.new()
 
 func _ready():
     if not drops:
-        var randarr = [preload("res://items/big_wire.tres"), preload("res://items/wires.tres"), preload("res://items/junk.tres")]
-        drops = InvSlot.new(randarr[randi()%randarr.size()],randi()%3)
+        # The old scrap bot always yields a recognizable trash can, not a
+        # zero-count random drop which becomes the placeholder missing icon.
+        drops = InvSlot.new(preload("res://items/junk.tres"), 1)
+    if not drops.occupied():
+        drops = InvSlot.new(preload("res://items/junk.tres"), 1)
     do_drop_timer.one_shot = true
     do_drop_timer.timeout.connect(do_drop_timer_update)
     add_child(do_drop_timer)
