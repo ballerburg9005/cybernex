@@ -25,6 +25,11 @@ jobs:
           set -o pipefail
           godot --headless --path . --script res://tests/inventory_smoke.gd 2>&1 | tee /tmp/inventory.log
           ! grep -q "SCRIPT ERROR\|INVENTORY TESTS FAILED" /tmp/inventory.log
+      - name: Verify inventory world-drop and pickup conservation
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/inventory_world_smoke.gd 2>&1 | tee /tmp/world-inventory.log
+          ! grep -q "SCRIPT ERROR\|WORLD INVENTORY TESTS FAILED" /tmp/world-inventory.log
       - name: Verify HUD/world coordinates while camera pans and zooms
         run: godot --headless --path . --script res://tests/coordinate_smoke.gd
       - name: Instantiate Godot-native workbench scene
