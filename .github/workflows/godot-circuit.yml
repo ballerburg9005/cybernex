@@ -43,6 +43,11 @@ jobs:
           set -o pipefail
           godot --headless --path . --script res://tests/world_interaction_smoke.gd 2>&1 | tee /tmp/world-actions.log
           ! grep -q "SCRIPT ERROR\\|WORLD INTERACTION TESTS FAILED" /tmp/world-actions.log
+      - name: Verify desk inspection, linked backpack and blocking world-drop leakage
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/desk_inspection_smoke.gd 2>&1 | tee /tmp/desks.log
+          ! grep -q "SCRIPT ERROR\\|DESK INSPECTION TESTS FAILED" /tmp/desks.log
       - name: Verify powered augments and world save roundtrips
         run: |
           set -o pipefail
