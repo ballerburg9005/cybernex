@@ -201,7 +201,8 @@ func play_toggle(instant = false):
 
 
 func _on_influence_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
-    if not disabled:
+    # A desk is still inspectable when its terminal electronics are disabled.
+    if not disabled or myname == "desk":
         if "activatables" in body:
             body.activatables.append(self)
         if $AnimatedSprite2D:
