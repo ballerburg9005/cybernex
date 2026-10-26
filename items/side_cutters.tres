@@ -36,5 +36,7 @@ texture = SubResource("AtlasTexture_f7308")
 damage = 2.0
 combos = Array[ExtResource("1_yxx5w")]([SubResource("Resource_kx3bl"), SubResource("Resource_erepa")])
 type = 6
+contact_resistance_ohms = 0.35
+contact_rated_watts = 0.45
 
 description = "Hardened steel side cutters."
