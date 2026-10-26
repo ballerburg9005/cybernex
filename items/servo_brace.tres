@@ -10,6 +10,7 @@ region = Rect2(16, 0, 16, 16)
 [resource]
 script = ExtResource("item")
 name = "Servo forearm brace"
+item_id = "servo_forearm_brace"
 short_name = "servo brace"
 texture = SubResource("icon")
 damage = 0.0
