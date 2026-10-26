@@ -55,6 +55,18 @@ clear_button_enabled = true
 layout_mode = 2
 text = "0 entries / 0 units"
 
+[node name="Crafting" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Recipes" type="OptionButton" parent="Layout/Crafting"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Craft" type="Button" parent="Layout/Crafting"]
+layout_mode = 2
+text = "ASSEMBLE"
+
 [node name="Scroll" type="ScrollContainer" parent="Layout"]
 layout_mode = 2
 size_flags_vertical = 3
