@@ -67,6 +67,7 @@ func _ready():
     )
     $HUD/FullInventory/VBoxContainer.move_child($HUD/FullInventory/VBoxContainer/DrawerNav, 0)
     get_viewport().size_changed.connect(_layout_hud)
+    $HUD/FullInventory.visibility_changed.connect(_layout_hud)
     _setup_compact_hud()
     _layout_hud()
     _select_drawer_page(0)
