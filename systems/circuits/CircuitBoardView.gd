@@ -13,13 +13,55 @@ signal tool_applied(item: InvItem, cell: Vector2i)
 @export var board: CircuitBoard:
     set(next):
         board = next
+        pan_needs_center = true
         if is_inside_tree():
-            update_minimum_size()
+            call_deferred("_center_on_authored_board")
             queue_redraw()
 @export_range(24, 128, 4) var cell_size: int = 64
 var allow_dragging: bool = true
 var workbench: CircuitWorkbench
 var hottest_part: int = -1
+@export_range(1, 40, 1) var pan_limit_cells: int = 20
+var pan_offset: Vector2 = Vector2.ZERO
+var pan_needs_center: bool = true
+var middle_panning: bool = false
+
+func _ready() -> void:
+    resized.connect(func() -> void:
+        if pan_needs_center:
+            call_deferred("_center_on_authored_board")
+        else:
+            pan_offset = clamp_pan(pan_offset)
+        queue_redraw()
+    )
+    call_deferred("_center_on_authored_board")
+
+func _center_on_authored_board() -> void:
+    if board == null or not is_inside_tree() or size.x < 1 or size.y < 1:
+        return
+    if pan_needs_center:
+        pan_offset = size * 0.5 - Vector2(board.width, board.height) * cell_size * 0.5
+        pan_needs_center = false
+    pan_offset = clamp_pan(pan_offset)
+    queue_redraw()
+
+func clamp_pan(desired: Vector2) -> Vector2:
+    if board == null:
+        return desired
+    # The visible viewport centre stays at most twenty blank cells outside
+    # the actual board on each side.  No additional cells are authored.
+    var focus: Vector2 = size * 0.5
+    var padding: float = float(pan_limit_cells * cell_size)
+    var board_pixels: Vector2 = Vector2(board.width, board.height) * cell_size
+    return focus - Vector2(
+        clampf(focus.x - desired.x, -padding, board_pixels.x + padding),
+        clampf(focus.y - desired.y, -padding, board_pixels.y + padding)
+    )
+
+func pan_by(delta_pixels: Vector2) -> void:
+    pan_needs_center = false
+    pan_offset = clamp_pan(pan_offset + delta_pixels)
+    queue_redraw()
 
 const FRAME := Color("#1a2731")
 const GRID := Color("#3a4a53")
@@ -30,19 +72,28 @@ const SIDES := [Vector2.LEFT, Vector2.UP, Vector2.RIGHT, Vector2.DOWN]
 const RESISTOR_BANDS: Texture2D = preload("res://UI/resistor_color_atlas.tres")
 
 func _get_minimum_size() -> Vector2:
-    if board == null:
-        return Vector2(440, 360)
-    return Vector2(board.width * cell_size, board.height * cell_size)
+    # The authored board does NOT size the viewport: the finite footprint
+    # floats in an infinite-looking canvas that fills the panel.
+    return Vector2.ZERO
 
 func _draw() -> void:
     if board == null:
         return
-    draw_rect(Rect2(Vector2.ZERO, _get_minimum_size()), FRAME, true)
-    for y in range(board.height):
-        for x in range(board.width):
-            var rect := Rect2(Vector2(x, y) * cell_size, Vector2.ONE * cell_size)
-            draw_rect(rect.grow(-1.0), Color("#25313a"), true)
-            draw_rect(rect.grow(-1.0), GRID, false, 1.0)
+    draw_rect(Rect2(Vector2.ZERO, size), FRAME, true)
+    # Draw only visible virtual cells: the texture appears endless while
+    # off-board positions have no simulation data or possible placement.
+    var first_x: int = floori(-pan_offset.x / cell_size) - 1
+    var first_y: int = floori(-pan_offset.y / cell_size) - 1
+    var last_x: int = ceili((size.x - pan_offset.x) / cell_size) + 1
+    var last_y: int = ceili((size.y - pan_offset.y) / cell_size) + 1
+    for y in range(first_y, last_y):
+        for x in range(first_x, last_x):
+            var rect := Rect2(pan_offset + Vector2(x, y) * cell_size, Vector2.ONE * cell_size)
+            var authored: bool = x >= 0 and y >= 0 and x < board.width and y < board.height
+            draw_rect(rect.grow(-1.0), Color("#29423b") if authored else Color("#202b34"), true)
+            draw_rect(rect.grow(-1.0), Color("#567b68") if authored else GRID, false, 1.0)
+    # Render the electronic sprites, leads and notches in board coordinates.
+    draw_set_transform(pan_offset)
     var font: Font = get_theme_default_font()
     for i in range(board.placements.size()):
         var placement: CircuitPlacement = board.placements[i]
@@ -59,12 +110,12 @@ func _draw() -> void:
             var factor: float = minf((rect.size.x - 12.0) / rotated_size.x,
                                     (rect.size.y - 12.0) / rotated_size.y)
             var draw_size: Vector2 = image_size * maxf(factor, 0.1)
-            draw_set_transform(center, placement.rotation * PI * 0.5)
+            draw_set_transform(pan_offset + center, placement.rotation * PI * 0.5)
             var drawing := Rect2(-draw_size * 0.5, draw_size)
             draw_texture_rect(part.sprite, drawing, false)
             if part.model == "resistor":
                 _draw_color_bands(drawing, part.value)
-            draw_set_transform(Vector2.ZERO)
+            draw_set_transform(pan_offset)
         else:
             draw_rect(rect.grow(-9.0), Color("#57676d"), true)
         if placement.failed_open:
@@ -98,6 +149,7 @@ func _draw() -> void:
             var outward: Vector2 = SIDES[int(rotated["side"])]
             draw_line(center + outward * cell_size * 0.30,
                       center + outward * cell_size * 0.52, Color("#e0d3a8"), 3.0)
+    draw_set_transform(Vector2.ZERO)
 
 func _marking(part: CircuitPart) -> String:
     match part.model:
@@ -133,13 +185,22 @@ func _draw_color_bands(body: Rect2, resistance: float) -> void:
             Rect2(i * 32, 0, 32, 16), _band_color(int(digits[i])))
 
 func _cell_from_position(local: Vector2) -> Vector2i:
-    return Vector2i(floori(local.x / cell_size), floori(local.y / cell_size))
+    return Vector2i(floori((local.x - pan_offset.x) / cell_size),
+        floori((local.y - pan_offset.y) / cell_size))
 
 func _inside(cell: Vector2i) -> bool:
     return board != null and cell.x >= 0 and cell.y >= 0 and cell.x < board.width and cell.y < board.height
 
 func _gui_input(event: InputEvent) -> void:
     if Engine.is_editor_hint() or board == null:
+        return
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
+        middle_panning = event.pressed
+        accept_event()
+        return
+    if event is InputEventMouseMotion and middle_panning:
+        pan_by(event.relative)
+        accept_event()
         return
     if event is InputEventMouseButton and event.pressed:
         var cell: Vector2i = _cell_from_position(event.position)
