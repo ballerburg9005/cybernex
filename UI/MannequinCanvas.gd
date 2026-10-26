@@ -24,7 +24,7 @@ func _draw() -> void:
         Vector2.ONE * scale_factor)
     # Eight slot leads converge on matching anatomical/system mounts.
     var left: float = 126.0
-    var right: float = size.x - 126.0
+    var right: float = 450.0 - 126.0
     var leads: Array = [
         [Vector2(left, 51), Vector2(mid - 32, 64)],
         [Vector2(right, 51), Vector2(mid + 12, 61)],
@@ -66,7 +66,7 @@ func _draw() -> void:
     draw_line(Vector2(mid - 22, 74), Vector2(mid + 22, 74), bright, 2.0)
     for y in [139.0, 198.0, 283.0, 345.0]:
         draw_line(Vector2(mid - 7, y), Vector2(mid + 7, y), bright.darkened(0.4), 2.0)
-    draw_string(get_theme_default_font(), Vector2(mid - 62, size.y - 12),
+    draw_string(get_theme_default_font(), Vector2(mid - 62, 418.0),
         "SUIT PLATFORM MK-I", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, bright)
 
     draw_set_transform(Vector2.ZERO)
