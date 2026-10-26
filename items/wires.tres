@@ -22,6 +22,7 @@ region = Rect2(64, 0, 16, 16)
 [resource]
 script = ExtResource("1_s1ivf")
 name = "wires"
+item_id = "copper_wire"
 short_name = "wires"
 texture = SubResource("AtlasTexture_f7308")
 damage = 0.0
