@@ -75,7 +75,7 @@ func activate(caller, action = "default"):
     if toggled:
         return false
 
-    if action == "default" and has_loot:
+    if action == "default" and (has_loot or myname == "desk"):
         if disabled or not is_connected:
             spawn_lootbox()
         elif not loot_after_solved or access_granted:
@@ -117,15 +117,20 @@ func _on_circuit_solved() -> void:
     play_activate()
     get_node("/root/main").p("Service relay accepted. Terminal interface unlocked.")
 
-func spawn_lootbox():
-    ui_menu = preload("res://UI/Inventory.tscn").instantiate()
-    ui_menu.inv = loot
-    get_node("/root/main").add_child(ui_menu)
-    ui_menu.z_index = 2000
-    ui_menu.global_position = get_global_transform_with_canvas().origin
-    ui_menu.size = Vector2(400, 260)
-    ui_menu.configure(loot, null, "backpack")
-    pass
+func spawn_lootbox() -> void:
+    var game: Node = get_node("/root/main")
+    if game.desk_inspection != null and is_instance_valid(game.desk_inspection):
+        return
+    ui_menu = preload("res://UI/DeskInspection.tscn").instantiate()
+    game.get_node("HUD").add_child(ui_menu)
+    ui_menu.z_index = 3000
+    game.desk_inspection = ui_menu
+    ui_menu.configure_contents(loot, game.player.inventory, Callable(game, "p"))
+    ui_menu.closed.connect(func() -> void:
+        ui_menu = null
+        game.desk_inspection = null
+    )
+    game.p("Desk opened.")
 
 func spawn_multiui_menu():
     ui_menu = preload("res://interactibles/multichoice_box.tscn").instantiate()
