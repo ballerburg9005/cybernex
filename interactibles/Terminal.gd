@@ -29,7 +29,7 @@ signal do_toggle
 
 
 func _ready():
-	if loot.count() < loot.items.size():
+	if loot.count() > 0:
 		has_loot = true
 		for i in range(0,max(9, loot.items.size())):
 			if i >= loot.items.size():
@@ -96,9 +96,9 @@ func spawn_lootbox():
 	ui_menu.inv = loot
 	get_node("/root/main").add_child(ui_menu)
 	ui_menu.z_index = 2000
-	ui_menu.global_position = global_position
-	ui_menu.size = Vector2(0,0)
-	ui_menu.is_world = true
+	ui_menu.global_position = get_global_transform_with_canvas().origin
+	ui_menu.size = Vector2(400, 260)
+	ui_menu.configure(loot, null, "backpack")
 	pass
 
 func spawn_multiui_menu():
