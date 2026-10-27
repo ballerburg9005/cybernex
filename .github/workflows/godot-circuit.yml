@@ -1,7 +1,7 @@
 name: Godot 4.7 circuit checks
 on:
   push:
-    branches: [refactor/godot-4.7-station-systems]
+    branches: [main, refactor/godot-4.7-station-systems]
   pull_request:
 
 jobs:
