@@ -238,6 +238,8 @@ func _get_drag_data(at_position: Vector2) -> Variant:
     preview.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
     preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
     preview.custom_minimum_size = Vector2(64, 64)
+    preview.size = Vector2(64, 64)
+    preview.position = -preview.size * 0.5
     preview.z_index = 4096
     preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
