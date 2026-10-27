@@ -458,7 +458,14 @@ func _safe_drop_position(target: Vector2) -> Dictionary:
         if point.distance_to(player.global_position) > player.service_reach():
             continue
         shape_query.transform = Transform2D(0.0, point)
-        if world.get_world_2d().direct_space_state.intersect_shape(shape_query, 1).is_empty():
+        if not world.get_world_2d().direct_space_state.intersect_shape(shape_query, 1).is_empty():
+            continue
+        # Every fallback position needs its own unobstructed path. An empty
+        # tile 24px away is not necessarily on the player side of a wall.
+        var path_query := PhysicsRayQueryParameters2D.create(
+            player.global_position, point, (1 << 19) | (1 << 21) | (1 << 22) | (1 << 23))
+        path_query.collide_with_bodies = true
+        if world.get_world_2d().direct_space_state.intersect_ray(path_query).is_empty():
             return {"ok": true, "point": point}
     return {"ok": false}
 
