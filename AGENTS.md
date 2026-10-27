@@ -1,6 +1,6 @@
 # AGENTS.md — Cybernex product, story, visual and interaction invariants
 
-This file is **project direction from the author**, not suggestions. Contributors and coding agents must read it **before editing Godot scenes, resources, UI or mechanics**. Do not replace deliberately mysterious physical interactions with tutorial controls. Fix regressions against the original `main` project where possible. Do not merge the large draft PR without graphical approval.
+This file is **project direction from the author**, not suggestions. Contributors and coding agents must read it **before editing Godot scenes, resources, UI or mechanics**. Do not replace deliberately mysterious physical interactions with tutorial controls. Consult historical implementations where useful to fix regressions. Work directly on `main` as explicitly authorized by the author. Do not treat prior draft-branch restrictions as active.
 
 ## Aesthetic and layout contract
 
@@ -36,10 +36,10 @@ The AI is secretly using the outpost antenna to receive a seemingly encoded mess
 
 ## Engineering and verification
 
-- Use native Godot scenes/resources Inspector-authorably; preserve the original world. Review **original `main`** pixel art, input and layout before recreating them.
+- Use native Godot scenes/resources Inspector-authorably; preserve the original world. Review original authored pixel art, input and layout before recreating them.
 - Treat GUI drag and world physics as separate spaces; transform through camera correctly; account for 3× world scale and 720p/1080p canvas. Drops must be idempotent, conserve resources and never leak through UI. Use the engine's ordinary Control drag/drop pipeline wherever possible, and test release over every panel backdrop/edge.
 - Install/use Godot 4.7.2 in GitHub Actions for headless import, syntax and integration tests. Validate full scene startup and dimensional constraints at both target resolutions. **Headless tests do not substitute for a real rendered playtest.**
-- Make small patches, log CI outcomes, never silently claim that unverified visuals are polished. Keep PR #1 draft and `main` untouched until owner reviews.
+- Make small patches, log CI outcomes, never silently claim that unverified visuals are polished. PR #1 was explicitly approved and merged into `main` on 2026-10-27. Make subsequent development commits directly to `main`, as requested by the author.
 
 ## Systemic interaction follow-up — implementation invariants
 
@@ -80,3 +80,14 @@ The author has now played another build and explicitly rejects anything that fee
 - The **resistor in backpack** needs visible original-style four-color-code stripes (10Ω brown/black/black/gold) overlaying the hand-drawn component, never its numeric resistance. World tooltip for the player must cover the visible animated head/body as well as his tiny physics capsule, while remaining strictly a tooltip and not increasing gameplay interaction range.
 
 Treat latency, actual rendered bounds, drag icon visibility, and input leaks as release-blocking correctness bugs; do not substitute explanatory HUD text for fixing them.
+
+## Author's design directive — discovery through intelligent simulation (2026-10-27)
+
+- Cybernex deliberately rejects generic game-design handholding, boilerplate tutorials, quest-marker-style guidance, signposted solutions, and explanatory overlays. Do not add these simply to make challenges accessible to an unprepared player.
+- The UI should clearly communicate affordances by layout, grouping, material styling, feedback and consistent controls, **without explaining what the player should think or how to solve puzzles**. If a control is unclear due to poor presentation, fix the presentation. If a world system is mysterious, let the player investigate.
+- Target intellectually demanding play. Puzzles should reward reasoning, experimentation, technical knowledge, observation and inference. Some challenges legitimately require outside study, e.g. operational amplifiers, circuit behavior, or Ohm's law. Never give away answers as tutorial UI or precomputed recipes.
+- Knowledge can emerge through progressively difficult, authentic interactions: measuring, constructing, breaking, comparing outcomes and deducing the rules. This is not an explicit theory-lesson game. Players may need to learn externally and return with new understanding.
+- Prioritize coherent systemic mechanics and real consequences over prescriptive permitted-action lists and scripted success conditions. Allow unexpected solutions when they are physically and logically plausible, with conservation of item identity and quantity.
+- Resist conventional 'quality-of-life' automation that removes meaningful choices (auto-sorting, auto-fitting, auto-solving, auto-highlighting answers). Distinguish helpful interaction reliability from eliminating challenge: **input lag, missing feedback, illegible interfaces and physics bugs are defects, not difficulty**.
+- Keep the event transcript useful for observability and accessibility—record events and results, not unsolicited instructions. Tooltips identify world objects and physical characteristics, never reveal the puzzle solution.
+- The surreal late-game challenges intentionally become unsolvable; do not change that ending to conventional mastery, victory or reassuring exposition.
