@@ -78,13 +78,13 @@ func _input(event: InputEvent) -> void:
     if event is InputEventMouseButton and (host.is_hud_drop_region(event.position)
         or get_viewport().gui_get_drag_data() != null):
         return
-    if event.is_action_pressed("action_1"):
+    if event is InputEventKey and event.is_action_pressed("action_1") and not event.echo:
         for obj in activatables.duplicate():
             if is_instance_valid(obj):
                 obj.activate(self)
     if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_X:
         fire_arc_tool()
-    elif event is InputEventMouseButton and event.pressed \
+    elif event is InputEventMouseButton and not event.pressed \
         and event.button_index == MOUSE_BUTTON_RIGHT:
         # Right-click fires ONLY over actual World2D. Right-button drag from a
         # backed inventory still carries the complete physical item stack.
@@ -171,12 +171,12 @@ func fire_arc_tool() -> bool:
         aim = Vector2.RIGHT
     var destination: Vector2 = origin + aim.normalized() * float(shot["range"])
     var query := PhysicsRayQueryParameters2D.create(
-        origin, destination, (1 << 14) | (1 << 15) | (1 << 19),
-        [get_rid()])
+        origin, destination, (1 << 14) | (1 << 15) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 19) | (1 << 21),
+        [get_rid(), $hitbox.get_rid()])
     var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
     var collider: Node = hit.get("collider", null)
     var target: Node = collider
-    if target != null and not target.is_in_group("enemies") and target.get_parent().is_in_group("enemies"):
+    if target != null and not target.is_in_group("enemies") and target.get_parent() != null and target.get_parent().is_in_group("enemies"):
         target = target.get_parent()
     if target != null and target.is_in_group("enemies") and target.has_method("stun_for"):
         target.stun_for(1.6)
