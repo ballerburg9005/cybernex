@@ -1,0 +1,148 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://UI/EquipmentMannequin.gd" id="panel"]
+[ext_resource type="Script" path="res://UI/MannequinCanvas.gd" id="canvas"]
+[ext_resource type="Script" path="res://UI/EquipmentSlot.gd" id="socket"]
+
+[node name="EquipmentMannequin" type="PanelContainer"]
+custom_minimum_size = Vector2(328, 425)
+mouse_filter = 0
+script = ExtResource("panel")
+
+[node name="Frame" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="Layout" type="VBoxContainer" parent="Frame"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Frame/Layout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "BODY SYSTEMS"
+horizontal_alignment = 1
+
+[node name="Canvas" type="Control" parent="Frame/Layout"]
+custom_minimum_size = Vector2(316, 370)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("canvas")
+
+[node name="WeaponPrimary" type="Button" parent="Frame/Layout/Canvas"]
+offset_left = 0.0
+offset_top = 299.0
+offset_right = 88.0
+offset_bottom = 344.0
+mouse_filter = 0
+focus_mode = 0
+text = "WEAPON / A"
+clip_text = true
+theme_override_font_sizes/font_size = 9
+script = ExtResource("socket")
+slot_id = "weapon_primary"
+
+[node name="WeaponSecondary" type="Button" parent="Frame/Layout/Canvas"]
+offset_left = 228.0
+offset_top = 299.0
+offset_right = 316.0
+offset_bottom = 344.0
+mouse_filter = 0
+focus_mode = 0
+text = "WEAPON / B"
+clip_text = true
+theme_override_font_sizes/font_size = 11
+script = ExtResource("socket")
+slot_id = "weapon_secondary"
+
+[node name="AugmentHead" type="Button" parent="Frame/Layout/Canvas"]
+offset_left = 0.0
+offset_top = 12.0
+offset_right = 88.0
+offset_bottom = 57.0
+mouse_filter = 0
+focus_mode = 0
+text = "HEAD"
+clip_text = true
+theme_override_font_sizes/font_size = 11
+script = ExtResource("socket")
+slot_id = "augment_head"
+
+[node name="AugmentTorso" type="Button" parent="Frame/Layout/Canvas"]
+offset_left = 228.0
+offset_top = 100.0
+offset_right = 316.0
+offset_bottom = 145.0
+mouse_filter = 0
+focus_mode = 0
+text = "TORSO"
+clip_text = true
+theme_override_font_sizes/font_size = 11
+script = ExtResource("socket")
+slot_id = "augment_torso"
+
+[node name="AugmentLeft" type="Button" parent="Frame/Layout/Canvas"]
+offset_left = 0.0
+offset_top = 100.0
+offset_right = 88.0
+offset_bottom = 145.0
+mouse_filter = 0
+focus_mode = 0
+text = "LEFT ARM"
+clip_text = true
+theme_override_font_sizes/font_size = 11
+script = ExtResource("socket")
+slot_id = "augment_left_arm"
+
+[node name="AugmentRight" type="Button" parent="Frame/Layout/Canvas"]
+offset_left = 228.0
+offset_top = 194.0
+offset_right = 316.0
+offset_bottom = 239.0
+mouse_filter = 0
+focus_mode = 0
+text = "RIGHT ARM"
+clip_text = true
+theme_override_font_sizes/font_size = 11
+script = ExtResource("socket")
+slot_id = "augment_right_arm"
+
+[node name="AugmentLegs" type="Button" parent="Frame/Layout/Canvas"]
+offset_left = 0.0
+offset_top = 194.0
+offset_right = 88.0
+offset_bottom = 239.0
+mouse_filter = 0
+focus_mode = 0
+text = "LEGS"
+clip_text = true
+theme_override_font_sizes/font_size = 11
+script = ExtResource("socket")
+slot_id = "augment_legs"
+
+[node name="AugmentNeural" type="Button" parent="Frame/Layout/Canvas"]
+offset_left = 228.0
+offset_top = 12.0
+offset_right = 316.0
+offset_bottom = 57.0
+mouse_filter = 0
+focus_mode = 0
+text = "NEURAL"
+clip_text = true
+theme_override_font_sizes/font_size = 11
+script = ExtResource("socket")
+slot_id = "augment_neural"
+
+[node name="LoadoutStatus" type="Label" parent="Frame/Layout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "0 / 8 sockets active"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Frame/Layout"]
+visible = false
+layout_mode = 2
+text = ""

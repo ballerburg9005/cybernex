@@ -1,90 +1,250 @@
-@tool
 extends PanelContainer
+class_name InventoryView
 
-@export var inv : Inv
+## One inventory is the source of truth. Change signals rebuild only visible
+## controls, replacing 200ms polling and per-cell physics collisions.
+signal feedback(message: String)
+signal use_requested(item: InvItem)
+signal save_requested
+signal load_requested
+signal world_drop_requested(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2, amount: int)
+@export var inv: Inv
+@export_enum("backpack", "hotbar") var mode: String = "backpack"
+@export_range(1, 12, 1) var preferred_columns: int = 10
+@export_range(1, 20, 1) var empty_slots_to_show: int = 10
 
-var item_scene = preload("res://UI/InventoryItem.tscn")
+@onready var grid_container: GridContainer = $Layout/Scroll/GridContainer
+@onready var counter: Label = $Layout/Toolbar/Counter
+@onready var filter_button: OptionButton = $Layout/Actions/Filter
+@onready var sort_button: Button = $Layout/Actions/Sort
+@onready var search_input: LineEdit = $Layout/SearchBar/Search
+@onready var visible_count: Label = $Layout/SearchBar/VisibleCount
+@onready var info: Label = $Layout/Feedback
+@onready var recipe_selector: OptionButton = $Layout/Crafting/Recipes
+@onready var assemble_button: Button = $Layout/Crafting/Craft
+var offered_recipes: Array[Dictionary] = []
 
-var timer_update := Timer.new()
+var backpack: Inv
+var cells_scene: PackedScene = preload("res://UI/InventoryItem.tscn")
+var filtering: int = 0
+var _layout_indices: Array[int] = []
+var _display_rows: int = -1
 
-var is_world = false
+func _ready() -> void:
+    # Every instance (pack, storage, shortcut binding and companion) shares
+    # one inset. Remove theme-imposed asymmetric right padding.
+    var inset := StyleBoxFlat.new()
+    inset.bg_color = Color(0.11, 0.15, 0.18, 0.96)
+    inset.border_color = Color(0.26, 0.32, 0.36)
+    inset.set_border_width_all(1)
+    inset.set_corner_radius_all(7)
+    inset.content_margin_left = 2
+    inset.content_margin_right = 2
+    inset.content_margin_top = 2
+    inset.content_margin_bottom = 2
+    add_theme_stylebox_override("panel", inset)
+    filter_button.add_item("ALL ITEMS")
+    filter_button.add_item("TOOLS")
+    filter_button.add_item("WEAPONS")
+    filter_button.add_item("AUGMENTS")
+    filter_button.add_item("MATERIALS / JUNK")
+    filter_button.add_item("FOOD")
+    filter_button.item_selected.connect(func(idx: int) -> void:
+        filtering = idx
+        refresh()
+    )
+    search_input.text_changed.connect(func(_new_text: String) -> void:
+        refresh()
+    )
+    sort_button.pressed.connect(func() -> void:
+        if inv != null and mode != "hotbar":
+            inv.sort_by_category()
+    )
+    assemble_button.pressed.connect(_assemble_selected)
+    recipe_selector.item_selected.connect(func(index: int) -> void:
+        assemble_button.disabled = index < 0 or index >= offered_recipes.size() or not bool(offered_recipes[index]["can_craft"])
+    )
+    $Layout/Actions/Save.pressed.connect(func() -> void: save_requested.emit())
+    $Layout/Actions/Load.pressed.connect(func() -> void: load_requested.emit())
+    if inv == null:
+        inv = Inv.new()
+    configure(inv, null, mode)
 
-@onready var grid_container = $GridContainer
+func configure(model: Inv, owner_inventory: Inv = null, display_mode: String = "backpack") -> void:
+    if inv != null and inv.changed.is_connected(refresh):
+        inv.changed.disconnect(refresh)
+    if backpack != null and backpack != inv and backpack.changed.is_connected(_backpack_updated):
+        backpack.changed.disconnect(_backpack_updated)
+    inv = model
+    backpack = owner_inventory if owner_inventory != null else model
+    mode = display_mode
+    if inv == null:
+        return
+    inv.ensure_slots()
+    if mode != "hotbar":
+        inv.ensure_slots() # Do not compact the player’s carefully positioned stacks.
+    else:
+        # Quickbar entries are references to backpack items, never duplicated stock.
+        for i in range(inv.size()):
+            if inv.items[i] == null:
+                inv.items[i] = InvSlot.new()
+    inv.changed.connect(refresh)
+    if backpack != null and backpack != inv:
+        backpack.changed.connect(_backpack_updated)
+    if is_node_ready():
+        refresh()
 
-func _update_items():
+func _notification(what: int) -> void:
+    if what == NOTIFICATION_RESIZED and is_node_ready() and inv != null:
+        var rows: int = maxi(1, floori(maxf(50.0, size.y - 35.0) / 50.0))
+        if rows != _display_rows:
+            _display_rows = rows
+            call_deferred("refresh")
 
-	for i in range(0, inv.items.size()):
-		var node_name = "./InventoryItem"+str(i)
-		if grid_container.has_node(node_name):
-			var ui_inv_item = grid_container.get_node(node_name)
-			if not ui_inv_item.itemslot == inv.items[i]:
-				ui_inv_item.itemslot = inv.items[i]
-				ui_inv_item.disabled = false
-			if ui_inv_item.inv == preload("res://quickinventory.tres"):
-				var playerinv = preload("res://playerinventory.tres")
-				if not playerinv.has(ui_inv_item.itemslot.item):
-					ui_inv_item.disabled = true
-					ui_inv_item.itemslot = InvSlot.new()
-				else:
-					var playerinvslot = playerinv.items[playerinv.find(ui_inv_item.itemslot.item)]
-					if playerinvslot != ui_inv_item.itemslot:
-						ui_inv_item.itemslot = playerinvslot
-			ui_inv_item._ready()
+func _backpack_updated() -> void:
+    # Expire linked quickslots when the last actual item is consumed.
+    if mode == "hotbar" and backpack != null:
+        var modified: bool = false
+        for i in range(inv.size()):
+            var stack: InvSlot = inv.slot_at(i)
+            if stack != null and not backpack.has(stack.item):
+                inv.items[i] = InvSlot.new()
+                modified = true
+        if modified:
+            inv.emit_changed()
+    refresh()
 
+func _allowed(item: InvItem) -> bool:
+    if mode != "hotbar" and is_node_ready() and not search_input.text.strip_edges().is_empty():
+        var search: String = search_input.text.strip_edges().to_lower()
+        var haystack: String = (item.name + " " + item.short_name + " " + item.description).to_lower()
+        if not haystack.contains(search):
+            return false
+    if filtering == 0 or mode == "hotbar":
+        return true
+    match filtering:
+        1: return item.type & InvItem.IS_TOOL != 0
+        2: return item.type & InvItem.IS_WEAPON != 0
+        3: return item.type & InvItem.IS_AUGMENTATION != 0
+        4: return item.type & InvItem.IS_JUNK != 0 or item.type == 0
+        5: return item.type & InvItem.IS_FOOD != 0
+    return true
 
-func _ready():
-	if not inv:
-		inv = Inv.new()
+func refresh() -> void:
+    if not is_node_ready() or inv == null:
+        return
+    var occupied: Array[int] = []
+    var available: Array[int] = []
+    var shown_quantity: int = 0
+    for i in range(inv.size()):
+        var slot: InvSlot = inv.slot_at(i)
+        if slot != null:
+            if _allowed(slot.item):
+                occupied.append(i)
+                shown_quantity += slot.count
+        else:
+            available.append(i)
+    var indices: Array[int] = []
+    if mode == "hotbar":
+        for i in range(inv.size()):
+            indices.append(i)
+    else:
+        if filtering == 0:
+            for i in range(inv.size()):
+                indices.append(i) # Preserve physical slot indexes and gaps.
+        else:
+            indices.append_array(occupied)
+    grid_container.columns = 10
+    # Fill the actual panel, not the entire game viewport: desk inventories
+    # must not acquire dozens of offscreen slots and scrollbars.
+    var available_height: float = size.y if size.y >= 120 else 550.0
+    var visible_rows: int = maxi(1, floori(maxf(50.0, available_height - 35.0) / 50.0))
+    if mode != "hotbar":
+        while indices.size() < maxi(inv.size(), visible_rows * 10):
+            indices.append(-1)
+    if mode != "hotbar":
+        while indices.size() % 10 != 0:
+            indices.append(-1)
+    # A pickup used to free and recreate 100-160 Button nodes for EACH view
+    # synchronously, stalling controls and invalidating in-flight drags.
+    # Keep the same physical controls/identity until the actual layout changes.
+    var existing: int = grid_container.get_child_count()
+    for i in range(existing, indices.size()):
+        var created: InventoryCell = cells_scene.instantiate()
+        grid_container.add_child(created)
+    if existing > indices.size():
+        for i in range(existing - 1, indices.size() - 1, -1):
+            var old_cell: Control = grid_container.get_child(i)
+            grid_container.remove_child(old_cell)
+            old_cell.queue_free()
+    for position in range(indices.size()):
+        var cell: InventoryCell = grid_container.get_child(position)
+        var slot_index: int = indices[position]
+        if cell.inventory != inv or cell.index != slot_index or cell.backpack != backpack \
+            or cell.is_hotbar != (mode == "hotbar"):
+            cell.configure(inv, slot_index, self, mode == "hotbar", backpack)
+        cell.disabled = slot_index == -1
+        cell.modulate = Color("#858b91") if slot_index == -1 else Color.WHITE
+        cell.refresh()
+    _layout_indices = indices
+    var actual_stacks: int = inv.size() - available.size()
+    var item_count: int = 0
+    for i in range(inv.size()):
+        var stack: InvSlot = inv.slot_at(i)
+        item_count += stack.count if stack != null else 0
+    counter.text = ("%d/%d stacks  |  %d items" % [actual_stacks, inv.size(), item_count]) if mode != "hotbar" else ""
+    visible_count.text = "%d entries / %d units" % [occupied.size(), shown_quantity] if mode != "hotbar" else "Linked; physical stock in backpack"
+    # Crafting is intentionally discovered by dragging physical ingredients.
+    # The legacy programmatic controls remain for authoring/tests only.
+    $Layout/Toolbar.visible = false
+    $Layout/Actions.visible = false
+    $Layout/SearchBar.visible = false
+    $Layout/Crafting.visible = false
+    $Layout/Feedback.visible = false
 
-	grid_container.columns = int(ceil(sqrt(inv.items.size())))
-	grid_container.size = Vector2(0,0)
-	
-#	if not Engine.is_editor_hint():
-	call_deferred("_started")
-	
+func request_use(item: InvItem) -> void:
+    if item != null and backpack != null and backpack.has(item):
+        use_requested.emit(item)
 
-func _started():
-	if inv == preload("res://playerinventory.tres"):
-		grid_container.columns = int(ceil(sqrt(inv.items.size())))
-	elif inv == preload("res://quickinventory.tres"):
-		grid_container.columns = 9
-	
-	if grid_container.columns < 3:
-		grid_container.columns = 3
+func message(value: String) -> void:
+    # Only the original lower-right event feed narrates gameplay.
+    feedback.emit(value)
 
-	if not inv == preload("res://quickinventory.tres"):
-		for i in range(inv.items.size(), grid_container.columns * grid_container.columns):
-			inv.items.append(InvSlot.new(preload("res://items/missing.tres")))
+func request_world_drop(origin: Inv, origin_index: int, item: InvItem, viewport_position: Vector2, amount: int = 1) -> void:
+    if item != null:
+        world_drop_requested.emit(origin, origin_index, item, viewport_position, amount)
 
-	if not Engine.is_editor_hint():
-		timer_update.one_shot = false
-		timer_update.timeout.connect(_update_items)
-		add_child(timer_update)
-		timer_update.start(0.2)
+func _refresh_recipe_index() -> void:
+    var retained_id: String = ""
+    var prior: int = recipe_selector.selected
+    if prior >= 0 and prior < offered_recipes.size():
+        retained_id = str(offered_recipes[prior]["id"])
+    offered_recipes = InventoryRecipeIndex.list_for(inv)
+    recipe_selector.clear()
+    if offered_recipes.is_empty():
+        recipe_selector.add_item("NO KNOWN COMBINATIONS")
+        recipe_selector.set_item_disabled(0, true)
+        assemble_button.disabled = true
+        return
+    var selected: int = 0
+    for i in range(offered_recipes.size()):
+        var entry: Dictionary = offered_recipes[i]
+        recipe_selector.add_item(entry["label"])
+        recipe_selector.set_item_disabled(i, not bool(entry["can_craft"]))
+        if str(entry["id"]) == retained_id:
+            selected = i
+    recipe_selector.select(selected)
+    assemble_button.disabled = not bool(offered_recipes[selected]["can_craft"])
 
-
-	for i in range(0, inv.items.size()):
-		var item = item_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE)
-		item.name = "InventoryItem"+str(i)
-		item.itemslot = inv.items[i]
-		item.inv = inv
-		item.is_world = is_world
-
-		if grid_container.has_node("./"+item.name):
-			var oldnode = grid_container.get_node("./"+item.name)
-			grid_container.remove_child(oldnode)
-			oldnode.queue_free()
-			oldnode = null
-			
-		grid_container.add_child(item)
-		item.set_owner(get_tree().get_edited_scene_root())
-		
-
-
-## not needed!
-#func disconnect_all_signals(node):
-#		for cur_signal in node.get_signal_list():
-#			for cur_conn in node.get_signal_connection_list(cur_signal.name):
-#				if cur_conn.callable.get_object() == node and node.is_connected(cur_conn.signal.get_name(), cur_conn.callable):
-#					print("is connected: "+str(cur_conn.signal.get_name())+" in "+str(cur_signal.name))
-#					disconnect(cur_conn.signal.get_name(), cur_conn.callable)
+func _assemble_selected() -> void:
+    var index: int = recipe_selector.selected
+    if mode == "hotbar" or inv == null or index < 0 or index >= offered_recipes.size():
+        return
+    var entry: Dictionary = offered_recipes[index]
+    var from_index: int = inv.find(entry["source"])
+    var to_index: int = inv.find(entry["target"])
+    if from_index < 0 or to_index < 0 or from_index == to_index:
+        message("Required ingredients are not in distinct inventory stacks.")
+        return
+    var outcome: Dictionary = InventoryOperations.move_or_combine(inv, from_index, inv, to_index)
+    message(str(outcome.get("message", "No usable result.")))

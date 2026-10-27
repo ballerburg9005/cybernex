@@ -1,0 +1,167 @@
+[gd_scene load_steps=23 format=3]
+
+[ext_resource type="Script" path="res://systems/circuits/CircuitWorkbench.gd" id="workbench"]
+[ext_resource type="Script" path="res://systems/circuits/CircuitBoardView.gd" id="view"]
+[ext_resource type="Script" path="res://systems/circuits/CircuitPart.gd" id="part_script"]
+[ext_resource type="Resource" path="res://systems/circuits/boards/door_actuator.tres" id="board"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/resistor_10.tres" id="r"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/wire_straight.tres" id="wire"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/wire_corner.tres" id="corner"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/wire_junction.tres" id="junction"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/wire_crossover.tres" id="crossover"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/diode.tres" id="diode"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/npn.tres" id="npn"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/pnp.tres" id="pnp"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/nmos.tres" id="nmos"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/pmos.tres" id="pmos"]
+
+[ext_resource type="Resource" path="res://systems/circuits/parts/capacitor_20mf.tres" id="capacitor"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/inductor_100h.tres" id="inductor"]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="item_script"]
+[ext_resource type="Resource" path="res://items/wire_bridge.tres" id="jumper_item"]
+[ext_resource type="Resource" path="res://items/resistor10.tres" id="resistor_item"]
+[ext_resource type="Resource" path="res://items/side_cutters.tres" id="cutters_item"]
+
+[sub_resource type="StyleBoxFlat" id="power_idle"]
+bg_color = Color(0.44, 0.075, 0.07, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.82, 0.23, 0.17, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="power_hover"]
+bg_color = Color(0.58, 0.105, 0.09, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.38, 0.22, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="CircuitWorkbench" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("workbench")
+authored_board = ExtResource("board")
+catalog = Array[ExtResource("part_script")]([ExtResource("r"), ExtResource("wire"), ExtResource("corner"), ExtResource("junction"), ExtResource("crossover"), ExtResource("diode"), ExtResource("npn"), ExtResource("pnp"), ExtResource("nmos"), ExtResource("pmos"), ExtResource("capacitor"), ExtResource("inductor")])
+item_catalog = Array[ExtResource("item_script")]([ExtResource("resistor_item"), ExtResource("jumper_item"), ExtResource("cutters_item")])
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Padding" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="Layout" type="VBoxContainer" parent="Panel/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HeaderBar" type="PanelContainer" parent="Panel/Padding/Layout"]
+visible = false
+layout_mode = 2
+
+[node name="Header" type="Label" parent="Panel/Padding/Layout/HeaderBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "SERVICE ELECTRONICS / ACTUATOR"
+horizontal_alignment = 1
+
+[node name="MainRow" type="HBoxContainer" parent="Panel/Padding/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BoardFrame" type="PanelContainer" parent="Panel/Padding/Layout/MainRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BoardScroll" type="ScrollContainer" parent="Panel/Padding/Layout/MainRow/BoardFrame"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 0
+
+[node name="BoardView" type="Control" parent="Panel/Padding/Layout/MainRow/BoardFrame/BoardScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+script = ExtResource("view")
+board = ExtResource("board")
+cell_size = 64
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Bottom" type="HBoxContainer" parent="Panel/Padding/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RunButton" type="Button" parent="Panel/Padding/Layout/Bottom"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+custom_minimum_size = Vector2(96, 42)
+text = "⚡  POWER"
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("power_idle")
+theme_override_styles/hover = SubResource("power_hover")
+theme_override_styles/pressed = SubResource("power_hover")
+
+[node name="StatusFrame" type="PanelContainer" parent="Panel/Padding/Layout/Bottom"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Status" type="Label" parent="Panel/Padding/Layout/Bottom/StatusFrame"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = ""
+autowrap_mode = 3
+
+[node name="SidePanel" type="VBoxContainer" parent="Panel/Padding/Layout"]
+visible = false
+layout_mode = 2
+
+[node name="Palette" type="OptionButton" parent="Panel/Padding/Layout/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RotateButton" type="Button" parent="Panel/Padding/Layout/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ROTATE"
+
+[node name="RemoveButton" type="Button" parent="Panel/Padding/Layout/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "REMOVE"
+
+[node name="ProbeReport" type="Label" parent="Panel/Padding/Layout/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+
+[node name="SolveTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 0.05

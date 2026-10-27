@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="EquipmentLoadout" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://UI/EquipmentLoadout.gd" id="gear"]
+[ext_resource type="Resource" path="res://items/arc_pistol.tres" id="pistol"]
+[ext_resource type="Resource" path="res://items/neural_regulator.tres" id="neural"]
+
+[resource]
+script = ExtResource("gear")
+weapon_primary = ExtResource("pistol")
+augment_neural = ExtResource("neural")

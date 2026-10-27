@@ -1,0 +1,69 @@
+name: Godot 4.7 circuit checks
+on:
+  push:
+    branches: [refactor/godot-4.7-station-systems]
+  pull_request:
+
+jobs:
+  circuit-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+      - name: Report downloaded Godot version
+        run: godot --version
+      - name: Check all GDScript void callbacks
+        run: python3 tests/lint_void_callbacks.py .
+      - name: Import Godot project in headless editor
+        run: |
+          set -o pipefail
+          godot --headless --path . --editor --import --quit 2>&1 | tee /tmp/godot-import.log
+          ! grep -q 'SCRIPT ERROR\|Parse Error: A void' /tmp/godot-import.log
+      - name: Run headless electrical tests
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/circuit_smoke.gd 2>&1 | tee /tmp/circuits.log
+          ! grep -q "SCRIPT ERROR\|Parse Error: A void" /tmp/circuits.log
+      - name: Verify inventory, craft recipes, groups and mannequin
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/inventory_smoke.gd 2>&1 | tee /tmp/inventory.log
+          ! grep -q "SCRIPT ERROR\|INVENTORY TESTS FAILED" /tmp/inventory.log
+      - name: Verify inventory world-drop and pickup conservation
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/inventory_world_smoke.gd 2>&1 | tee /tmp/world-inventory.log
+          ! grep -q "SCRIPT ERROR\|WORLD INVENTORY TESTS FAILED" /tmp/world-inventory.log
+      - name: Verify world wire cutting and tool-on-robot interactions
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/world_interaction_smoke.gd 2>&1 | tee /tmp/world-actions.log
+          ! grep -q "SCRIPT ERROR\\|WORLD INTERACTION TESTS FAILED" /tmp/world-actions.log
+      - name: Verify desk inspection, linked backpack and blocking world-drop leakage
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/desk_inspection_smoke.gd 2>&1 | tee /tmp/desks.log
+          ! grep -q "SCRIPT ERROR\\|DESK INSPECTION TESTS FAILED" /tmp/desks.log
+      - name: Verify powered augments and world save roundtrips
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/equipment_save_smoke.gd 2>&1 | tee /tmp/equipment-save.log
+          ! grep -q "SCRIPT ERROR\\|EQUIPMENT + SAVE TESTS FAILED" /tmp/equipment-save.log
+      - name: Verify HUD/world coordinates while camera pans and zooms
+        run: godot --headless --path . --script res://tests/coordinate_smoke.gd
+      - name: Instantiate Godot-native workbench scene
+        run: |
+          godot --headless --path . --quit-after 8 res://systems/circuits/CircuitWorkbench.tscn 2>&1 | tee /tmp/workbench.log
+          ! grep -q "SCRIPT ERROR" /tmp/workbench.log
+      - name: Launch integrated maintenance bay
+        run: |
+          godot --headless --path . --quit-after 8 res://systems/station/StationMaintenanceBay.tscn 2>&1 | tee /tmp/maintenance.log
+          ! grep -q "SCRIPT ERROR" /tmp/maintenance.log
+      - name: Launch original world scene with reworked HUD
+        run: |
+          godot --headless --path . --quit-after 8 res://main.tscn 2>&1 | tee /tmp/main.log
+          ! grep -q "SCRIPT ERROR" /tmp/main.log

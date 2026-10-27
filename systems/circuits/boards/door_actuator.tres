@@ -1,0 +1,52 @@
+[gd_resource type="Resource" script_class="CircuitBoard" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://systems/circuits/CircuitBoard.gd" id="b"]
+[ext_resource type="Script" path="res://systems/circuits/CircuitPlacement.gd" id="p"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/5v_source.tres" id="s"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/resistor_10.tres" id="r"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/load_door.tres" id="l"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/ground.tres" id="g"]
+
+[sub_resource type="Resource" id="source"]
+script = ExtResource("p")
+part = ExtResource("s")
+cell = Vector2i(1, 1)
+rotation = 0
+fixed_to_board = true
+
+[sub_resource type="Resource" id="burned_resistor"]
+script = ExtResource("p")
+part = ExtResource("r")
+cell = Vector2i(2, 1)
+rotation = 0
+fixed_to_board = false
+failed_open = true
+
+[sub_resource type="Resource" id="motor"]
+script = ExtResource("p")
+part = ExtResource("l")
+cell = Vector2i(3, 1)
+rotation = 0
+fixed_to_board = true
+
+[sub_resource type="Resource" id="ground_source"]
+script = ExtResource("p")
+part = ExtResource("g")
+cell = Vector2i(1, 2)
+fixed_to_board = true
+
+[sub_resource type="Resource" id="ground_load"]
+script = ExtResource("p")
+part = ExtResource("g")
+cell = Vector2i(3, 2)
+fixed_to_board = true
+
+[resource]
+script = ExtResource("b")
+width = 9
+height = 7
+placements = Array[ExtResource("p")]([SubResource("source"), SubResource("burned_resistor"), SubResource("motor"), SubResource("ground_source"), SubResource("ground_load")])
+required_load_part_id = "door_motor"
+min_load_volts = 4.0
+max_load_volts = 5.2
+minimum_hold_seconds = 0.5

@@ -10,6 +10,7 @@ region = Rect2(80, 0, 16, 16)
 [resource]
 script = ExtResource("1_e38yv")
 name = "big wire"
+item_id = "heavy_cable"
 short_name = "bigwire"
 texture = SubResource("AtlasTexture_f7308")
 damage = 0.5

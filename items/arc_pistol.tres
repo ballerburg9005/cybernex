@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="item"]
+[ext_resource type="Texture2D" path="res://assets/items.png" id="atlas"]
+
+[sub_resource type="AtlasTexture" id="icon"]
+atlas = ExtResource("atlas")
+region = Rect2(32, 0, 16, 16)
+
+[resource]
+script = ExtResource("item")
+name = "Arc maintenance pistol"
+item_id = "arc_pistol"
+short_name = "arc pistol"
+texture = SubResource("icon")
+damage = 0.0
+combos = []
+type = 4
+equipment_slots = PackedStringArray("weapon_primary", "weapon_secondary")
+discharge_wh = 0.45
+discharge_range = 150.0
+description = "Low-powered electric discharge tool; consumes rare charge cells."

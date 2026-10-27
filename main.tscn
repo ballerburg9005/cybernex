@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://ctfh5rdwvcfap"]
+[gd_scene load_steps=37 format=3 uid="uid://ctfh5rdwvcfap"]
 
 [ext_resource type="Shader" path="res://flowing_squares.gdshader" id="1_rtrpn"]
 [ext_resource type="Script" path="res://main.gd" id="1_rw06d"]
@@ -12,9 +12,11 @@
 [ext_resource type="PackedScene" uid="uid://bax3ydx4vf0i5" path="res://items/item_world.tscn" id="7_n8dxg"]
 [ext_resource type="Resource" uid="uid://djrjkdayl2olj" path="res://items/side_cutters.tres" id="9_bamd0"]
 [ext_resource type="PackedScene" uid="uid://btv4v1ibnrmla" path="res://UI/Inventory.tscn" id="10_vg8hb"]
-[ext_resource type="Texture2D" uid="uid://dfvjd8p1p1lc3" path="res://assets/noise.jpg" id="12_3inrd"]
+[ext_resource type="PackedScene" path="res://UI/EquipmentMannequin.tscn" id="30_eqp"]
+[ext_resource type="Script" path="res://systems/interactions/WorldHitTest.gd" id="40_world_hit"]
 [ext_resource type="Script" path="res://inventory_slot.gd" id="12_26g80"]
 [ext_resource type="Resource" uid="uid://c1rm8ll7i4il7" path="res://items/wires.tres" id="14_vb2n3"]
+[ext_resource type="Resource" path="res://items/insulation_tape.tres" id="42_tape"]
 [ext_resource type="PackedScene" uid="uid://cfhmk4tjehyse" path="res://interactibles/desk.tscn" id="16_5p6vc"]
 [ext_resource type="PackedScene" uid="uid://c7fsimpojygjv" path="res://interactibles/object.tscn" id="16_h2lng"]
 [ext_resource type="Resource" uid="uid://c7oecn17tljh4" path="res://items/big_wire.tres" id="18_k8fjm"]
@@ -62,9 +64,14 @@ script = ExtResource("12_26g80")
 item = ExtResource("18_k8fjm")
 count = 3
 
+[sub_resource type="Resource" id="Resource_tape"]
+script = ExtResource("12_26g80")
+item = ExtResource("42_tape")
+count = 1
+
 [sub_resource type="Resource" id="Resource_grmg7"]
 script = ExtResource("19_gesh8")
-items = Array[ExtResource("12_26g80")]([SubResource("Resource_boupi")])
+items = Array[ExtResource("12_26g80")]([SubResource("Resource_boupi"), SubResource("Resource_tape")])
 
 [sub_resource type="Resource" id="Resource_3funf"]
 script = ExtResource("12_26g80")
@@ -102,6 +109,10 @@ expand_mode = 5
 y_sort_enabled = true
 scale = Vector2(3, 3)
 
+[node name="WorldHitTest" type="Node2D" parent="World"]
+script = ExtResource("40_world_hit")
+interactable_layers = 49776
+
 [node name="TileMap" parent="World" instance=ExtResource("3_5faoa")]
 
 [node name="Enemy" parent="World" instance=ExtResource("4_i0gwi")]
@@ -119,6 +130,7 @@ hostile_towards = "enemies"
 
 [node name="Terminal" parent="World" instance=ExtResource("6_rq1bm")]
 position = Vector2(206.667, 119)
+puzzle_type = "circuit"
 
 [node name="Door-0-0" parent="World" instance=ExtResource("5_gs8tt")]
 position = Vector2(256.333, 111.667)
@@ -135,39 +147,53 @@ position = Vector2(346, -32)
 disabled = true
 loot = SubResource("Resource_g6cdm")
 
+desk_note = "RADIATION SURVEY / 03:14\nThe personal dosimeter saturated before its logger completed a frame. The shift was never signed out."
+computer_readout = "RAD-MON / LOCAL\nDetector overload. External particle flux beyond calibrated range."
 [node name="Desk2" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(346, 0)
 disabled = true
 loot = SubResource("Resource_2qi1w")
 
+desk_note = "STAFF SHIFT CARD\nThree engineering badges remain in their desk drawers. One has a small dried mark across the name field."
+computer_readout = "CORE VAULT / PERSONNEL\nAccess log incomplete. Last badge used: ENGINEERING."
 [node name="Desk3" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(346, 32)
 disabled = true
 loot = SubResource("Resource_3daxw")
 
+desk_note = "ROVER TELEMETRY\nThe last camera frame from the surface was white from edge to edge. The image checksum passed."
+computer_readout = "ROVER / NO CARRIER\nArchive frame exposure exceeded sensor range."
 [node name="Desk4" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(166, -32)
 
+desk_note = "MEDICAL STORES\nBlue insulated case marked INSULIN. The cold-chain logger stopped at 04:19."
+computer_readout = "MED / STORAGE\nRefrigeration fault. Inventory awaiting manual audit."
 [node name="Desk5" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(166, 0)
 
+desk_note = "COMMS ROTATION\nEarthside acknowledgement remains overdue. Array dish scheduled for a new pointing solution at first light."
+computer_readout = "TX ARRAY / QUEUED\nOutbound beam slot remains reserved."
 [node name="Desk6" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(166, 32)
 loot = SubResource("Resource_grmg7")
 
+desk_note = "RECEIVER WORKSHEET\nA narrow carrier appears repeatedly in the noise floor. Nobody could identify its origin before the shift changed."
+computer_readout = "RX ARRAY / MONITOR\nUnknown periodic structure in the last captured spectrum."
 [node name="Desk8" parent="World" instance=ExtResource("16_5p6vc")]
 position = Vector2(258.333, 4.66667)
 loot = SubResource("Resource_lkee5")
 
+desk_note = "CORE MAINTENANCE NOTE\nThe computing room was built with unusually thick lead around the racks. Nobody ever explained the weight budget."
+computer_readout = "CORE / ENCLOSURE\nRadiation attenuator: manual inspection overdue."
 [node name="HUD" type="CanvasLayer" parent="."]
 
-[node name="TextBox" type="VBoxContainer" parent="HUD"]
+[node name="TextBox" type="Control" parent="HUD"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 0
 
 [node name="S2" type="Control" parent="HUD/TextBox"]
 layout_mode = 2
@@ -176,7 +202,12 @@ size_flags_stretch_ratio = 6.0
 mouse_filter = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HUD/TextBox"]
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
@@ -205,8 +236,8 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
-theme_override_font_sizes/normal_font_size = 24
-theme_override_font_sizes/bold_font_size = 24
+theme_override_font_sizes/normal_font_size = 17
+theme_override_font_sizes/bold_font_size = 17
 theme_override_font_sizes/italics_font_size = 24
 theme_override_font_sizes/bold_italics_font_size = 24
 theme_override_font_sizes/mono_font_size = 24
@@ -223,29 +254,22 @@ scroll_following = true
 shortcut_keys_enabled = false
 metadata/myname = "hud_textbox"
 
-[node name="QuickInventory" type="VBoxContainer" parent="HUD"]
+[node name="QuickInventory" type="PanelContainer" parent="HUD"]
 z_index = 1000
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-
-[node name="S" type="Control" parent="HUD/QuickInventory"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 6.0
-mouse_filter = 2
+mouse_filter = 0
 
 [node name="InventoryItems" parent="HUD/QuickInventory" instance=ExtResource("10_vg8hb")]
 layout_mode = 2
-size_flags_vertical = 6
-size_flags_stretch_ratio = 1.0
+size_flags_vertical = 3
 inv = ExtResource("6_pnrst")
 metadata/myname = "hud_quick_inventory"
 
-[node name="FullInventory" type="HBoxContainer" parent="HUD"]
+[node name="FullInventory" type="PanelContainer" parent="HUD"]
 visible = false
 z_index = 1000
 anchors_preset = 15
@@ -253,7 +277,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HUD/FullInventory"]
 layout_mode = 2
@@ -287,30 +311,72 @@ size_flags_stretch_ratio = 0.2
 mouse_filter = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 6
 size_flags_vertical = 4
 
 [node name="MarginContainer" type="MarginContainer" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 
-[node name="TextureRect" type="TextureRect" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer"]
-custom_minimum_size = Vector2(200, 300)
+[node name="Equipment" parent="HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/PanelContainer/MarginContainer" instance=ExtResource("30_eqp")]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-mouse_filter = 2
-texture = ExtResource("12_3inrd")
-expand_mode = 1
 
 [node name="S3" type="Control" parent="HUD/FullInventory/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
+
+[node name="DrawerNav" type="PanelContainer" parent="HUD/FullInventory/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NavRow" type="HBoxContainer" parent="HUD/FullInventory/VBoxContainer/DrawerNav"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LeftBalance" type="Control" parent="HUD/FullInventory/VBoxContainer/DrawerNav/NavRow"]
+custom_minimum_size = Vector2(38, 36)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Previous" type="Button" parent="HUD/FullInventory/VBoxContainer/DrawerNav/NavRow"]
+layout_mode = 2
+focus_mode = 0
+custom_minimum_size = Vector2(38, 36)
+text = "◀"
+
+[node name="Section" type="Label" parent="HUD/FullInventory/VBoxContainer/DrawerNav/NavRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "INVENTORY"
+
+[node name="Next" type="Button" parent="HUD/FullInventory/VBoxContainer/DrawerNav/NavRow"]
+layout_mode = 2
+focus_mode = 0
+custom_minimum_size = Vector2(38, 36)
+text = "▶"
+
+[node name="Close" type="Button" parent="HUD/FullInventory/VBoxContainer/DrawerNav/NavRow"]
+custom_minimum_size = Vector2(38, 36)
+layout_mode = 2
+focus_mode = 0
+text = "×"
+
+[node name="PdaPage" type="RichTextLabel" parent="HUD/FullInventory/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 17
+bbcode_enabled = true
+scroll_following = false
+text = ""
 
 [node name="S" type="Control" parent="HUD/FullInventory/VBoxContainer"]
 layout_mode = 2

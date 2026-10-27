@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="item"]
+[ext_resource type="Texture2D" path="res://assets/tileset_electronics.png" id="atlas"]
+[ext_resource type="Resource" path="res://systems/circuits/parts/resistor_10.tres" id="circuit"]
+
+[sub_resource type="AtlasTexture" id="icon"]
+atlas = ExtResource("atlas")
+region = Rect2(8, 0, 16, 16)
+
+[resource]
+script = ExtResource("item")
+name = "10-ohm salvage resistor"
+item_id = "resistor_10ohm"
+short_name = "10Ω resistor"
+texture = SubResource("icon")
+type = 0
+circuit_part = ExtResource("circuit")
+description = "Axial resistor; four-band color code."

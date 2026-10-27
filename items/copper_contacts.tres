@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="item"]
+[ext_resource type="Texture2D" path="res://assets/items.png" id="atlas"]
+
+[ext_resource type="Script" path="res://inventory_combo.gd" id="recipe"]
+[ext_resource type="Resource" path="res://items/solder.tres" id="solder"]
+[ext_resource type="Resource" path="res://items/wire_bridge.tres" id="bridge"]
+
+[sub_resource type="Resource" id="solder_join"]
+script = ExtResource("recipe")
+with = ExtResource("solder")
+yields = ExtResource("bridge")
+amount = 1
+eats_source = true
+eats_target = true
+
+[sub_resource type="AtlasTexture" id="icon"]
+atlas = ExtResource("atlas")
+region = Rect2(64, 0, 16, 16)
+
+[resource]
+script = ExtResource("item")
+name = "Copper terminal contacts"
+item_id = "copper_contacts"
+short_name = "contacts"
+texture = SubResource("icon")
+damage = 0.0
+combos = Array[ExtResource("recipe")]([SubResource("solder_join")])
+type = 0
+equipment_slots = PackedStringArray()
+description = "Prepared copper ends. Rework with solder to make a usable jumper."

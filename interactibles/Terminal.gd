@@ -11,6 +11,10 @@ var mytype = "terminal"
 @export_range(0, 20) var puzzle_difficulty = 0
 @export var loot : Inv = Inv.new(9)
 @export var loot_after_solved = true
+## Inspected text belongs to a particular authored desk, never a generic HUD hint.
+@export_multiline var desk_note: String = ""
+@export_multiline var computer_readout: String = ""
+@export var computer_powered: bool = true
 
 var SCALE = 3
 
@@ -29,146 +33,184 @@ signal do_toggle
 
 
 func _ready():
-	if loot.count() < loot.items.size():
-		has_loot = true
-		for i in range(0,max(9, loot.items.size())):
-			if i >= loot.items.size():
-				loot.items += [InvSlot.new()]
-	
-	for signal_description in get_signal_list():
-		var signal_name = str(signal_description["name"])
-		for connection in get_signal_connection_list(signal_name):
-			if connection['signal'].get_name() in ["do_activate", "do_deactivate", "do_toggle"]:
-				is_connected = true
-				connections += [connection['signal'].get_name()]
-				
-	call_deferred("_started")
+    # Scene-owned loot: never mutate a globally cached .tres in another
+    # terminal, second level or loaded save.
+    loot = loot.duplicate(true) if loot != null else Inv.new(9)
+    # Empty editor-authored Array([]) overrides Inv._init(), so all
+    # terminals must grow their own nine real slots before saving/loading.
+    while loot.items.size() < 9:
+        loot.items.append(InvSlot.new())
+    loot.ensure_slots()
+    has_loot = loot.count() > 0
+    
+    for signal_description in get_signal_list():
+        var signal_name = str(signal_description["name"])
+        for connection in get_signal_connection_list(signal_name):
+            if connection['signal'].get_name() in ["do_activate", "do_deactivate", "do_toggle"]:
+                is_connected = true
+                connections += [connection['signal'].get_name()]
+                
+    call_deferred("_started")
 
 
 # reset animation based on access
 func _started():
-	if access_granted:
-		play_activate(true)
-	else:
-		play_deactivate(true)
-		
-	if puzzle_type == "none":
-		access_granted = true
+    if access_granted:
+        play_activate(true)
+    else:
+        play_deactivate(true)
+        
+    if puzzle_type == "none":
+        access_granted = true
 
 
 # start puzzle
 func activate(caller, action = "default"):
-	
-	var toggled = false
-	if ui_menu:
-		if not (caller == ui_menu and action in ["loot", "activate"]):
-			toggled = true
-		get_node("/root/main").remove_child(ui_menu)
-		ui_menu.queue_free()
-		ui_menu = null
+    
+    var toggled = false
+    if ui_menu:
+        if not (caller == ui_menu and action in ["loot", "activate"]):
+            toggled = true
+        if ui_menu == get_node("/root/main").desk_inspection_cache:
+            ui_menu.close()
+        else:
+            ui_menu.queue_free()
+        ui_menu = null
+        if get_node("/root/main").puzzle_active:
+            get_node("/root/main").exit_circuit_mode()
 
-	if toggled:
-		return false
+    if toggled:
+        return false
 
-	if action == "default" and has_loot:
-		if disabled or not is_connected:
-			spawn_lootbox()
-		elif not loot_after_solved or access_granted:
-				print("spawn multichice")
-				spawn_multiui_menu()
-	elif action == "loot":
-		spawn_lootbox()
-	elif disabled:
-		get_node("/root/main").p(myname+" is not functional.")
-	elif animation_playing.size() == 0:
-		if access_granted:
-			if not is_activated:
-				play_activate()
-			else:
-				play_deactivate()
-		elif puzzle_type == "none":
-			play_activate()
-		else:
-			get_node("/root/main").p("Terminal needs to be fixed!")
+    if action == "default" and (has_loot or myname == "desk"):
+        if disabled or not is_connected:
+            spawn_lootbox()
+        elif not loot_after_solved or access_granted:
+                print("spawn multichice")
+                spawn_multiui_menu()
+    elif action == "loot":
+        spawn_lootbox()
+    elif disabled:
+        get_node("/root/main").p(myname+" is not functional.")
+    elif animation_playing.size() == 0:
+        if access_granted:
+            if not is_activated:
+                play_activate()
+            else:
+                play_deactivate()
+        elif puzzle_type == "none":
+            play_activate()
+        elif puzzle_type == "circuit":
+            _open_circuit_puzzle(caller)
+        else:
+            get_node("/root/main").p("Unknown terminal puzzle: " + puzzle_type)
 
-func spawn_lootbox():
-	ui_menu = preload("res://UI/Inventory.tscn").instantiate()
-	ui_menu.inv = loot
-	get_node("/root/main").add_child(ui_menu)
-	ui_menu.z_index = 2000
-	ui_menu.global_position = global_position
-	ui_menu.size = Vector2(0,0)
-	ui_menu.is_world = true
-	pass
+func _open_circuit_puzzle(caller) -> void:
+    ui_menu = preload("res://systems/circuits/CircuitWorkbench.tscn").instantiate()
+    get_node("/root/main/HUD").add_child(ui_menu)
+    ui_menu.z_index = 3000
+    if caller != null and "inventory" in caller:
+        ui_menu.set_field_inventory(caller.inventory)
+    ui_menu.puzzle_solved.connect(_on_circuit_solved)
+    get_node("/root/main").enter_circuit_mode(ui_menu)
+    get_node("/root/main").p("Relay housing opened.")
+
+func _on_circuit_solved() -> void:
+    # The relay latches after a valid electrical pulse. Any loose pliers or
+    # other contact probes have to come back before the circuit pane closes.
+    if is_instance_valid(ui_menu) and not ui_menu.reclaim_loose_tools(loot):
+        get_node("/root/main").p("No room to recover tools from the relay.")
+        return
+    access_granted = true
+    has_loot = loot.count() > 0
+    if is_instance_valid(ui_menu):
+        ui_menu.queue_free()
+    ui_menu = null
+    get_node("/root/main").exit_circuit_mode()
+    play_activate()
+    get_node("/root/main").p("Relay latched. Terminal unlocked.")
+
+func spawn_lootbox() -> void:
+    var game: Node = get_node("/root/main")
+    if game.desk_inspection != null and is_instance_valid(game.desk_inspection):
+        return
+    ui_menu = game.desk_inspection_cache
+    game.desk_inspection_terminal = self
+    game.desk_inspection = ui_menu
+    ui_menu.show()
+    ui_menu.configure_contents(loot, game.player.inventory, Callable(game, "p"),
+        desk_note, computer_readout, computer_powered)
+    game.p("Desk opened.")
 
 func spawn_multiui_menu():
-	ui_menu = preload("res://interactibles/multichoice_box.tscn").instantiate()
-	get_node("/root/main").add_child(ui_menu)
-	ui_menu.z_index = 2000
-	#ui_menu.global_position = get_global_transform_with_canvas().origin 
-	ui_menu.global_position = global_position
-	#print(get_global_transform_with_canvas().origin)
-	#ui_menu.global_position
-	var buttons = get_node("/root/main").get_all_the_children(ui_menu, "Button")
-	for i in range(2,buttons.size()):
-		buttons[i].get_parent().remove_child(buttons[i])
-		buttons[i].queue_free()
-	ui_menu.size = Vector2(0,0)
-	buttons[0].text = "activate"
-	buttons[1].text = "loot"
-	
-	buttons[0].button_up.connect(Callable(activate).bind(ui_menu, "activate"))
-	buttons[1].button_up.connect(Callable(activate).bind(ui_menu, "loot"))
+    ui_menu = preload("res://interactibles/multichoice_box.tscn").instantiate()
+    get_node("/root/main").add_child(ui_menu)
+    ui_menu.z_index = 2000
+    #ui_menu.global_position = get_global_transform_with_canvas().origin 
+    ui_menu.global_position = global_position
+    #print(get_global_transform_with_canvas().origin)
+    #ui_menu.global_position
+    var buttons = get_node("/root/main").get_all_the_children(ui_menu, "Button")
+    for i in range(2,buttons.size()):
+        buttons[i].get_parent().remove_child(buttons[i])
+        buttons[i].queue_free()
+    ui_menu.size = Vector2(0,0)
+    buttons[0].text = "activate"
+    buttons[1].text = "loot"
+    
+    buttons[0].button_up.connect(Callable(activate).bind(ui_menu, "activate"))
+    buttons[1].button_up.connect(Callable(activate).bind(ui_menu, "loot"))
 
 
 func play_activate(instant = false):
-	if playing_first_time:
-		playing_first_time = false
-		instant = true
-		
-	if "do_activate" in connections:
-		is_activated = true
-		do_activate.emit(self, instant)
-	else:
-		play_toggle(instant)
+    if playing_first_time:
+        playing_first_time = false
+        instant = true
+        
+    if "do_activate" in connections:
+        is_activated = true
+        do_activate.emit(self, instant)
+    else:
+        play_toggle(instant)
 
 
 func play_deactivate(instant = false):
-	if playing_first_time:
-		playing_first_time = false
-		instant = true
-		
-	if "do_deactivate" in connections:
-		is_activated = false
-		do_deactivate.emit(self, instant)
-	else:
-		play_toggle(instant)
+    if playing_first_time:
+        playing_first_time = false
+        instant = true
+        
+    if "do_deactivate" in connections:
+        is_activated = false
+        do_deactivate.emit(self, instant)
+    else:
+        play_toggle(instant)
 
 
 func play_toggle(instant = false):
-	if playing_first_time:
-		playing_first_time = false
-		instant = true
-		
-	if "do_toggle" in connections:
-		is_activated = not is_activated
-		do_toggle.emit(self, instant, is_activated)
+    if playing_first_time:
+        playing_first_time = false
+        instant = true
+        
+    if "do_toggle" in connections:
+        is_activated = not is_activated
+        do_toggle.emit(self, instant, is_activated)
 
 
 func _on_influence_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
-	if not disabled:
-		if "activatables" in body:
-			body.activatables.append(self)
-		if $AnimatedSprite2D:
-			$AnimatedSprite2D.play("on")
+    # A desk is still inspectable when its terminal electronics are disabled.
+    if not disabled or myname == "desk":
+        if "activatables" in body:
+            body.activatables.append(self)
+        if $AnimatedSprite2D:
+            $AnimatedSprite2D.play("on")
 
 
 func _on_influence_body_shape_exited(body_rid, body, body_shape_index, local_shape_index):
-	if ui_menu:
-		get_node("/root/main").remove_child(ui_menu)
-		ui_menu.queue_free()
-		ui_menu = null
-	if "activatables" in body and body.activatables.has(self):
-		body.activatables.erase(self)
-	if $AnimatedSprite2D:
-		$AnimatedSprite2D.play("off")
+    if ui_menu:
+        ui_menu.queue_free()
+        ui_menu = null
+        get_node("/root/main").exit_circuit_mode()
+    if "activatables" in body and body.activatables.has(self):
+        body.activatables.erase(self)
+    if $AnimatedSprite2D:
+        $AnimatedSprite2D.play("off")

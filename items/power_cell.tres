@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="InvItem" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://items/inventory_items.gd" id="item"]
+[ext_resource type="Texture2D" path="res://assets/items.png" id="atlas"]
+
+[sub_resource type="AtlasTexture" id="icon"]
+atlas = ExtResource("atlas")
+region = Rect2(112, 0, 16, 16)
+
+[resource]
+script = ExtResource("item")
+name = "Reclaimed 24 Wh suit cell"
+item_id = "suit_cell"
+short_name = "power cell"
+texture = SubResource("icon")
+type = 0
+energy_wh = 12.0
+description = "A salvaged 12 Wh usable battery module. Activates on double-click in the inventory. Must be physically in your backpack; depleted suits cannot power servo limbs, neural diagnostics or the arc tool."

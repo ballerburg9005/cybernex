@@ -1,69 +1,181 @@
-@tool
-extends TextureRect
+extends Button
+class_name InventoryCell
 
-@export var itemslot : InvSlot
+var inventory: Inv
+var backpack: Inv
+var index: int = -1
+var is_hotbar: bool = false
+var parent_view: Control
+var _pending_world_item: InvItem
+var _pending_world_amount: int = 0
+var _right_drag_origin: Vector2 = Vector2.ZERO
+var _right_drag_armed: bool = false
 
-var in_drag_space = false
+@onready var image: TextureRect = $Icon
+@onready var number: Label = $Count
 
-var inv : Inv
+func configure(model: Inv, cell_index: int, view: Control, hotbar: bool = false, owner_inventory: Inv = null) -> void:
+    inventory = model
+    backpack = owner_inventory if owner_inventory != null else model
+    index = cell_index
+    parent_view = view
+    is_hotbar = hotbar
+    if is_node_ready():
+        refresh()
 
-var disabled = false
+func refresh() -> void:
+    if not is_node_ready():
+        return
+    var cell: InvSlot = inventory.slot_at(index) if inventory != null else null
+    var amount: int = backpack.count(cell.item) if is_hotbar and cell != null else cell.count if cell != null else 0
+    $ResistorBands.visible = cell != null and cell.item.item_id == "resistor_10ohm"
+    if cell == null or amount <= 0:
+        image.texture = null
+        number.text = "×" if index == -1 else ""
+        number.add_theme_color_override("font_color", Color("#a8afb5") if index == -1 else Color.WHITE)
+        tooltip_text = ""
+        return
+    number.remove_theme_color_override("font_color")
+    image.texture = cell.item.texture
+    number.text = "%dx" % amount
+    var lines := PackedStringArray()
+    lines.append("%s  %dx" % [cell.item.name, amount])
+    # Tooltips identify items; recipe and use instructions belong nowhere in
+    # the HUD. Only short physical descriptions are appropriate.
+    if not cell.item.description.is_empty() and not _is_instructions(cell.item.description):
+        lines.append(cell.item.description)
+    tooltip_text = "\n".join(lines)
 
-var myname 
+func _is_instructions(value: String) -> bool:
+    var lower: String = value.to_lower()
+    for phrase in [" to ", "requires ", "use ", "combine ", "drag ", "install ", "craft ", "reusable", "equip ", "solder is"]:
+        if lower.contains(phrase):
+            return true
+    return false
 
-var idx = 0
+func _gui_input(event: InputEvent) -> void:
+    if event is InputEventMouseButton:
+        if event.button_index == MOUSE_BUTTON_RIGHT:
+            if event.pressed:
+                _right_drag_origin = event.position
+                _right_drag_armed = true
+            else:
+                _right_drag_armed = false
+            accept_event()
+            return
+        if event.button_index == MOUSE_BUTTON_LEFT and event.pressed and event.double_click:
+            var slot: InvSlot = inventory.slot_at(index) if inventory != null else null
+            if slot != null and parent_view != null and parent_view.has_method("request_use"):
+                parent_view.request_use(slot.item)
+                accept_event()
+    if event is InputEventMouseMotion and _right_drag_armed:
+        if not (event.button_mask & MOUSE_BUTTON_MASK_RIGHT):
+            _right_drag_armed = false
+            return
+        if event.position.distance_to(_right_drag_origin) >= 6.0:
+            _right_drag_armed = false
+            var data: Variant = _make_drag_payload(true)
+            if data != null:
+                force_drag(data, _make_preview(data["item"], data["amount"]))
+                accept_event()
 
-var is_world = false
+func _make_preview(item: InvItem, _amount: int) -> Control:
+    # The native icon alone follows the cursor; no second background panel,
+    # name text, spacer or padding is allowed in the drag ghost.
+    var sprite := TextureRect.new()
+    sprite.texture = item.texture
+    sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+    sprite.custom_minimum_size = Vector2(48, 48)
+    sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    sprite.z_index = 4096
+    return sprite
 
-func _ready():
-	idx = int(name.substr(13))
-	if not itemslot:
-		itemslot = InvSlot.new(preload("res://items/missing.tres"))
-	if disabled or (in_drag_space and itemslot.count < 2) or itemslot.count < 1:
-		texture = preload("res://items/blank.tres").texture
-	else:
-		texture = itemslot.item.texture
-	
-	if itemslot.item not in [preload("res://items/blank.tres")]:
-		myname = itemslot.item.name
-	
-	stretch_mode = TextureRect.STRETCH_SCALE
-	expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	custom_minimum_size = Vector2(48, 48)
-	
-	$PanelContainer/MarginContainer/Label.text = str(itemslot.count - (1 if in_drag_space else 0))
-	
-	if itemslot.count > 1 and not (in_drag_space and itemslot.count < 2):
-		$PanelContainer.visible = true
-	else:
-		$PanelContainer.visible = false
-		
-	if is_world:
-		$influence.set_collision_mask_value(30, false)
-		$influence.set_collision_mask_value(29, true)
-		
+func _make_drag_payload(whole_stack: bool) -> Variant:
+    if inventory == null:
+        return null
+    var stack: InvSlot = inventory.slot_at(index)
+    if stack == null or (is_hotbar and backpack.count(stack.item) <= 0):
+        return null
+    var amount: int = stack.count if whole_stack else 1
+    if is_hotbar:
+        amount = backpack.count(stack.item) if whole_stack else 1
+    _pending_world_item = stack.item
+    _pending_world_amount = amount
+    return {"kind": "inventory_item", "item": stack.item,
+        "inventory": inventory, "index": index, "hotbar": is_hotbar,
+        "amount": amount}
 
-func _on_focus_entered():
-	material = ShaderMaterial.new()
-	material.shader = preload("res://assets/shaders/outline.gdshader")
-	material.set_shader_parameter("add_margins", false)
+func _get_drag_data(_at_position: Vector2) -> Variant:
+    # Godot's standard left-button drag carries one item; the explicit
+    # right-button gesture below calls force_drag for the entire pile.
+    var data: Variant = _make_drag_payload(false)
+    if data != null:
+        set_drag_preview(_make_preview(data["item"], data["amount"]))
+    return data
 
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+    if not (data is Dictionary) or inventory == null:
+        return false
+    if data.get("kind", "") == "circuit_part":
+        if is_hotbar or backpack == null:
+            return false
+        var source: CircuitBoardView = data.get("source")
+        return source != null and source.workbench != null and source.workbench.can_extract_to(int(data.get("index", -1)), backpack)
+    return data.get("kind", "") in ["inventory_item", "equipped_item"]
 
-func _on_focus_exited():
-	material.shader = null
+func _drop_data(_at_position: Vector2, data: Variant) -> void:
+    if not _can_drop_data(_at_position, data):
+        return
+    var kind: String = data.get("kind", "")
+    if kind == "circuit_part":
+        var view: CircuitBoardView = data.get("source")
+        if view != null and view.workbench != null:
+            view.workbench.extract_to_backpack(int(data.get("index", -1)), backpack)
+        return
+    if kind == "equipped_item":
+        var loadout: EquipmentLoadout = data.get("loadout")
+        if loadout != null:
+            loadout.assign(str(data.get("slot", "")), null, backpack)
+            _feedback("Unequipped item; still in backpack.")
+        return
+    var origin: Inv = data.get("inventory")
+    var item: InvItem = data.get("item")
+    if item == null or origin == null:
+        return
+    if is_hotbar:
+        if backpack == null or not backpack.has(item):
+            _feedback("Not in backpack: retrieve the item before assigning quick access.")
+            return
+        # A hotbar is a reference, not a duplicated stack.
+        inventory.items[index] = InvSlot.new(item, 1)
+        inventory.emit_changed()
+        _feedback("Assigned %s to quick slot %d." % [item.name, index + 1])
+        return
+    if bool(data.get("hotbar", false)):
+        # Dragging quickslot onto backpack removes only quick binding.
+        var origin_idx: int = int(data.get("index", -1))
+        if origin_idx >= 0 and origin_idx < origin.size():
+            origin.items[origin_idx] = InvSlot.new()
+            origin.emit_changed()
+        _feedback("Quickslot cleared. Items remain in backpack.")
+        return
+    var outcome: Dictionary = InventoryOperations.move_or_combine(origin, int(data.get("index", -1)), inventory, index,
+        int(data.get("amount", 1)))
+    _feedback(str(outcome.get("message", "")))
 
+func _feedback(message: String) -> void:
+    if parent_view != null and parent_view.has_method("message"):
+        parent_view.message(message)
 
-func _on_gui_input(event):
-	if not disabled:
-		if event.is_action_pressed("mouse_button_1") and not (itemslot.item.type & itemslot.item.IS_NOT) and not in_drag_space:
-			in_drag_space = true
-			_ready()
-			get_node("/root/main").player.drag_inventory_item(self, Vector2(0,0)) #custom_minimum_size*0.5
-
-
-func _on_body_entered(body):
-	if is_visible_in_tree():
-		get_node("/root/main").player.combinables.append([self, body])
-
-func _on_body_exited(body):
-	get_node("/root/main").player.combinables.erase([self, body])
+func _notification(what: int) -> void:
+    if what != NOTIFICATION_DRAG_END or _pending_world_item == null:
+        return
+    var released: InvItem = _pending_world_item
+    _pending_world_item = null
+    var released_amount: int = _pending_world_amount
+    _pending_world_amount = 0
+    if not get_viewport().gui_is_drag_successful():
+        if parent_view != null and parent_view.has_method("request_world_drop"):
+            parent_view.request_world_drop(inventory, index, released, get_viewport().get_mouse_position(), released_amount)

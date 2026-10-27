@@ -194,6 +194,8 @@ script = ExtResource("1_ajct2")
 stationary = true
 
 [node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+z_index = -1
+show_behind_parent = true
 position = Vector2(0, -18)
 amount = 24
 lifetime = 0.33
@@ -210,7 +212,7 @@ scale_amount_max = 3.0
 color = Color(0.74902, 0.462745, 0.584314, 1)
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
-z_index = 1
+z_index = 0
 position = Vector2(0, -16)
 sprite_frames = SubResource("SpriteFrames_4utyp")
 animation = &"death"

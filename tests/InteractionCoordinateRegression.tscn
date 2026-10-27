@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://systems/interactions/WorldHitTest.gd" id="hit"]
+
+[sub_resource type="RectangleShape2D" id="actor_rect"]
+size = Vector2(20, 20)
+
+[sub_resource type="RectangleShape2D" id="target_rect"]
+size = Vector2(52, 52)
+
+[node name="InteractionCoordinateRegression" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+enabled = true
+
+[node name="Actor" type="CharacterBody2D" parent="."]
+position = Vector2(160, 100)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Actor"]
+shape = SubResource("actor_rect")
+
+[node name="Target" type="Area2D" parent="."]
+position = Vector2(450, 280)
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Target"]
+shape = SubResource("target_rect")
+
+[node name="WorldHitTest" type="Node2D" parent="."]
+script = ExtResource("hit")
+reference_physics_body = NodePath("../Actor")
+interactable_layers = 112
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="HudIndicator" type="Label" parent="HUD"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 50.0
+text = "HUD: no physics shape"
