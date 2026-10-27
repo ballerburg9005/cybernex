@@ -96,7 +96,7 @@ func configure(model: Inv, owner_inventory: Inv = null, display_mode: String = "
 
 func _notification(what: int) -> void:
     if what == NOTIFICATION_RESIZED and is_node_ready() and inv != null:
-        var rows: int = maxi(1, floori(maxf(50.0, size.y - 35.0) / 50.0))
+        var rows: int = maxi(1, mini(6, ceili(float(inv.size()) / 10.0)))
         if rows != _display_rows:
             _display_rows = rows
             call_deferred("refresh")
@@ -164,8 +164,9 @@ func refresh() -> void:
     # 550px fallback generated 110 buttons per instance, before the first
     # resize, and frequently left an unnecessary vertical scrollbar.
     var scroll: ScrollContainer = $Layout/Scroll
-    var available_height: float = scroll.size.y if scroll.size.y >= 48.0 else maxf(48.0, size.y - 8.0)
-    var visible_rows: int = maxi(1, floori(available_height / 50.0))
+    # Do not allow a GridContainer to determine its own parent height by
+    # expanding to fill that height. This feedback loop causes screen overflow.
+    var visible_rows: int = maxi(1, mini(6, ceili(float(inv.size()) / 10.0)))
     if mode != "hotbar":
         while indices.size() < maxi(inv.size(), visible_rows * 10):
             indices.append(-1)
