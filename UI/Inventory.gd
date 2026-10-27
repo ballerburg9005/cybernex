@@ -155,10 +155,17 @@ func refresh() -> void:
         else:
             indices.append_array(occupied)
     grid_container.columns = 10
+    # Center the ten-cell rectangle, not the ScrollContainer viewport minus
+    # a permanently reserved scrollbar strip.
+    grid_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
     # Fill the actual panel, not the entire game viewport: desk inventories
     # must not acquire dozens of offscreen slots and scrollbars.
-    var available_height: float = size.y if size.y >= 120 else 550.0
-    var visible_rows: int = maxi(1, floori(maxf(50.0, available_height - 35.0) / 50.0))
+    # During scene construction this panel has not been laid out yet. A fake
+    # 550px fallback generated 110 buttons per instance, before the first
+    # resize, and frequently left an unnecessary vertical scrollbar.
+    var scroll: ScrollContainer = $Layout/Scroll
+    var available_height: float = scroll.size.y if scroll.size.y >= 48.0 else maxf(48.0, size.y - 8.0)
+    var visible_rows: int = maxi(1, floori(available_height / 50.0))
     if mode != "hotbar":
         while indices.size() < maxi(inv.size(), visible_rows * 10):
             indices.append(-1)
@@ -187,6 +194,9 @@ func refresh() -> void:
         cell.modulate = Color("#858b91") if slot_index == -1 else Color.WHITE
         cell.refresh()
     _layout_indices = indices
+    # Scrolling is only useful if real physical capacity exceeds the view.
+    # Decorative disabled X cells must never force a scrollbar by themselves.
+    scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if inv.size() > visible_rows * 10 and mode != "hotbar" else ScrollContainer.SCROLL_MODE_DISABLED
     var actual_stacks: int = inv.size() - available.size()
     var item_count: int = 0
     for i in range(inv.size()):
