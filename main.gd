@@ -281,7 +281,7 @@ func close_circuit_mode() -> void:
     var bench: CircuitWorkbench = active_circuit
     if bench != null and is_instance_valid(bench):
         # Tools borrowed as board contacts must return to physical storage.
-        if not bench.reclaim_loose_tools(player.inventory):
+        if not bench.reclaim_loose_tools():
             p("No room to recover loose tools.")
             return
         for terminal in get_tree().get_nodes_in_group("terminals"):
