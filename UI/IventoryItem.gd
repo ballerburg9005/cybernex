@@ -86,10 +86,13 @@ func _make_preview(item: InvItem, _amount: int) -> Control:
     sprite.texture = item.texture
     sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
     sprite.custom_minimum_size = Vector2(48, 48)
+    sprite.size = Vector2(48, 48)
+    sprite.position = -sprite.size * 0.5
     sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
     sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
     sprite.z_index = 4096
+    sprite.top_level = true
     return sprite
 
 func _make_drag_payload(whole_stack: bool) -> Variant:
