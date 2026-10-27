@@ -253,6 +253,12 @@ func ui_captures_world_input() -> bool:
     return puzzle_active or (desk_inspection != null and is_instance_valid(desk_inspection))
 
 func toggle_inventory() -> void:
+    if puzzle_active:
+        close_circuit_mode()
+        return
+    if desk_inspection != null and is_instance_valid(desk_inspection):
+        desk_inspection.close()
+        return
     var drawer: Control = $HUD/FullInventory
     drawer.visible = not drawer.visible
     if drawer.visible:
@@ -268,6 +274,25 @@ func enter_circuit_mode(workbench: CircuitWorkbench) -> void:
     _layout_hud()
     workbench.journal_event.connect(p)
     workbench.set_meter_unlocked(false)
+
+func close_circuit_mode() -> void:
+    if not puzzle_active:
+        return
+    var bench: CircuitWorkbench = active_circuit
+    if bench != null and is_instance_valid(bench):
+        # Tools borrowed as board contacts must return to physical storage.
+        if not bench.reclaim_loose_tools(player.inventory):
+            p("No room to recover loose tools.")
+            return
+        for terminal in get_tree().get_nodes_in_group("terminals"):
+            if terminal.get("ui_menu") == bench:
+                terminal.set("ui_menu", null)
+        # Terminals need no persistent stale reference to a closed workbench.
+        for target in world.get_children():
+            if "ui_menu" in target and target.ui_menu == bench:
+                target.ui_menu = null
+        bench.queue_free()
+    exit_circuit_mode()
 
 func exit_circuit_mode() -> void:
     puzzle_active = false
