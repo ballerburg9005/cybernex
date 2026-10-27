@@ -32,6 +32,11 @@ func activate(caller: Node) -> void:
         return
     # A pickup transfers an entire authored stack, or none of it on overflow.
     if caller.add_inventory_item(itemslot):
+        # Stop another Space event from transferring the same pickup before
+        # queue_free is processed at the end of the frame.
+        disabled = true
+        if "activatables" in caller:
+            caller.activatables.erase(self)
         var main: Node = get_node_or_null("/root/main")
         if main != null and main.has_method("p"):
             main.p("Picked up %s, %dx." % [itemslot.item.name, itemslot.count])
