@@ -207,9 +207,14 @@ func _on_influence_body_shape_entered(body_rid, body, body_shape_index, local_sh
 
 func _on_influence_body_shape_exited(body_rid, body, body_shape_index, local_shape_index):
     if ui_menu:
-        ui_menu.queue_free()
-        ui_menu = null
-        get_node("/root/main").exit_circuit_mode()
+        var game: Node = get_node("/root/main")
+        if ui_menu == game.desk_inspection_cache:
+            ui_menu.close() # Cached inspection must never be freed on leaving reach.
+        else:
+            ui_menu.queue_free()
+            ui_menu = null
+            if game.puzzle_active:
+                game.exit_circuit_mode()
     if "activatables" in body and body.activatables.has(self):
         body.activatables.erase(self)
     if $AnimatedSprite2D:
