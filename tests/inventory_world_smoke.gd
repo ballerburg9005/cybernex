@@ -31,6 +31,10 @@ func _run() -> void:
     check(drawer.position.x <= 12.0, "Exploration inventory drawer must stay left of centered player.")
     var backpack_panel: InventoryView = game.get_node("HUD/FullInventory/VBoxContainer/HBoxContainer/HBoxContainer/InventoryItems")
     check(backpack_panel.grid_container.columns == 10, "Player inventory must be ten cells wide.")
+    check(backpack_panel.grid_container.get_child_count() <= maxi(10, ceili(float(game.player.inventory.size()) / 10.0) * 10),
+        "Inventory must not manufacture offscreen filler rows based on its own expanding height.")
+    check(backpack_panel.grid_container.get_global_rect().end.x <= drawer.get_global_rect().end.x + 1.0,
+        "Inventory grid must fit horizontally inside the drawer.")
     var first_cell: InventoryCell = backpack_panel.grid_container.get_child(0)
     check(first_cell.custom_minimum_size == Vector2(48, 48)
         and first_cell.number.get_theme_font_size("font_size") >= 18,
@@ -174,6 +178,15 @@ func _run() -> void:
     terminal.activate(player)
     var bench: CircuitWorkbench = terminal.ui_menu
     check(bench != null and bench.field_inventory == player.inventory, "Terminal workbench should bind actual player backpack.")
+    game.toggle_inventory() # Tab while the circuit UI is open.
+    check(not game.puzzle_active and not drawer.visible and game.get_node("HUD/QuickInventory").visible,
+        "Tab must close the actual circuit puzzle, not only its inventory drawer.")
+    check(terminal.ui_menu == null,
+        "Closing the circuit must clear the terminal workbench reference.")
+    terminal.activate(player)
+    bench = terminal.ui_menu
+    check(game.puzzle_active and bench != null,
+        "Closed circuit must reopen cleanly without a stale overlay.")
     var canvas: CircuitBoardView = bench.board_view
     check(canvas._get_minimum_size() == Vector2.ZERO, "Infinite-looking circuit view must not shrink the board panel to authored cells.")
     canvas.size = Vector2(800, 440)
