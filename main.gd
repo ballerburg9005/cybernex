@@ -336,7 +336,7 @@ func tooltip_timer_update() -> void:
     # The character's animated 32px sprite extends ABOVE his slim feet
     # collision capsule. A pointer over the visible head must say "player",
     # without expanding the physical hitbox or tool-interaction reach.
-    if collider == null and player != null and is_instance_valid(player):
+    if player != null and is_instance_valid(player):
         var sprite: AnimatedSprite2D = player.get_node("Sprite")
         var frames: SpriteFrames = sprite.sprite_frames
         if frames != null:
@@ -345,6 +345,8 @@ func tooltip_timer_update() -> void:
                 var local: Vector2 = sprite.to_local(
                     $World/WorldHitTest.viewport_to_world(mouse_viewport))
                 if Rect2(-graphic.get_size() * 0.5, graphic.get_size()).has_point(local):
+                    # The visible character wins over overlapping floor/tile
+                    # physics, not just over an empty physics query.
                     collider = player
     var changed: bool = collider != last_hovered_world
     if changed or moved:
@@ -363,6 +365,7 @@ func tooltip_timer_update() -> void:
     hud_tooltip.name = "world_hover_tooltip"
     hud_tooltip.get_node("MarginContainer/Label").text = label
     hud.add_child(hud_tooltip)
+    hud_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
     var desired: Vector2 = $HUD.get_final_transform().affine_inverse() * mouse_viewport + Vector2(14, 10)
     hud_tooltip.position = Vector2(
         clampf(desired.x, 2.0, maxf(2.0, get_viewport_rect().size.x - hud_tooltip.size.x - 4.0)),
