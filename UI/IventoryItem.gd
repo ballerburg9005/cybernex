@@ -92,7 +92,6 @@ func _make_preview(item: InvItem, _amount: int) -> Control:
     sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
     sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
     sprite.z_index = 4096
-    sprite.top_level = true
     if item.item_id == "resistor_10ohm":
         # The EIA color markings are part of the recognizable object, including
         # while held by the pointer—not an inventory-cell-only decoration.
