@@ -12,7 +12,8 @@ func _equipped(loadout: EquipmentLoadout, backpack: Inv) -> Array[InvItem]:
     var result: Array[InvItem] = []
     if loadout == null or backpack == null:
         return result
-    loadout.reconcile(backpack)
+    # EquipmentMannequin already reconciles on inventory/loadout changes.
+    # Physics-frame reads must not mutate resources or emit change signals.
     for socket in EquipmentLoadout.SOCKETS:
         var item: InvItem = loadout.item_at(socket)
         if item != null and item.equipment_slots.has(socket):
