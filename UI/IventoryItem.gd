@@ -93,6 +93,13 @@ func _make_preview(item: InvItem, _amount: int) -> Control:
     sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
     sprite.z_index = 4096
     sprite.top_level = true
+    if item.item_id == "resistor_10ohm":
+        # The EIA color markings are part of the recognizable object, including
+        # while held by the pointer—not an inventory-cell-only decoration.
+        var bands: Control = preload("res://UI/ResistorBands.gd").new()
+        bands.size = sprite.size
+        bands.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        sprite.add_child(bands)
     return sprite
 
 func _make_drag_payload(whole_stack: bool) -> Variant:
