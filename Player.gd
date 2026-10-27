@@ -22,6 +22,7 @@ var combinables = []
 @export var equipment: EquipmentLoadout
 var equipment_runtime := EquipmentRuntime.new()
 var unsecured_head_seconds: float = 0.0
+var _right_press_started_on_ui: bool = false
 
 func _ready():
     last_health = health
@@ -73,6 +74,14 @@ func _input(event: InputEvent) -> void:
         host.toggle_inventory()
         get_viewport().set_input_as_handled()
         return
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+        if event.pressed:
+            _right_press_started_on_ui = host.ui_captures_world_input() or host.is_hud_drop_region(event.position) or get_viewport().gui_get_drag_data() != null
+            return
+        var consumed_by_ui: bool = _right_press_started_on_ui
+        _right_press_started_on_ui = false
+        if consumed_by_ui:
+            return
     if host.ui_captures_world_input():
         return
     if event is InputEventMouseButton and (host.is_hud_drop_region(event.position)
