@@ -18,7 +18,7 @@ atlas = ExtResource("3_2sp57")
 region = Rect2(16, 0, 16, 16)
 
 [node name="Item" type="AnimatableBody2D" groups=["items"]]
-z_index = 100
+z_index = 0
 y_sort_enabled = true
 collision_layer = 32
 collision_mask = 512
