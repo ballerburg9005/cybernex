@@ -133,10 +133,10 @@ func _setup_compact_hud() -> void:
     paper.add_theme_stylebox_override("panel", dark)
     var hotbar_back: StyleBoxFlat = dark.duplicate()
     hotbar_back.bg_color = Color("#111d2f")
-    hotbar_back.set_corner_radius_all(19)
+    hotbar_back.set_corner_radius_all(25)
     hotbar_back.border_color = Color("#2b4358")
-    hotbar_back.content_margin_left = 4
-    hotbar_back.content_margin_right = 4
+    hotbar_back.content_margin_left = 0
+    hotbar_back.content_margin_right = 0
     hotbar_back.content_margin_top = 3
     hotbar_back.content_margin_bottom = 3
     $HUD/QuickInventory.add_theme_stylebox_override("panel", hotbar_back)
@@ -161,8 +161,8 @@ func _setup_compact_hud() -> void:
     $HUD/TextBox/S2.visible = false
     $HUD/TextBox/HBoxContainer/S3.visible = false
     var feed: RichTextLabel = hud_textbox
-    feed.add_theme_font_size_override("normal_font_size", 17)
-    feed.add_theme_font_size_override("bold_font_size", 17)
+    feed.add_theme_font_size_override("normal_font_size", 19)
+    feed.add_theme_font_size_override("bold_font_size", 19)
     feed.add_theme_color_override("default_color", Color("#e7ece7"))
     $HUD/TextBox/HBoxContainer/MarginContainer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     $HUD/TextBox/HBoxContainer.custom_minimum_size.y = 0.0
@@ -208,8 +208,10 @@ func _layout_hud() -> void:
     journal.set_anchors_preset(Control.PRESET_TOP_LEFT)
     journal.offset_left = 6.0 if puzzle_active else quick.offset_right + 8.0
     journal.offset_right = viewport.x - 6.0
-    journal.offset_top = viewport.y - 125.0
-    journal.offset_bottom = viewport.y - 4.0
+    # The transcript remains visibly above the screen edge, with a usable
+    # scroll region rather than a short strip behind the bottom quickbar.
+    journal.offset_top = viewport.y - 175.0
+    journal.offset_bottom = viewport.y - 12.0
 
     if active_circuit != null and is_instance_valid(active_circuit):
         active_circuit.set_anchors_preset(Control.PRESET_TOP_LEFT)
