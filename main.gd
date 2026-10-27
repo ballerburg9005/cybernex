@@ -284,9 +284,6 @@ func close_circuit_mode() -> void:
         if not bench.reclaim_loose_tools():
             p("No room to recover loose tools.")
             return
-        for terminal in get_tree().get_nodes_in_group("terminals"):
-            if terminal.get("ui_menu") == bench:
-                terminal.set("ui_menu", null)
         # Terminals need no persistent stale reference to a closed workbench.
         for target in world.get_children():
             if "ui_menu" in target and target.ui_menu == bench:
